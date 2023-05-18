@@ -1,0 +1,5 @@
+frontend/gui/node_modules
+backend/bin
+backend/lib
+backend/src/node_modules
+certbot
