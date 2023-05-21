@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Button, Divider } from 'antd';
 import IP, {IP_image} from "../components/ipConfig";
 import protocol from "../components/httpORhttps";

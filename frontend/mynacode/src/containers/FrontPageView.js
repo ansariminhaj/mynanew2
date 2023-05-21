@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, Checkbox, Spin } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useHistory, Link } from "react-router-dom";
 import { connect } from 'react-redux';
 import * as actions from '../store/actions/actions';
 import axios from 'axios';

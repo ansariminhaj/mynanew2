@@ -1,10 +1,8 @@
 import React from 'react';
 import { Layout, Menu, Breadcrumb, Dropdown } from 'antd';
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import { Checkbox, Radio, Form, Badge, Button  } from 'antd';
-import Logoutbutton from '../components/Logoutbutton';
 import { connect } from 'react-redux';
 import * as actions from '../store/actions/actions';
 import IP, {IP_image} from "../components/ipConfig";
@@ -36,8 +34,9 @@ const CustomLayout = (props) => {
     setLoginState('false') //Need to rerender to push to frontpage.
   }
 
-  if (props.isAuthenticated == 'false' && localStorage.getItem('isAuthenticated') != 'true'){
-    navigate("/frontpage")
+  if (props.isAuthenticated == 'false' && localStorage.getItem('isAuthenticated') == 'false'){
+    navigate("/login")
+    localStorage.setItem('isAuthenticated', 'dummy') 
   }
 
   return (

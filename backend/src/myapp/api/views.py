@@ -75,7 +75,6 @@ class UserInfoView(APIView):
 
 		# if request.user.payment_status == 0:
 		# 	return Response(0)
-		print("HIYAAAz")
 		query_dict={'id': request.user.id, 'user_type': request.user.user_type,'name': request.user.name}
 
 		return Response(query_dict)

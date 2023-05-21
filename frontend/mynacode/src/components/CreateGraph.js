@@ -9,7 +9,7 @@ import '../components/index.css';
 import protocol from "../components/httpORhttps";
 import * as actions from '../store/actions/actions';
 import { connect } from 'react-redux';
-import { Bar } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import { Chart as ChartJS } from 'chart.js/auto'
 import { Chart }            from 'react-chartjs-2'
 
@@ -26,7 +26,7 @@ const layout = {
 
 const labels = [0.75, 1.25, 1.75, 2.25];
 const data = [1, 2, 3, 4];
-const options = {
+const bar_options = {
   scales: {
     x: {
       type: "linear",
@@ -36,7 +36,36 @@ const options = {
       },
       title: {
         display: true,
-        text: "Arrivals per minute"
+        text: "Predictions"
+      }
+    },
+
+    y: {
+      title: {
+        display: true,
+        text: "Frequency"
+      }
+    }
+  }
+};
+
+const line_options = {
+  scales: {
+    x: {
+      type: "linear",
+      offset: false,
+      gridLines: {
+        offsetGridLines: false
+      },
+      title: {
+        display: true,
+        text: "FPR"
+      }
+    },
+    y: {
+      title: {
+        display: true,
+        text: "TPR"
       }
     }
   }
@@ -60,6 +89,10 @@ const CreateGraph = (props) => {
   const [systemInfo, setSystemInfo] = useState([]);
   const [libraries, setLibraries] = useState([]);
   const [filepaths, setFilepaths] = useState([]);
+  const [freq, setFreq] = useState([]);
+  const [bins, setBins] = useState([]);
+  const [fpr, setTpr] = useState([]);
+  const [tpr, setFpr] = useState([]);
 
   const [form] = Form.useForm();
 
@@ -334,14 +367,26 @@ const CreateGraph = (props) => {
               }
               else if (res.data['nodes'][i]['node_type'] == 2){
                 if (res.data['nodes'][i]['description']){
-                  console.log(res.data['nodes'][i]['description']['freq'])
                   let c_matrix = res.data['nodes'][i]['description']['c_matrix']
                   let freq = res.data['nodes'][i]['description']['freq']
                   let bins = res.data['nodes'][i]['description']['bins']
                   let fpr = res.data['nodes'][i]['description']['fpr']
                   let tpr = res.data['nodes'][i]['description']['tpr']
-                  console.log(c_matrix, freq, tpr, fpr, bins)
+
+                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>Precision</div><div style={{width:'110px'}}>{res.data['nodes'][i]['description']['precision']}</div></div>)
+                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>Recall</div><div style={{width:'110px'}}>{res.data['nodes'][i]['description']['recall']}</div></div>)
+                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>Specificity</div><div style={{width:'110px'}}>{res.data['nodes'][i]['description']['specificity']}</div></div>)
+                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>NPV</div><div style={{width:'110px'}}>{res.data['nodes'][i]['description']['npv']}</div></div>)
+                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>Accuracy</div><div style={{width:'110px'}}>{res.data['nodes'][i]['description']['accuracy']}</div></div>)
+                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>F1 Score</div><div style={{width:'110px'}}>{res.data['nodes'][i]['description']['f1']}</div></div>)
+
+
+                  setFreq(freq)
+                  setBins(bins)
+                  setFpr(fpr)
+                  setTpr(tpr)
                 }
+
               }
 
 
@@ -504,24 +549,64 @@ const CreateGraph = (props) => {
                       </div>                      
                       <Bar
                         data={{
-                          labels: labels,
+                          labels: bins,
                           datasets: [
                             {
-                              borderColor: "blac",
+                              label: 'Prediction Histogram',
                               lineTension: 0,
                               fill: false,
                               borderJoinStyle: "round",
-                              data: data,
+                              data: freq,
                               borderWidth: 0.2,
                               barPercentage: 1,
                               categoryPercentage: 1,
                               hoverBackgroundColor: "darkgray",
-                              barThickness: "flex"
+                              barThickness: "flex",
+                              borderColor: 'rgb(53, 162, 235)',
+                              backgroundColor: 'rgba(53, 162, 235, 0.5)',
                             }
                           ]
                         }}
-                        options={options}
+                        options={bar_options}
                       />
+
+                      <Line
+                        data={{
+                          labels: fpr,
+                          datasets: [
+                            {
+                              label: 'ROC Curve',
+                              data: tpr,
+                              borderWidth: 2,
+                              borderColor: 'rgb(255, 99, 132)',
+                              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            }
+                          ]
+                        }}
+                        options={line_options}
+                      />
+
+                      <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
+                        
+                        <div style={{display:'flex', justifyContent:'center', alignItems:'center'}}>Actual</div>
+
+                        <div style={{display:'flex', flexDirection:'row'}}>
+                          <div style={{writingMode:'vertical-rl', testOrientation:'mixed', display:'flex', justifyContent:'center', alignItems:'center'}}>Predicted</div>
+                          <div>
+                            <div style={{display:'flex', flexDirection:'row'}}>
+                              <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TP: 1</div>
+                              <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>FP: 2</div>
+                            </div>
+                            <div style={{display:'flex', flexDirection:'row'}}>
+                              <div style={{padding: '25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>FN: 3</div>
+                              <div style={{padding: '25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TN: 4</div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
+
                       <div style={{marginTop: '15px'}}>
                         <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
                       </div>
