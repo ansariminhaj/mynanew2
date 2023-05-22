@@ -12,7 +12,7 @@ from django.db.models import F
 import copy, ast
 from decimal import Decimal
 import socket
-from django.core.mail import send_mail
+from django.core.files.storage import default_storage
 import collections, json, time
 
 import requests
@@ -329,7 +329,7 @@ class GetRunsView(CreateAPIView):
 				runs = Run.objects.filter(project = project_obj_exists)
 				runs = runs.values()
 				for run in runs:
-					query_list.append({'run_name': run['run_name'], 'id': run['id']})
+					query_list.append({'run_name': run['run_name'], 'id': run['id'], 'weights': 'http://'+IP+'/media/'+run['weights']})
 		else: # This is a run
 			pass
 
@@ -354,8 +354,8 @@ class GetNodesView(CreateAPIView):
 				installed_packages = metadata_obj.installed_packages
 				system_information = metadata_obj.system_information
 			else:
-				system_information = '["Nothing saved"]'
-				installed_packages = '["Nothing saved"]'
+				system_information = '["Metadata Not Saved"]'
+				installed_packages = '["Metadata Not Saved"]'
 
 			for node in all_run_nodes:
 				if node['node_type'] == 0 or node['node_type'] == 2: #Input
@@ -455,51 +455,6 @@ class ProjectShareView(CreateAPIView):
 			ProjectUser.objects.create(user = user_obj, project = project_obj_exists)
 
 		return Response(OK)
-
-
-class AdminPanelMetricsView(APIView):
-
-	def post(self, request):
-
-		user_count = myUser.objects.all().count()
-		projects_count = Project.objects.all().count()
-
-		return Response({'user_count': user_count, 'projects_count': projects_count})
-
-
-class AdminPanelFeedbackView(APIView):
-
-	def post(self, request):
-
-		count = request.data['count']
-		index = count*3
-		querylist = []
- 
-		feedback = Feedback.objects.all()[index:index+3]
-		for fb in feedback:
-			query = {'id': fb.id, 'username': fb.user.username, 'feedback': fb.feedback, 'date': fb.feedback_date}
-			querylist.append(query)
-
-
-		return Response(querylist)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -704,39 +659,53 @@ class GetAllUserInfoView(APIView):
 
 		return Response(querylist)
 
-class SetPaymentStatusView(APIView):
+
+class UploadWeightsView(APIView):
 
 	def post(self, request):
-		data=request.data
-		user_id = data['user_id']
-		payment_status = data['payment_status']
+		print(request.data)
+		print(request.FILES)
+		# file = request.FILES.get('weights')
+		# file_name = default_storage.save(file.name, file)
+		# file_url = fs.url(filename)
 
+		try:
+			run_obj = Run.objects.get(id=request.data['run_id'])
+			run_obj.weights = request.FILES.get('weights')
+			run_obj.save() 
+		except:
+			pass
+
+
+		return Response(OK)
+
+
+
+class AdminPanelMetricsView(APIView):
+
+	def post(self, request):
+
+		user_count = myUser.objects.all().count()
+		projects_count = Project.objects.all().count()
+
+		return Response({'user_count': user_count, 'projects_count': projects_count})
+
+
+class AdminPanelFeedbackView(APIView):
+
+	def post(self, request):
+
+		count = request.data['count']
+		index = count*3
 		querylist = []
-
-		user_obj = myUser.objects.get(id = user_id)
-		user_obj.payment_status = payment_status
-		user_obj.save() 
-
-		return Response(OK)
-
-
-class SendCodeView(APIView):
-
-	def post(self, request):
-		data=request.data
-		user_email = data['email']
-
-		send_mail(
-		    'Subject here',
-		    'Here is the message.',
-		    'ansariuminhaj@gm.com',
-		    ['minhaj3737@gmail.com'],
-		    fail_silently=False,
-		)
-
-		return Response(OK)
+ 
+		feedback = Feedback.objects.all()[index:index+3]
+		for fb in feedback:
+			query = {'id': fb.id, 'username': fb.user.username, 'feedback': fb.feedback, 'date': fb.feedback_date}
+			querylist.append(query)
 
 
+		return Response(querylist)
 
 
 

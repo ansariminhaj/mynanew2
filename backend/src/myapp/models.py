@@ -7,7 +7,7 @@ from datetime import datetime
 # Create your models here.
 
 class myUser(AbstractUser):
-	image= models.ImageField(upload_to='media/user_profile_pictures', blank=True, null=True, max_length=1000)
+	image= models.ImageField(upload_to='user_profile_pictures', blank=True, null=True, max_length=1000)
 	name = models.CharField(max_length=150, null=True, blank=True, default='New User')
 	key = models.CharField(max_length=150, null=True, blank=True, default='')
 	email = models.EmailField(max_length=255, unique=False, blank=True, null=True)
@@ -36,6 +36,7 @@ class Run(models.Model):
 	project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
 	run_name = models.TextField(null=True, blank=True)
 	run_date = models.DateTimeField(default=datetime.now, blank=True)
+	weights = models.FileField(upload_to ='weights', null=True, blank=True)
 
 
 class Node(models.Model):

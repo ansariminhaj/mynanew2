@@ -11,7 +11,7 @@ urlpatterns = [
 	path('province_list=<country>', ProvinceListView.as_view()),
 	path('city_list=<province>', CityListView.as_view()),
 	path('get_all_user_info', GetAllUserInfoView.as_view()),
-	path('set_payment_status', SetPaymentStatusView.as_view()),
+	path('upload_weights', UploadWeightsView.as_view()),
 	
 
 	path('python_login', PythonLoginView.as_view()),
@@ -21,7 +21,6 @@ urlpatterns = [
 	path('create_run', CreateRunView.as_view()),
 	path('get_nodes', GetNodesView.as_view()),
 	path('create_node', CreateNodeView.as_view()),
-	path('send_code', SendCodeView.as_view()),
 	path('update_node_info', UpdateNodeView.as_view()),
 	path('submit_feedback', SetFeedbackView.as_view()),
 	path('get_admin_metrics', AdminPanelMetricsView.as_view()),

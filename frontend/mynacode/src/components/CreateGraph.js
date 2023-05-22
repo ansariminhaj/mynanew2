@@ -3,8 +3,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import IP from "../components/ipConfig";
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, Tooltip, Popover, Checkbox, Form, Input, Alert, Modal, Switch, Dropdown, Menu } from 'antd';
-import { PlusCircleOutlined, EditOutlined, AlignLeftOutlined, ApartmentOutlined, ExpandOutlined, CloseOutlined, CheckOutlined, DesktopOutlined, CodeOutlined } from '@ant-design/icons';
+import { Button, Tooltip, Popover, Checkbox, Form, Input, Alert, Modal, Switch, Dropdown, Menu, Upload } from 'antd';
+import { PlusCircleOutlined, EditOutlined, AlignLeftOutlined, ApartmentOutlined, ExpandOutlined, CloseOutlined, CheckOutlined, DesktopOutlined, CodeOutlined, NodeIndexOutlined, UploadOutlined } from '@ant-design/icons';
 import '../components/index.css';
 import protocol from "../components/httpORhttps";
 import * as actions from '../store/actions/actions';
@@ -77,6 +77,7 @@ const CreateGraph = (props) => {
   const [refresh, setRefresh] = useState(0)
   const [isCreateNodeModalOpen, setIsCreateNodeModalOpen] = useState(false);
   const [isDeleteNodeModalOpen, setIsDeleteNodeModalOpen] = useState(false);
+  const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
 
   const [inputNodes, setInputNodes] = useState([])
   const [methodNodes, setMethodNodes] = useState([])
@@ -588,10 +589,10 @@ const CreateGraph = (props) => {
 
                       <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
                         
-                        <div style={{display:'flex', justifyContent:'center', alignItems:'center'}}>Actual</div>
+                        <div style={{color:'purple', fontWeight:'bold', display:'flex', justifyContent:'center', alignItems:'center'}}>Actual</div>
 
                         <div style={{display:'flex', flexDirection:'row'}}>
-                          <div style={{writingMode:'vertical-rl', testOrientation:'mixed', display:'flex', justifyContent:'center', alignItems:'center'}}>Predicted</div>
+                          <div style={{color:'purple', fontWeight:'bold', writingMode:'vertical-rl', testOrientation:'mixed', display:'flex', justifyContent:'center', alignItems:'center'}}>Predicted</div>
                           <div>
                             <div style={{display:'flex', flexDirection:'row'}}>
                               <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TP: 1</div>
@@ -685,6 +686,57 @@ const CreateGraph = (props) => {
     })
   }
 
+  const onWeightUpload = (values)  => {
+    console.log(values)
+
+    let form_data = new FormData();
+
+    let lol = []
+
+    if (values.weights && values.weights.file) {
+        form_data.append('weights', values.weights.file);
+    } 
+    else {
+        form_data.append('weights', null); // or handle the absence of a file
+    }
+
+    form_data.append('run_id', props.run_id)
+
+    var csrftoken = Cookies.get('csrftoken');
+    axios({
+      withCredentials: true,
+      method: 'post',
+      url: protocol+'://'+IP+'/api/token/refresh/',
+      data: {'refresh': localStorage.getItem('refresh_token')},
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken}} ) 
+    .then(res =>{
+      localStorage.setItem('access_token', res.data["access"])
+      localStorage.setItem('refresh_token', res.data["refresh"])
+      axios({
+        withCredentials: true,
+        method: 'post',
+        url: protocol+'://'+IP+'/api/upload_weights',
+        data: form_data,
+        headers: {
+          'Authorization': "JWT " + localStorage.getItem('access_token'),
+          'content-type': 'multipart/form-data',
+          'X-CSRFToken': csrftoken}} )
+      .then(res => { 
+          setIsWeightModalOpen(false)           
+          setRefresh((prevValue) => prevValue + 1)
+        })
+    })
+    .catch(err => {
+      console.log(err)
+      console.log("Error")
+      navigate("/login")
+    })
+  }
+
+
+
   return (
     <div>
 
@@ -716,10 +768,36 @@ const CreateGraph = (props) => {
     </Modal>
 
 
+      <Modal visible={isWeightModalOpen} closable={false} footer={null}>
+
+          
+
+          <Form onFinish={onWeightUpload}>
+            <Form.Item name="weights" >
+              <Upload name="logo" listType="picture" beforeUpload={() => false}>
+                <Button icon={<UploadOutlined />}>Upload</Button>
+              </Upload>
+            </Form.Item>
+
+
+            <Form.Item>
+              <Button style={{marginRight:'5px'}} onClick={()=>setIsWeightModalOpen(false)}>Cancel</Button>
+              <Button type="primary" htmlType="submit">Update</Button>
+            </Form.Item>
+          </Form>
+
+      </Modal> 
+
+
+
       { props.run_id != -1 ? 
 
         <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center'}}>
           <div style={{marginBottom:'15px', color:'#003568', fontSize:'17px', fontWeight:'bold'}}> 
+
+          <Tooltip placement="top" title="Weights">
+            <Button size="medium" shape="circle" style={{marginRight:'5px'}} onClick={()=>setIsWeightModalOpen(true)}> <NodeIndexOutlined /> </Button>
+          </Tooltip> 
 
           <Dropdown overlay={systemInfo}>
             <Tooltip placement="top" title="System">

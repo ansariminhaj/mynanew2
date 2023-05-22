@@ -79,7 +79,6 @@ const EditProfileView = (props) => {
           headers: {
             'Authorization': "JWT " + localStorage.getItem('access_token'),
             'content-type': 'multipart/form-data',
-            'Content-Type': 'application/json',
             'X-CSRFToken': csrftoken}} )
         .then(res => {
            if(res.data == 'OK')
