@@ -78,6 +78,7 @@ const CreateGraph = (props) => {
   const [isCreateNodeModalOpen, setIsCreateNodeModalOpen] = useState(false);
   const [isDeleteNodeModalOpen, setIsDeleteNodeModalOpen] = useState(false);
   const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
+  const [downloadWeights, setDownloadWeights] = useState();
 
   const [inputNodes, setInputNodes] = useState([])
   const [methodNodes, setMethodNodes] = useState([])
@@ -292,6 +293,10 @@ const CreateGraph = (props) => {
             }
 
             setSystemInfo(<Menu items={system_info_list} style={{overflowY: 'auto', height:'300px'}}/>)           
+          }
+
+          if (res.data['weights']){
+            setDownloadWeights(<div><a href={res.data['weights']}>Download Saved Weights</a></div>)
           }
           
           
@@ -779,12 +784,13 @@ const CreateGraph = (props) => {
               </Upload>
             </Form.Item>
 
-
             <Form.Item>
               <Button style={{marginRight:'5px'}} onClick={()=>setIsWeightModalOpen(false)}>Cancel</Button>
               <Button type="primary" htmlType="submit">Update</Button>
             </Form.Item>
           </Form>
+
+          {downloadWeights}
 
       </Modal> 
 

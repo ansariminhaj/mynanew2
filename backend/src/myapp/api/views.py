@@ -82,11 +82,14 @@ class UserInfoView(APIView):
 class LoginView(APIView):
 
 	def post(self, request):
+		print("LOGIN")
+		print(request.data)
 		data = request.data
 		URL = 'http://'+IP+'/api/token/'
 		data={'username': data['username'], 'password': data['password']}
 		tokens = requests.post(url = URL, data = data)
 		token_data = tokens.json()
+		print(token_data)
 
 		if 'access' not in token_data:
 			return Response(ERROR)
@@ -110,6 +113,8 @@ class SignupView(APIView):
 	def post(self, request):
 		data=request.data
 		data._mutable = True
+		print(data)
+		print("SIGN UP")
 
 		key = str(int(time.time())) + ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=10))
 
@@ -265,8 +270,6 @@ class AddCsvView(APIView):
 	def post(self, request):
 		data = querydict_to_dict(request.data)
 
-		print(data)
-
 		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
 			return Response(0)
 
@@ -329,7 +332,7 @@ class GetRunsView(CreateAPIView):
 				runs = Run.objects.filter(project = project_obj_exists)
 				runs = runs.values()
 				for run in runs:
-					query_list.append({'run_name': run['run_name'], 'id': run['id'], 'weights': 'http://'+IP+'/media/'+run['weights']})
+					query_list.append({'run_name': run['run_name'], 'id': run['id']})
 		else: # This is a run
 			pass
 
@@ -368,7 +371,7 @@ class GetNodesView(CreateAPIView):
 
 				query_list.append({'id': node['id'], 'name': node['name'], 'description': input_dict, 'node_type' : node['node_type'], 'csv_node': node['csv_node'], 'dataset_node': node['dataset_node'], 'date': node['date']})
 		
-			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information}
+			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'http://'+IP+'/media/'+run_obj.weights.name}
 			return Response(query)
 
 		return Response(ERROR)
@@ -665,9 +668,6 @@ class UploadWeightsView(APIView):
 	def post(self, request):
 		print(request.data)
 		print(request.FILES)
-		# file = request.FILES.get('weights')
-		# file_name = default_storage.save(file.name, file)
-		# file_url = fs.url(filename)
 
 		try:
 			run_obj = Run.objects.get(id=request.data['run_id'])
@@ -678,6 +678,42 @@ class UploadWeightsView(APIView):
 
 
 		return Response(OK)
+
+
+class UploadPytorchWeightsView(APIView):
+
+	def post(self, request):
+		print(request.data)
+		print(request.FILES)
+		data = querydict_to_dict(request.data)
+
+		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
+			return Response(0)
+
+		try:
+			run_obj = Run.objects.get(id=request.data['run_id'])
+			run_obj.weights = request.FILES.get('state_dict')
+			run_obj.network = request.FILES.get('network')
+			run_obj.save() 
+		except:
+			pass
+
+		return Response(OK)
+
+
+class GetPytorchWeightsView(APIView):
+
+	def post(self, request):
+		print(request.data)
+		data = querydict_to_dict(request.data)
+
+		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
+			return Response(0)
+
+
+		run_obj = Run.objects.get(id=request.data['run_id'])
+
+		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 
 

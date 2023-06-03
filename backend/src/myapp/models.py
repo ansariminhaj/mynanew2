@@ -37,6 +37,7 @@ class Run(models.Model):
 	run_name = models.TextField(null=True, blank=True)
 	run_date = models.DateTimeField(default=datetime.now, blank=True)
 	weights = models.FileField(upload_to ='weights', null=True, blank=True)
+	network = models.FileField(upload_to ='network', null=True, blank=True)
 
 
 class Node(models.Model):

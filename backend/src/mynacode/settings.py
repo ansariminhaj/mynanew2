@@ -16,7 +16,7 @@ SECRET_KEY = 'django-insecure-c(+8+apbknho9q3v6x(ny1*f3gbjmn+%6=*9o2p6x(s@3g8$=g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'www.mynacode.com', 'mynacode.com', '54.210.56.0']
 
 
 # Application definition
@@ -65,26 +65,26 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mynacode.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'HOST': 'pgdb',
+        'PORT': 5432,
+    }
+}
 
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'myna2',
+#         'USER': 'mladmin',
+#         'PASSWORD': 'Fapa-Nufe0336!', #Fapa-Nufe0336!
+#         'HOST': 'localhost',
+#         'PORT': '',
 #     }
 # }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'myna2',
-        'USER': 'mladmin',
-        'PASSWORD': 'Fapa-Nufe0336!', #Fapa-Nufe0336!
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
 
 
 # Password validation
@@ -167,6 +167,8 @@ CORS_ORIGIN_WHITELIST = [
      'http://localhost:3000',
      "http://127.0.0.1:3000"
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_CREDENTIALS = True
 
