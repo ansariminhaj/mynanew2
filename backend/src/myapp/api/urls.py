@@ -34,7 +34,7 @@ urlpatterns = [
 	path('project_share', ProjectShareView.as_view()),
 	path('add_metadata', AddMetadataView.as_view()),
 	path('add_results', AddResultsView.as_view()),
-	path('add_datasets', AddDatasetsView.as_view()),
+	path('add_dataset', AddDatasetView.as_view()),
 	path('add_csv', AddCsvView.as_view()),
 	path('toggle_enable', ToggleEnableView.as_view())
 ]

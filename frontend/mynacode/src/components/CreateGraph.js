@@ -79,6 +79,7 @@ const CreateGraph = (props) => {
   const [isDeleteNodeModalOpen, setIsDeleteNodeModalOpen] = useState(false);
   const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
   const [downloadWeights, setDownloadWeights] = useState();
+  const [downloadNetwork, setDownloadNetwork] = useState();
 
   const [inputNodes, setInputNodes] = useState([])
   const [methodNodes, setMethodNodes] = useState([])
@@ -95,6 +96,7 @@ const CreateGraph = (props) => {
   const [bins, setBins] = useState([]);
   const [fpr, setTpr] = useState([]);
   const [tpr, setFpr] = useState([]);
+  const [cmatrix, setCMatrix] = useState([]);
 
   const [form] = Form.useForm();
 
@@ -297,6 +299,7 @@ const CreateGraph = (props) => {
 
           if (res.data['weights']){
             setDownloadWeights(<div><a href={res.data['weights']}>Download Saved Weights</a></div>)
+            setDownloadNetwork(<div><a href={res.data['network']}>Download Saved Network</a></div>)
           }
           
           
@@ -346,29 +349,11 @@ const CreateGraph = (props) => {
               else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['dataset_node'] == 1){
                 if (res.data['nodes'][i]['description']){
 
-                  console.log(res.data['nodes'][i]['description']['train set'])
-                   let parsed_trainset = JSON.parse(res.data['nodes'][i]['description']['train set'].replace(/'/g, '"'))
-                   let parsed_valset = JSON.parse(res.data['nodes'][i]['description']['val set'].replace(/'/g, '"'))
-                   let parsed_testset = JSON.parse(res.data['nodes'][i]['description']['test set'].replace(/'/g, '"'))
-                   
-                   rows.push(<div style={{color: '#38b6ff', fontSize:'15px', fontWeight:'bold', marginTop:'10px', marginBottom:'15px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}> Train Set </div>)   
-
-                   for (const [key, value] of Object.entries(parsed_trainset)){
+                   let parsed_set = JSON.parse(res.data['nodes'][i]['description'][res.data['nodes'][i]['name']].replace(/'/g, '"'))
+                    
+                   for (const [key, value] of Object.entries(parsed_set)){
                     rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>{key}</div><div style={{width:'110px'}}>{value}</div></div>)
-                   }    
-
-                   rows.push(<div style={{color: '#38b6ff', fontSize:'15px', fontWeight:'bold', marginTop:'10px', marginBottom:'15px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}> Validation Set </div>)   
-
-                   for (const [key, value] of Object.entries(parsed_valset)){
-                    rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>{key}</div><div style={{width:'110px'}}>{value}</div></div>)
-                   }   
-
-
-                   rows.push(<div style={{color: '#38b6ff', fontSize:'15px', fontWeight:'bold', marginTop:'10px', marginBottom:'15px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}> Test Set </div>)   
-
-                   for (const [key, value] of Object.entries(parsed_testset)){
-                    rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>{key}</div><div style={{width:'110px'}}>{value}</div></div>)
-                   }       
+                   }          
                 }
               }
               else if (res.data['nodes'][i]['node_type'] == 2){
@@ -391,6 +376,7 @@ const CreateGraph = (props) => {
                   setBins(bins)
                   setFpr(fpr)
                   setTpr(tpr)
+                  setCMatrix(c_matrix)
                 }
 
               }
@@ -600,12 +586,12 @@ const CreateGraph = (props) => {
                           <div style={{color:'purple', fontWeight:'bold', writingMode:'vertical-rl', testOrientation:'mixed', display:'flex', justifyContent:'center', alignItems:'center'}}>Predicted</div>
                           <div>
                             <div style={{display:'flex', flexDirection:'row'}}>
-                              <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TP: 1</div>
-                              <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>FP: 2</div>
+                              <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TP: {cmatrix[3]}</div>
+                              <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>FP: {cmatrix[1]}</div>
                             </div>
                             <div style={{display:'flex', flexDirection:'row'}}>
-                              <div style={{padding: '25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>FN: 3</div>
-                              <div style={{padding: '25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TN: 4</div>
+                              <div style={{padding: '25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>FN: {cmatrix[2]}</div>
+                              <div style={{padding: '25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TN: {cmatrix[0]}</div>
                             </div>
                           </div>
                         </div>
@@ -791,6 +777,7 @@ const CreateGraph = (props) => {
           </Form>
 
           {downloadWeights}
+          {downloadNetwork}
 
       </Modal> 
 

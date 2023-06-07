@@ -245,7 +245,7 @@ class AddResultsView(APIView):
 		return Response(OK)
 
 
-class AddDatasetsView(APIView):
+class AddDatasetView(APIView):
 
 	def post(self, request):
 		data = querydict_to_dict(request.data)
@@ -258,9 +258,10 @@ class AddDatasetsView(APIView):
 		user_obj = myUser.objects.get(username = data['username'], key = data['key'])
 
 		if Run.objects.filter(id=int(data["run_id"])).exists():
+			print("exists")
 			run_obj = Run.objects.get(id=int(data["run_id"]))
-			datasets = {'train set': data['trainset'], 'val set': data['valset'], 'test set': data['testset'] }
-			node_obj = Node.objects.create(run = run_obj, name='Dataset', description = str(datasets), node_type = 0, dataset_node=1)
+			datasets = {data['name']: data['dataset']}
+			node_obj = Node.objects.create(run = run_obj, name=data['name'], description = str(datasets), node_type = 0, dataset_node=1)
 
 		return Response(OK)
 
@@ -710,8 +711,9 @@ class GetPytorchWeightsView(APIView):
 		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
 			return Response(0)
 
-
 		run_obj = Run.objects.get(id=request.data['run_id'])
+
+		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
 
 		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
