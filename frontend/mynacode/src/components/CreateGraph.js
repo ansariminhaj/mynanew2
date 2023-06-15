@@ -348,10 +348,8 @@ const CreateGraph = (props) => {
               }
               else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['dataset_node'] == 1){
                 if (res.data['nodes'][i]['description']){
-
-                   let parsed_set = JSON.parse(res.data['nodes'][i]['description'][res.data['nodes'][i]['name']].replace(/'/g, '"'))
                     
-                   for (const [key, value] of Object.entries(parsed_set)){
+                   for (const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
                     rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width:'200px'}}>{key}</div><div style={{width:'110px'}}>{value}</div></div>)
                    }          
                 }
@@ -442,8 +440,8 @@ const CreateGraph = (props) => {
 
                method_nodes.push(
                 <div>
-                  <div onClick={() => viewNode(index)} style={{fontWeight: 'bold', color:'white', fontSize:'15px', width: '200px', height: '100px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#34568B', borderRadius: '15px'}}>
-                    <p style={{margin: 'auto', cursor:'pointer'}}>{res.data['nodes'][i]['name']}</p>
+                  <div onClick={() => viewNode(index)} style={{padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#34568B', borderRadius: '15px'}}>
+                    <div style={{ cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
                   </div>
                   <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
 
@@ -455,11 +453,6 @@ const CreateGraph = (props) => {
                       onFinish={onFinish}
                       style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
                         <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
-
-                        Name
-                        <Form.Item name={"node_name"} initialValue={res.data['nodes'][i]['name']}> 
-                          <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
-                        </Form.Item> 
 
                         Description
                         <Form.Item name={"node_description"} initialValue={res.data['nodes'][i]['description']}>
@@ -476,13 +469,11 @@ const CreateGraph = (props) => {
                       :
                       <div>
                       <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
-                      <div style={{fontSize:'20px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                        {res.data['nodes'][i]['name']}
-                      </div>
-
-                      <div style={{whiteSpace: 'pre-wrap'}}>
+                      <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize:'15px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                         {res.data['nodes'][i]['description']}
                       </div>
+
+
                       <div style={{marginTop: '15px'}}>
                         <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
                       </div>
@@ -579,23 +570,19 @@ const CreateGraph = (props) => {
                       />
 
                       <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
+                        Confusion Matrix
+
+                        <table border="1">
+                          <tr>
+                            <td style={{padding:20}}>TP: {cmatrix[3]}</td>
+                            <td style={{padding:20}}>FP: {cmatrix[1]}</td>
+                          </tr>
+                          <tr>
+                            <td style={{padding:20}}>FN: {cmatrix[2]}</td>
+                            <td style={{padding:20}}>TN: {cmatrix[0]}</td>
+                          </tr>
+                        </table>
                         
-                        <div style={{color:'purple', fontWeight:'bold', display:'flex', justifyContent:'center', alignItems:'center'}}>Actual</div>
-
-                        <div style={{display:'flex', flexDirection:'row'}}>
-                          <div style={{color:'purple', fontWeight:'bold', writingMode:'vertical-rl', testOrientation:'mixed', display:'flex', justifyContent:'center', alignItems:'center'}}>Predicted</div>
-                          <div>
-                            <div style={{display:'flex', flexDirection:'row'}}>
-                              <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TP: {cmatrix[3]}</div>
-                              <div style={{padding:'25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>FP: {cmatrix[1]}</div>
-                            </div>
-                            <div style={{display:'flex', flexDirection:'row'}}>
-                              <div style={{padding: '25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>FN: {cmatrix[2]}</div>
-                              <div style={{padding: '25px', border:'2px solid gray', width:'60px', maxWidth:'60px', color: 'black', fontSize:'15px', fontWeight:'bold'}}>TN: {cmatrix[0]}</div>
-                            </div>
-                          </div>
-                        </div>
-
                       </div>
 
 
@@ -806,7 +793,7 @@ const CreateGraph = (props) => {
 
           Run ID: {props.run_id}</div> 
 
-          <div style={{color:'#38b6ff', fontSize:'20px', fontWeight:'bold'}}>Input <PlusCircleOutlined onClick={()=>createNodeModal(0)} /></div>
+          <div style={{color:'#38b6ff', fontSize:'20px', fontWeight:'bold'}}>Variables</div>
           <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {inputNodes}
           </div>

@@ -14,6 +14,7 @@ from decimal import Decimal
 import socket
 from django.core.files.storage import default_storage
 import collections, json, time
+from collections.abc import Mapping
 
 import requests
 
@@ -41,29 +42,12 @@ class UpdateNodeView(APIView):
 
 		data = request.data 
 		node_id = data['node_id']
-		node_new_name = data['node_name']
 		node_description = data['node_description']
 
 
 		node_obj = Node.objects.get(id = int(node_id))
-		node_old_name = node_obj.name
-		node_obj.name = node_new_name
 		node_obj.description = node_description
 		node_obj.save()
-
-		# Replicate node information in all project runs 
-
-		run_obj = node_obj.run
-		project_obj = run_obj.project
-		runs = Run.objects.filter(project = project_obj)
-
-		for run in runs:
-			nodes = Node.objects.filter(run = run, name = node_old_name)
-			for node in nodes:
-				node.name = node_new_name
-				node.description = node_description
-				node.save()
-
 
 		return Response(OK)
 
@@ -89,7 +73,6 @@ class LoginView(APIView):
 		data={'username': data['username'], 'password': data['password']}
 		tokens = requests.post(url = URL, data = data)
 		token_data = tokens.json()
-		print(token_data)
 
 		if 'access' not in token_data:
 			return Response(ERROR)
@@ -176,13 +159,11 @@ class CreateRunView(APIView):
 
 	def initial_nodes(self, user_obj, run_obj):
 
-		data_node = Node.objects.create(run = run_obj, name="Datasets", description = "", node_type = 0)
+		data_node = Node.objects.create(run = run_obj, name="Datasets", description = "", node_type = 0, dataset_node = 1)
 		csv_node = Node.objects.create(run = run_obj, name="CSV", description = "", node_type = 0, csv_node=1)
-		hyperparameter_node = Node.objects.create(run = run_obj, name="Parameters & Filepaths", description = "", node_type = 0)
+		hyperparameter_node = Node.objects.create(run = run_obj, name="Variables", description = "", node_type = 0)
 	
-		method1_node = Node.objects.create(run = run_obj, name="Method1", description = "", node_type = 1)
-		method2_node = Node.objects.create(run = run_obj, name="Method2", description = "", node_type = 1)
-		method3_node = Node.objects.create(run = run_obj, name="Method3", description = "", node_type = 1)
+		method1_node = Node.objects.create(run = run_obj, name="Method", description = "Method", node_type = 1)
 
 		results_node = Node.objects.create(run = run_obj, name="Results", description = "", node_type = 2)
 		
@@ -250,7 +231,45 @@ class AddDatasetView(APIView):
 	def post(self, request):
 		data = querydict_to_dict(request.data)
 
-		print(data)
+		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
+			return Response(0)
+
+		user_obj = myUser.objects.get(username = data['username'], key = data['key'])
+
+		if Run.objects.filter(id=int(data["run_id"])).exists():
+			run_obj = Run.objects.get(id=int(data["run_id"]))
+
+			if Node.objects.filter(run = run_obj, name = 'Datasets').exists():
+				node_obj = Node.objects.get(run = run_obj, name = 'Datasets')
+			else:
+				node_obj = Node.objects.create(run = run_obj, description="", name='Datasets', node_type = 0, dataset_node = 1)
+
+
+			description = node_obj.description 
+
+			if isinstance(ast.literal_eval(data['dataset_dict']), Mapping):
+				if len(description) == 0:
+					description = ast.literal_eval(data['dataset_dict'])	
+				else:
+					description = ast.literal_eval(description)
+					description.update(ast.literal_eval(data['dataset_dict']))
+
+				node_obj.description = description
+				node_obj.save()	
+			else:
+				Response(ERROR)
+
+
+
+		return Response(OK)
+
+
+class AddCsvView(APIView):
+
+	def post(self, request):
+		data = querydict_to_dict(request.data)
+		csv = {'columns list': data['columns_list'], 'isnull list': data['isnull_list'], 'isunique list': data['isunique_list'], 'dtypes list': data['dtypes_list'], 'size': data['size'], 'shape': data['shape']}
+
 
 		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
 			return Response(0)
@@ -258,15 +277,18 @@ class AddDatasetView(APIView):
 		user_obj = myUser.objects.get(username = data['username'], key = data['key'])
 
 		if Run.objects.filter(id=int(data["run_id"])).exists():
-			print("exists")
 			run_obj = Run.objects.get(id=int(data["run_id"]))
-			datasets = {data['name']: data['dataset']}
-			node_obj = Node.objects.create(run = run_obj, name=data['name'], description = str(datasets), node_type = 0, dataset_node=1)
+			if Node.objects.filter(run = run_obj, name = 'CSV').exists():
+				node_obj = Node.objects.get(run = run_obj, name = 'CSV')
+				node_obj.description = str(csv)
+				node_obj.save()
+			else:
+				node_obj = Node.objects.create(run = run_obj, name='CSV', description = str(csv), node_type = 0, csv_node = 1)
 
 		return Response(OK)
 
 
-class AddCsvView(APIView):
+class AddVariablesView(APIView):
 
 	def post(self, request):
 		data = querydict_to_dict(request.data)
@@ -278,10 +300,26 @@ class AddCsvView(APIView):
 
 		if Run.objects.filter(id=int(data["run_id"])).exists():
 			run_obj = Run.objects.get(id=int(data["run_id"]))
-			datasets = {'columns list': data['columns_list'], 'isnull list': data['isnull_list'], 'isunique list': data['isunique_list'], 'dtypes list': data['dtypes_list'], 'size': data['size'], 'shape': data['shape']}
-			node_obj = Node.objects.create(run = run_obj, name='CSV', description = str(datasets), node_type = 0, csv_node = 1)
 
-		return Response(OK)
+			if Node.objects.filter(run = run_obj, name = 'Variables').exists():
+				node_obj = Node.objects.get(run = run_obj, name = 'Variables')
+			else:
+				node_obj = Node.objects.create(run = run_obj, description="", name='Variables', node_type = 0)
+
+
+			description = node_obj.description 
+
+			if isinstance(ast.literal_eval(data['variables_dict']), Mapping):
+				if len(description) == 0:
+					description = ast.literal_eval(data['variables_dict'])	
+				else:
+					description = ast.literal_eval(description)
+					description.update(ast.literal_eval(data['variables_dict']))
+
+				node_obj.description = description
+				node_obj.save()	
+			else:
+				Response(ERROR)
 
 
 class ToggleEnableView(CreateAPIView):
@@ -372,7 +410,7 @@ class GetNodesView(CreateAPIView):
 
 				query_list.append({'id': node['id'], 'name': node['name'], 'description': input_dict, 'node_type' : node['node_type'], 'csv_node': node['csv_node'], 'dataset_node': node['dataset_node'], 'date': node['date']})
 		
-			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'http://'+IP+'/media/'+run_obj.weights.name}
+			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name}
 			return Response(query)
 
 		return Response(ERROR)
