@@ -128,18 +128,30 @@ class CreateProjectView(APIView):
 class CreateNodeView(APIView):
 
 	def post(self, request):
-		data = querydict_to_dict(request.data)
+		print(request.data)
 
-		print(data)
+		data = request.data
 
 		user_obj = request.user
 
 		if not Run.objects.filter(id=int(data["run_id"])).exists():
 			return Response(-2)
-		
 		run_obj = Run.objects.get(id=int(data["run_id"]))
-		node_obj = Node.objects.create(run = run_obj, name=data["node_name"], description = data['node_description'], node_type = int(data['node_type']))
-		
+
+		if int(data['node_type']) == 0:
+			if not Node.objects.filter(run = run_obj, name = 'Datasets').exists():
+				node_obj = Node.objects.create(run = run_obj, description=data['node_description'], name='Datasets', node_type = 0, dataset_node = 1)
+		elif int(data['node_type']) == 1:
+			if not Node.objects.filter(run = run_obj, name = 'Variables').exists():
+				node_obj = Node.objects.create(run = run_obj, description=data['node_description'], name='Variables', node_type = 0)
+		elif int(data['node_type']) == 2:
+			node_obj = Node.objects.create(run = run_obj, description=data['node_description'], node_type = 1)
+		elif int(data['node_type']) == 3:
+			if not Node.objects.filter(run = run_obj, name = 'Results').exists():
+				node_obj = Node.objects.create(run = run_obj, name='Results', description=data['node_description'], node_type = 2)
+		else:
+			pass
+				
 		return Response(node_obj.id)
 
 
@@ -221,7 +233,13 @@ class AddResultsView(APIView):
 		if Run.objects.filter(id=int(data["run_id"])).exists():
 			run_obj = Run.objects.get(id=int(data["run_id"]))
 			results = {'precision': data['precision'], 'recall': data['recall'], 'specificity': data['specificity'], 'f1': data['f1'], 'accuracy': data['accuracy'], 'npv': data['npv'], 'c_matrix': data['c_matrix'],'test_auc': data['test_auc'], 'fpr': data['fpr'], 'tpr': data['tpr'], 'freq': data['freq'], 'bins': data['bins']}
-			node_obj = Node.objects.create(run = run_obj, name='Results', description = str(results), node_type = 2)
+
+			if Node.objects.filter(run = run_obj, name = 'Results').exists():
+				node_obj = Node.objects.get(run = run_obj, name = 'Results')
+				node_obj.description = str(results)
+				node_obj.save()
+			else:
+				node_obj = Node.objects.create(run = run_obj, name='Results', description = str(results), node_type = 2)
 
 		return Response(OK)
 
@@ -410,7 +428,15 @@ class GetNodesView(CreateAPIView):
 
 				query_list.append({'id': node['id'], 'name': node['name'], 'description': input_dict, 'node_type' : node['node_type'], 'csv_node': node['csv_node'], 'dataset_node': node['dataset_node'], 'date': node['date']})
 		
-			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name}
+			file_objs = Files.objects.filter(run = run_obj)
+
+			files_list = []
+
+			for file_obj in file_objs:
+				files_list.append('https://www.mynacode.com/media/'+file_obj.file.name)
+
+
+			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name, 'files_list': files_list}
 			return Response(query)
 
 		return Response(ERROR)
@@ -702,7 +728,7 @@ class GetAllUserInfoView(APIView):
 		return Response(querylist)
 
 
-class UploadWeightsView(APIView):
+class UploadFilesView(APIView):
 
 	def post(self, request):
 		print(request.data)
@@ -710,8 +736,7 @@ class UploadWeightsView(APIView):
 
 		try:
 			run_obj = Run.objects.get(id=request.data['run_id'])
-			run_obj.weights = request.FILES.get('weights')
-			run_obj.save() 
+			file_obj = Files.objects.create(run = run_obj, file = request.FILES.get('file'))
 		except:
 			pass
 

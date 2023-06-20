@@ -40,6 +40,11 @@ class Run(models.Model):
 	network = models.FileField(upload_to ='network', null=True, blank=True)
 
 
+class Files(models.Model):
+	run = models.ForeignKey(Run, on_delete=models.CASCADE, blank=True, null=True)
+	file = models.FileField(upload_to ='files', null=True, blank=True)
+
+
 class Node(models.Model):
 	run = models.ForeignKey(Run, on_delete=models.CASCADE, blank=True, null=True)
 	name = models.TextField(blank=True, null=True, default='New Node')

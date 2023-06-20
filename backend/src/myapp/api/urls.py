@@ -11,10 +11,9 @@ urlpatterns = [
 	path('province_list=<country>', ProvinceListView.as_view()),
 	path('city_list=<province>', CityListView.as_view()),
 	path('get_all_user_info', GetAllUserInfoView.as_view()),
-	path('upload_weights', UploadWeightsView.as_view()),
 	path('upload_pytorch_weights', UploadPytorchWeightsView.as_view()),
+	path('upload_file', UploadFilesView.as_view()),
 	path('get_pytorch_weights', GetPytorchWeightsView.as_view()),
-
 	path('python_login', PythonLoginView.as_view()),
 	path('get_projects', GetProjectsView.as_view()),
 	path('get_runs', GetRunsView.as_view()),

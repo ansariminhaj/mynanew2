@@ -457,8 +457,8 @@ const FrontAfterLogin = (props) => {
                   width: 225,
                   fontFamily: 'Helvetica, Arial, sans-serif', 
                   fontSize: '15px',
-                  minHeight: '100vh',
-                  border:'4px solid #38b6ff',
+                  backgroundColor:'white',
+                  //border:'4px solid #38b6ff',
                   fontWeight: 'bold'
                 }}
                 items={items}
@@ -523,8 +523,8 @@ const FrontAfterLogin = (props) => {
                   width: 225,
                   fontFamily: 'Helvetica, Arial, sans-serif', 
                   fontSize: '15px',
-                  height: '100vh',
-                  border:'4px solid #38b6ff',
+                  backgroundColor:'white',
+                  //border:'4px solid #38b6ff',
                   fontWeight: 'bold'
                 }}
                 items={items}
@@ -548,126 +548,128 @@ const FrontAfterLogin = (props) => {
 
   return (
 
-    <Layout>
-
-      <Sider>
-        <Layout style={{backgroundColor:'#383838'}}>
+    <Layout style={{display: 'flex', flexDirection:'row'}}>
+        
+      <div style={{backgroundColor:'white'}}>
+        <Layout>
 
           {menu}
 
         </Layout>
-      </Sider>
+      </div>
+
+      <div style={{paddingLeft:'130px'}}>
+        <Modal visible={isRunModalOpen} closable={false} footer={null}>
+          <Form
+            form={form}
+            name="editRun"
+            {...layout}
+            onFinish={onRunEdit}
+          >
+            <div>Name</div>
+            <Form.Item name="run_name">
+              <Input />
+            </Form.Item>
+            <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>setIsRunDeleteModalOpen(true)}>Delete Run</u></div>
+            <Form.Item>
+              <Button onClick={()=>setIsRunModalOpen(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Update</Button>
+            </Form.Item>
+          </Form>
+        </Modal>
 
 
-      <Modal visible={isRunModalOpen} closable={false} footer={null}>
-        <Form
-          form={form}
-          name="editRun"
-          {...layout}
-          onFinish={onRunEdit}
-        >
-          <div>Name</div>
-          <Form.Item name="run_name">
-            <Input />
-          </Form.Item>
-          <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>setIsRunDeleteModalOpen(true)}>Delete Run</u></div>
-          <Form.Item>
-            <Button onClick={()=>setIsRunModalOpen(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Update</Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Modal visible={isProjectModalOpen} closable={false} footer={null}>
+          <Form
+            form={form}
+            name="editProject"
+            {...layout}
+            onFinish={onProjectEdit}
+          >
+            <div>Name</div>
+            <Form.Item name="project_name">
+              <Input /> 
+            </Form.Item>
+            <Form.Item>
+              <Button onClick={()=>setIsProjectModalOpen(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Update</Button>
+            </Form.Item>
+            <DeleteOutlined style={{color:'red', marginBottom:'15px',  marginRight:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsProjectDeleteModalOpen(true)} /> <ShareAltOutlined style={{color:'purple', marginBottom:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsProjectShareModalOpen(true)}/>
+          </Form>
+          Project ID: {editProjectID}
+        </Modal>
+
+        <Modal visible={isProjectShareModalOpen} closable={false} footer={null}>
+          <Form
+            form={form}
+            name="shareProject"
+            {...layout}
+            onFinish={onProjectShare}
+          >
+            <div>Share with</div>
+            <Form.Item name="user_name">
+              <Input placeholder="Username"/> 
+            </Form.Item>
+            <Form.Item>
+              <Button onClick={()=>setIsProjectShareModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'purple'}} htmlType="submit">Share</Button>
+            </Form.Item>
+          </Form>
+        </Modal>                                    
 
 
-      <Modal visible={isProjectModalOpen} closable={false} footer={null}>
-        <Form
-          form={form}
-          name="editProject"
-          {...layout}
-          onFinish={onProjectEdit}
-        >
-          <div>Name</div>
-          <Form.Item name="project_name">
-            <Input /> 
-          </Form.Item>
-          <Form.Item>
-            <Button onClick={()=>setIsProjectModalOpen(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Update</Button>
-          </Form.Item>
-          <DeleteOutlined style={{color:'red', marginBottom:'15px',  marginRight:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsProjectDeleteModalOpen(true)} /> <ShareAltOutlined style={{color:'purple', marginBottom:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsProjectShareModalOpen(true)}/>
-        </Form>
-        Project ID: {editProjectID}
-      </Modal>
+        <Modal visible={isCreateProjectModalOpen} closable={false} footer={null}>
+          <Form
+            form={form}
+            name="createProject"
+            {...layout}
+            onFinish={onProjectCreate}
+          >
+            <div>Name</div>
+            <Form.Item name="project_name">
+              <Input placeholder="Project Name"/> 
+            </Form.Item>
 
-      <Modal visible={isProjectShareModalOpen} closable={false} footer={null}>
-        <Form
-          form={form}
-          name="shareProject"
-          {...layout}
-          onFinish={onProjectShare}
-        >
-          <div>Share with</div>
-          <Form.Item name="user_name">
-            <Input placeholder="Username"/> 
-          </Form.Item>
-          <Form.Item>
-            <Button onClick={()=>setIsProjectShareModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'purple'}} htmlType="submit">Share</Button>
-          </Form.Item>
-        </Form>
-      </Modal>                                    
+            <Form.Item>
+              <Button onClick={()=>setIsCreateProjectModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'purple'}} htmlType="submit">Create</Button>
+            </Form.Item>
+          </Form>
+        </Modal>
 
+        <Modal visible={isCreateRunModalOpen} closable={false} footer={null}>
+          <Form
+            form={form}
+            name="createRun"
+            {...layout}
+            onFinish={onRunCreate}
+          >
+            <div>Name</div>
+            <Form.Item name="run_name">
+              <Input placeholder="Run Name"/> 
+            </Form.Item>
 
-      <Modal visible={isCreateProjectModalOpen} closable={false} footer={null}>
-        <Form
-          form={form}
-          name="createProject"
-          {...layout}
-          onFinish={onProjectCreate}
-        >
-          <div>Name</div>
-          <Form.Item name="project_name">
-            <Input placeholder="Project Name"/> 
-          </Form.Item>
+            <Form.Item>
+              <Button onClick={()=>setIsCreateRunModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'purple'}} htmlType="submit">Create</Button>
+            </Form.Item>
+          </Form>
+        </Modal>
 
-          <Form.Item>
-            <Button onClick={()=>setIsCreateProjectModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'purple'}} htmlType="submit">Create</Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Modal visible={isRunDeleteModalOpen} closable={false}  footer={null}>
+            <div style={{color:'red', marginBottom:'15px'}}><u>Are you sure you want to delete this run? Deleted runs cannot be restored.</u></div>
+            <Button onClick={()=>setIsRunDeleteModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'red'}} onClick={handleDeleteRunOk}>Delete</Button>
+        </Modal>
 
-      <Modal visible={isCreateRunModalOpen} closable={false} footer={null}>
-        <Form
-          form={form}
-          name="createRun"
-          {...layout}
-          onFinish={onRunCreate}
-        >
-          <div>Name</div>
-          <Form.Item name="run_name">
-            <Input placeholder="Run Name"/> 
-          </Form.Item>
+        <Modal visible={isProjectDeleteModalOpen} closable={false}  footer={null}>
+            <div style={{color:'red', marginBottom:'15px'}}><u>Are you sure you want to delete this project? Deleted projects cannot be restored.</u></div>
+            <Button onClick={()=>setIsProjectDeleteModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'red'}} onClick={handleDeleteProjectOk}>Delete</Button>
+        </Modal>
 
-          <Form.Item>
-            <Button onClick={()=>setIsCreateRunModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'purple'}} htmlType="submit">Create</Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Content style={{minHeight:'100vh', padding: '10px 0px 10px 30px', fontFamily: 'Helvetica, Arial, sans-serif', display: 'flex', flexDirection:'column'}}>
+          <Layout>
 
-      <Modal visible={isRunDeleteModalOpen} closable={false}  footer={null}>
-          <div style={{color:'red', marginBottom:'15px'}}><u>Are you sure you want to delete this run? Deleted runs cannot be restored.</u></div>
-          <Button onClick={()=>setIsRunDeleteModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'red'}} onClick={handleDeleteRunOk}>Delete</Button>
-      </Modal>
+              <CreateGraph run_id = {runID} refreshParent = {refreshParent}/>
 
-      <Modal visible={isProjectDeleteModalOpen} closable={false}  footer={null}>
-          <div style={{color:'red', marginBottom:'15px'}}><u>Are you sure you want to delete this project? Deleted projects cannot be restored.</u></div>
-          <Button onClick={()=>setIsProjectDeleteModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'red'}} onClick={handleDeleteProjectOk}>Delete</Button>
-      </Modal>
+          </Layout>
+        </Content>
 
-      <Content style={{padding: '10px 0px 10px 30px', border:'4px solid #38b6ff', fontFamily: 'Helvetica, Arial, sans-serif', display: 'flex', flexDirection:'column', overflowY: 'auto'}}>
-        <Layout className="site-layout">
-
-            <CreateGraph run_id = {runID} refreshParent = {refreshParent}/>
-
-        </Layout>
-      </Content>
+      </div>
 
     </Layout>
 
