@@ -87,6 +87,7 @@ const CreateGraph = (props) => {
   const [datasetNodes, setDatasetNodes] = useState([])
   const [methodNodes, setMethodNodes] = useState([])
   const [resultNodes, setResultNodes] = useState([])
+  const [objectiveNodes, setObjectiveNodes] = useState([])
   const [nodeType, setNodeType] = useState(-1)
   const [nodeViewModalDict, setNodeViewModalDict] = useState({})
   const [editNodeViewModalDict, setEditNodeViewModalDict] = useState({})
@@ -257,11 +258,13 @@ const CreateGraph = (props) => {
           'Content-Type': 'application/json',
           'X-CSRFToken': csrftoken}} )
       .then(res => {  
+          console.log(res.data)
           let variable_nodes = []
           let csv_nodes = []
           let dataset_nodes = []
           let result_nodes = []
           let method_nodes = []
+          let objective_nodes = []
           let system_info_list = []
           let library_list = []
 
@@ -340,7 +343,7 @@ const CreateGraph = (props) => {
                     color = '#E0E0E0'
                   else
                     color = '#AECBB7'
-                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width: '200px'}}>{String(key)}</div><div style={{width: '200px'}}>{JSON.stringify(value)}</div></div>)
+                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width: '350px'}}>{String(key)}</div><div style={{width: '150px'}}>{JSON.stringify(value)}</div></div>)
                 }    
               }
               else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['csv_node'] == 1){
@@ -376,7 +379,7 @@ const CreateGraph = (props) => {
                       color = '#E0E0E0'
                     else
                       color = '#F08080'
-                    rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width: '200px'}}>{String(key)}</div><div style={{width: '200px'}}>{JSON.stringify(value)}</div></div>)
+                    rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '10px', width: '350px'}}>{String(key)}</div><div style={{width: '150px'}}>{JSON.stringify(value)}</div></div>)
                   }          
                 }
               }
@@ -392,6 +395,8 @@ const CreateGraph = (props) => {
                     else{
                       console.log(c_matrix)
                       cmatrix=(
+                          <div>
+                          Confusion Matrix
                           <table border="1">
                             <tr>
                               <td style={{padding:20}}>TP: {c_matrix[3]}</td>
@@ -402,6 +407,7 @@ const CreateGraph = (props) => {
                               <td style={{padding:20}}>TN: {c_matrix[0]}</td>
                             </tr>
                           </table>
+                          </div>
                       )
                     }
                   }
@@ -445,7 +451,7 @@ const CreateGraph = (props) => {
 
                     dataset_nodes.push( //Modal is in div. Therefore check if false before opening
                       <div>
-                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', minWidth: '200px', minHeight: '100px', border: '2px solid red', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '15px'}}>
+                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '2px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '15px'}}>
                             <div style={{marginTop:'15px', fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
                             </div>
@@ -467,7 +473,7 @@ const CreateGraph = (props) => {
                                 <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
                               </Form.Item> 
 
-                              Parameter Dictionary (Please paste a dictionary here.)
+                              Dictionary of values
                               <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
                                 <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
                               </Form.Item> 
@@ -505,57 +511,11 @@ const CreateGraph = (props) => {
 
                     csv_nodes.push(
                       <div>
-                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', minWidth: '200px', minHeight: '100px', border: '2px solid #6B5B95', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '15px'}}>
+                        <div onClick={() => viewNode(index)} style={{fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '2px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '15px'}}>
                             <div style={{marginTop:'15px', fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
                             </div>
                         </div>
-
-                        <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
-
-                          {editNodeViewModalDict[res.data['nodes'][i]['id']] == true ?
-
-                          <Form
-                            initialValues={{ remember: true,}}
-                            {...layout}
-                            onFinish={onFinish}
-                            style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
-                              <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
-
-                              Name
-                              <Form.Item name={"node_name"} initialValue={res.data['nodes'][i]['name']}> 
-                                <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
-                              </Form.Item> 
-
-                              Parameter Dictionary (Please paste a dictionary here.)
-                              <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
-                                <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
-                              </Form.Item> 
-
-                              <Form.Item>
-                                <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
-                                    <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
-                              </Form.Item>
-                              <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
-
-                            </Form>
-                            :
-                            <div>
-                            <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
-                            <div style={{fontSize:'20px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                              {res.data['nodes'][i]['name']}
-                            </div>
-
-                            <div style={{border: '1px solid black'}}>
-                              {rows}
-                            </div>
-                            <div style={{marginTop: '15px'}}>
-                              <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
-                            </div>
-                            </div>
-                          }
-
-                        </Modal>
                       </div>
                   )
               }
@@ -564,7 +524,7 @@ const CreateGraph = (props) => {
 
                     variable_nodes.push(
                       <div>
-                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', minWidth: '200px', minHeight: '100px', border: '2px solid #1B4D3E', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '15px'}}>
+                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '2px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '15px'}}>
                             <div style={{marginTop:'15px', fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
                             </div>
@@ -586,7 +546,7 @@ const CreateGraph = (props) => {
                                 <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
                               </Form.Item> 
 
-                              Parameter Dictionary (Please paste a dictionary here.)
+                              Dictionary of values
                               <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
                                 <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
                               </Form.Item> 
@@ -628,7 +588,58 @@ const CreateGraph = (props) => {
 
                method_nodes.push(
                 <div>
-                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#34568B', borderRadius: '15px'}}>
+                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '2px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#34568B', borderRadius: '15px'}}>
+                    <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
+                  </div>
+
+                  <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
+
+                    {editNodeViewModalDict[res.data['nodes'][i]['id']] == true ?
+
+                    <Form
+                      initialValues={{ remember: true,}}
+                      {...layout}
+                      onFinish={onFinish}
+                      style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
+                        <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
+
+                        Description
+                        <Form.Item name={"node_description"} initialValue={res.data['nodes'][i]['description']}>
+                          <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={res.data['nodes'][i]['description']} />
+                        </Form.Item> 
+
+                        <Form.Item>
+                          <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
+                          <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
+                        </Form.Item>
+                        <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
+
+                      </Form>
+                      :
+                      <div>
+                      <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
+                      <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize:'15px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                        {res.data['nodes'][i]['description']}
+                      </div>
+
+
+                      <div style={{marginTop: '15px'}}>
+                        <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
+                      </div>
+                      </div>
+                    }
+
+                  </Modal>
+                </div>
+
+              )               
+            }
+            else if(res.data['nodes'][i]['node_type'] == 5){
+
+
+               objective_nodes.push(
+                <div>
+                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '2px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#34568B', borderRadius: '15px'}}>
                     <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
                   </div>
 
@@ -678,14 +689,14 @@ const CreateGraph = (props) => {
 
                result_nodes.push(
                 <div>
-                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', color:'black', fontSize:'15px', minWidth: '200px', minHeight: '100px', border: '4px solid #FF6F61', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor:'white', borderRadius: '15px'}}>
+                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '2px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor:'white', borderRadius: '15px'}}>
 
                       <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-
-                      <div style={{border: '1px solid black'}}>
+                      <div>
                         {rows}
                       </div>  
 
+                      { res.data['nodes'][i]['result_type'] == 1 ?
                       <Bar
                         data={{
                           labels: bins,
@@ -709,7 +720,10 @@ const CreateGraph = (props) => {
                         }}
                         options={bar_options}
                       />
+                      :
+                      null}
 
+                      { res.data['nodes'][i]['result_type'] == 1 ?
                       <Line
                         data={{
                           labels: fpr,
@@ -725,9 +739,11 @@ const CreateGraph = (props) => {
                         }}
                         options={line_options}
                       />
+                      :
+                      null}
 
                       <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
-                        Confusion Matrix
+                        
 
                         {cmatrix}
 
@@ -753,7 +769,7 @@ const CreateGraph = (props) => {
                           <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
                         </Form.Item> 
 
-                        Parameter Dictionary (Please paste a dictionary here.)
+                        Dictionary of values
                         <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
                           <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
                         </Form.Item> 
@@ -766,11 +782,19 @@ const CreateGraph = (props) => {
 
                       </Form>
                       : 
+                      <div>
+                      <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
                       <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                      
+                      <div style={{fontSize:'20px'}}>
+                        {res.data['nodes'][i]['name']}
+                      </div>
 
-                      <div style={{border: '1px solid black'}}>
+                      <div>
                         {rows}
-                      </div>                      
+                      </div> 
+
+                      { res.data['nodes'][i]['result_type'] == 1 ?                     
                       <Bar
                         data={{
                           labels: bins,
@@ -792,8 +816,10 @@ const CreateGraph = (props) => {
                           ]
                         }}
                         options={bar_options}
-                      />
+                      />:null}
 
+
+                      { res.data['nodes'][i]['result_type'] == 1 ? 
                       <Line
                         data={{
                           labels: fpr,
@@ -808,10 +834,9 @@ const CreateGraph = (props) => {
                           ]
                         }}
                         options={line_options}
-                      />
+                      />:null}
 
                       <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
-                        Confusion Matrix
 
                         {cmatrix}
                         
@@ -820,6 +845,7 @@ const CreateGraph = (props) => {
 
                       <div style={{marginTop: '15px'}}>
                         <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
+                      </div>
                       </div>
                       </div>}
 
@@ -839,6 +865,7 @@ const CreateGraph = (props) => {
           setResultNodes(result_nodes)
           setDatasetNodes(dataset_nodes)
           setVariableNodes(variable_nodes)
+          setObjectiveNodes(objective_nodes)
 
         }})
     })
@@ -958,7 +985,22 @@ const CreateGraph = (props) => {
         {...layout}
         onFinish={onNodeCreate}
       >
-        <div>Name</div>
+        
+
+        {nodeType != 2 ?
+        <div>
+          <div>Name</div>
+          <Form.Item name="node_name">
+              <TextArea rows={1} />
+          </Form.Item>
+        </div>
+        :
+        null}
+
+        {nodeType != 2 ?
+        <div>Dictionary of values</div>
+        :
+        <div>Description</div>}
 
         <Form.Item name="node_description">
             <TextArea rows={5} />
@@ -1023,6 +1065,11 @@ const CreateGraph = (props) => {
           </Dropdown>
 
           Run ID: {props.run_id}</div> 
+
+          <div style={{color:'#38b6ff', fontSize:'20px', fontWeight:'bold'}}>Objective <PlusCircleOutlined onClick={()=>createNodeModal(5)} /></div>
+          <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+            {objectiveNodes}
+          </div>
 
           <div style={{color:'#38b6ff', fontSize:'20px', fontWeight:'bold'}}>Dataset <PlusCircleOutlined onClick={()=>createNodeModal(0)} /></div>
           <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>

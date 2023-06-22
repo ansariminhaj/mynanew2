@@ -49,9 +49,11 @@ class Node(models.Model):
 	run = models.ForeignKey(Run, on_delete=models.CASCADE, blank=True, null=True)
 	name = models.TextField(blank=True, null=True, default='New Node')
 	description = models.TextField(blank=True, null=True)
+	summary = models.TextField(blank=True, null=True)
 	node_type = models.DecimalField(max_digits=2, decimal_places=0, null=True, default = 0) #0 input, 1 method, 2 output
 	csv_node = models.DecimalField(max_digits=1, decimal_places=0, null=True, default = 0)
 	dataset_node = models.DecimalField(max_digits=1, decimal_places=0, null=True, default = 0)
+	result_type = models.DecimalField(max_digits=4, decimal_places=0, null=True, default = 0) # 0-undefined, 1-binary classification, etc...
 	date = models.DateTimeField(default=datetime.now, blank=True)
 	
 

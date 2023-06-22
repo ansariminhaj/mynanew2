@@ -139,16 +139,15 @@ class CreateNodeView(APIView):
 		run_obj = Run.objects.get(id=int(data["run_id"]))
 
 		if int(data['node_type']) == 0:
-			if not Node.objects.filter(run = run_obj, name = 'Datasets').exists():
-				node_obj = Node.objects.create(run = run_obj, description=data['node_description'], name='Datasets', node_type = 0, dataset_node = 1)
+			node_obj = Node.objects.create(run = run_obj, description=data['node_description'], name=data['node_name'], node_type = 0, dataset_node = 1)
 		elif int(data['node_type']) == 1:
-			if not Node.objects.filter(run = run_obj, name = 'Variables').exists():
-				node_obj = Node.objects.create(run = run_obj, description=data['node_description'], name='Variables', node_type = 0)
+			node_obj = Node.objects.create(run = run_obj, description=data['node_description'], name=data['node_name'], node_type = 0)
 		elif int(data['node_type']) == 2:
 			node_obj = Node.objects.create(run = run_obj, description=data['node_description'], node_type = 1)
 		elif int(data['node_type']) == 3:
-			if not Node.objects.filter(run = run_obj, name = 'Results').exists():
-				node_obj = Node.objects.create(run = run_obj, name='Results', description=data['node_description'], node_type = 2)
+			node_obj = Node.objects.create(run = run_obj, name=data['node_name'], description=data['node_description'], node_type = 2)
+		elif int(data['node_type']) == 5:
+			node_obj = Node.objects.create(run = run_obj, name=data['node_name'], description=data['node_description'], node_type = 5)
 		else:
 			pass
 				
@@ -433,10 +432,10 @@ class GetNodesView(CreateAPIView):
 			files_list = []
 
 			for file_obj in file_objs:
-				files_list.append('https://www.mynacode.com/media/'+file_obj.file.name)
+				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
-			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name, 'files_list': files_list}
+			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'https://www.mynacode.com/media/'+str(run_obj.weights.name), 'network': 'https://www.mynacode.com/media/'+str(run_obj.network.name), 'files_list': files_list}
 			return Response(query)
 
 		return Response(ERROR)
