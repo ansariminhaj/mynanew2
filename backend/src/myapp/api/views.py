@@ -47,6 +47,8 @@ class UpdateNodeView(APIView):
 
 		node_obj = Node.objects.get(id = int(node_id))
 		node_obj.description = node_description
+		if 'node_summary' in data:
+			node_obj.summary = data['node_summary']
 		node_obj.save()
 
 		return Response(OK)
@@ -368,7 +370,7 @@ class GetProjectsView(CreateAPIView):
 		projects_user = projects_user.values()
 		for project_user in projects_user:
 			project_obj = Project.objects.get(id = project_user['project_id'])
-			query_list.append({'name': project_obj.name, 'id': project_obj.id, 'enable': project_obj.enable})
+			query_list.append({'name': project_obj.name, 'id': project_obj.id, 'enable': project_obj.enable, 'project_date': project_obj.date})
 
 
 		return Response(query_list)
@@ -388,7 +390,7 @@ class GetRunsView(CreateAPIView):
 				runs = Run.objects.filter(project = project_obj_exists)
 				runs = runs.values()
 				for run in runs:
-					query_list.append({'run_name': run['run_name'], 'id': run['id']})
+					query_list.append({'run_name': run['run_name'], 'id': run['id'], 'run_date': run['run_date']})
 		else: # This is a run
 			pass
 
@@ -425,11 +427,11 @@ class GetNodesView(CreateAPIView):
 				else:
 					input_dict = node['description']
 
-				query_list.append({'id': node['id'], 'name': node['name'], 'description': input_dict, 'node_type' : node['node_type'], 'csv_node': node['csv_node'], 'dataset_node': node['dataset_node'], 'date': node['date']})
+				query_list.append({'id': node['id'], 'name': node['name'], 'description': input_dict, 'node_type' : node['node_type'], 'csv_node': node['csv_node'], 'dataset_node': node['dataset_node'], 'date': node['date'], 'node_summary': node['summary']})
 		
 			file_objs = Files.objects.filter(run = run_obj)
 
-			files_list = []
+			files_list = ['https://www.mynacode.com/media/'+str(run_obj.weights.name), 'https://www.mynacode.com/media/'+str(run_obj.network.name)]
 
 			for file_obj in file_objs:
 				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
@@ -443,7 +445,7 @@ class GetNodesView(CreateAPIView):
 				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
 
 
-			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'https://www.mynacode.com/media/'+str(run_obj.weights.name), 'network': 'https://www.mynacode.com/media/'+str(run_obj.network.name), 'files_list': files_list, 'images_list': images_list}
+			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'files_list': files_list, 'images_list': images_list}
 			return Response(query)
 
 		return Response(ERROR)

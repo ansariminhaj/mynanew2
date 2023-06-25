@@ -448,7 +448,11 @@ const FrontAfterLogin = (props) => {
               if(i == 0 && runID==-1){
                 setRunID(runs[i]['id'])
               }
-              items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}> <div onClick={getNodes(runs[i]['id'], runs[i]['run_name'])}>{runs[i]['run_name'] }</div><EditOutlined onClick={()=>editRunModalOpen(runs[i]['id'], runs[i]['run_name'])}/></div>))
+              items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
+                                      <EditOutlined style={{marginRight:'10px'}}  onClick={()=>editRunModalOpen(runs[i]['id'], runs[i]['run_name'])}/> 
+                                      <div style={{maxWidth:'100px'}} onClick={getNodes(runs[i]['id'], runs[i]['run_name'])}> {runs[i]['run_name'] } </div>
+                                      <span style={{fontSize:'10px', marginLeft: 'auto', marginRight: 0}}>{runs[i]['run_date'].slice(0, 10) }</span>     
+                                </div>))
           }
 
           setMenu(<Menu
@@ -458,6 +462,7 @@ const FrontAfterLogin = (props) => {
                   fontFamily: 'Helvetica, Arial, sans-serif', 
                   fontSize: '15px',
                   backgroundColor:'white',
+                  color:'#404040',
                   //border:'4px solid #38b6ff',
                   fontWeight: 'bold'
                 }}
@@ -514,7 +519,11 @@ const FrontAfterLogin = (props) => {
           let items = [getItem(<div style={{ display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'bold', color:'#38b6ff', fontSize:'17px'}}><span style={{marginRight: '10px'}}>Projects</span> <PlusCircleOutlined onClick={()=>setIsCreateProjectModalOpen(true)} /></div>)]
 
           for(let i=0;i<projects.length;i++){
-              items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}><Switch size="small" checked={projects[i]['enable']} onClick={()=>toggleEnable(projects[i]['id'])} /><div onClick={()=>getRuns(projects[i]['id'], projects[i]['name'])}>{projects[i]['name'] }</div><EditOutlined onClick={()=>editProjectModalOpen(projects[i]['id'], projects[i]['name'])}/></div>))
+              items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
+                                  <Switch style={{marginRight:'10px'}} size="small" checked={projects[i]['enable']} onClick={()=>toggleEnable(projects[i]['id'])} />
+                                  <div style={{maxWidth:'100px'}} onClick={()=>getRuns(projects[i]['id'], projects[i]['name'])}>{projects[i]['name']}</div> 
+                                  <EditOutlined style={{marginLeft: 'auto', marginRight: 0}} onClick={()=>editProjectModalOpen(projects[i]['id'], projects[i]['name'])}/>
+                                </div>))
           }
 
           setMenu(<Menu

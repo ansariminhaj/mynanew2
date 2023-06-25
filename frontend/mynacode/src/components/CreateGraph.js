@@ -79,8 +79,6 @@ const CreateGraph = (props) => {
   const [refresh, setRefresh] = useState(0)
   const [isCreateNodeModalOpen, setIsCreateNodeModalOpen] = useState(false);
   const [isDeleteNodeModalOpen, setIsDeleteNodeModalOpen] = useState(false);
-  const [downloadWeights, setDownloadWeights] = useState()
-  const [downloadNetwork, setDownloadNetwork] = useState()
   const [showUploadProgress, setshowUploadProgress] = useState(false)
   const [showFileUploadProgress, setshowFileUploadProgress] = useState(false)
   const [files, setFiles] = useState()
@@ -116,6 +114,8 @@ const CreateGraph = (props) => {
 
   const onFinish = (values)  => {
     let form_data = new FormData();
+
+    console.log(values)
 
     for (const [key, value] of Object.entries(values))
       form_data.append(key, value)
@@ -411,10 +411,6 @@ const CreateGraph = (props) => {
             setSystemInfo(<Menu items={system_info_list} style={{overflowY: 'auto', height:'300px'}}/>)           
           }
 
-          if (res.data['weights']){
-            setDownloadWeights(<div><a href={res.data['weights']}>{res.data['weights'].split("/").slice(-1)}</a></div>)
-            setDownloadNetwork(<div><a href={res.data['network']}>{res.data['network'].split("/").slice(-1)}</a></div>)
-          }
 
           console.log(res.data['files_list'])
 
@@ -554,7 +550,7 @@ const CreateGraph = (props) => {
 
                     count+=1
                     if(count%2==0)
-                      color = '#white'
+                      color = 'white'
                     else
                       color = '#E8E8E8'
                     rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
@@ -570,7 +566,12 @@ const CreateGraph = (props) => {
                     dataset_nodes.push( //Modal is in div. Therefore check if false before opening
                       <div>
                         <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            <div style={{marginTop:'15px', fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                            
+                            <div style={{paddingBottom: '10px', fontWeight: 'normal'}}>
+                              {res.data['nodes'][i]['node_summary']}
+                            </div>
+
+                            <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
                             </div>
                         </div>
@@ -591,6 +592,11 @@ const CreateGraph = (props) => {
                                 <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
                               </Form.Item> 
 
+                              Description
+                              <Form.Item name={"node_summary"} initialValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)}>
+                                <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
+                              </Form.Item> 
+
                               Dictionary of values
                               <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
                                 <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
@@ -608,6 +614,10 @@ const CreateGraph = (props) => {
                             <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
                             <div style={{fontSize:'20px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {res.data['nodes'][i]['name']}
+                            </div>
+
+                            <div>
+                              {res.data['nodes'][i]['node_summary']}
                             </div>
 
                             <div style={{border: '1px solid black'}}>
@@ -643,7 +653,12 @@ const CreateGraph = (props) => {
                     variable_nodes.push(
                       <div>
                         <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            <div style={{marginTop:'15px', fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                            
+                            <div style={{paddingBottom: '10px', fontWeight: 'normal'}}>
+                              {res.data['nodes'][i]['node_summary']}
+                            </div>
+
+                            <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
                             </div>
                         </div>
@@ -664,6 +679,12 @@ const CreateGraph = (props) => {
                                 <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
                               </Form.Item> 
 
+                              Description
+                              <Form.Item name={"node_summary"} initialValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)}>
+                                <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
+                              </Form.Item> 
+
+
                               Dictionary of values
                               <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
                                 <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
@@ -681,6 +702,10 @@ const CreateGraph = (props) => {
                             <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
                             <div style={{fontSize:'20px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {res.data['nodes'][i]['name']}
+                            </div>
+
+                            <div>
+                              {res.data['nodes'][i]['node_summary']}
                             </div>
 
                             <div style={{border: '1px solid black'}}>
@@ -757,7 +782,7 @@ const CreateGraph = (props) => {
 
                objective_nodes.push(
                 <div>
-                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#452c63', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', padding:'10px', fontWeight: 'bold', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
                     <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
                   </div>
 
@@ -810,6 +835,12 @@ const CreateGraph = (props) => {
                   <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor:'white', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
 
                       <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px', marginTop:'15px'}}>
+                      
+                      <div style={{paddingBottom: '10px', fontWeight: 'normal'}}>
+                        {res.data['nodes'][i]['node_summary']}
+                      </div>
+
+
                       <div>
                         {rows}
                       </div>  
@@ -887,6 +918,11 @@ const CreateGraph = (props) => {
                           <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
                         </Form.Item> 
 
+                        Description
+                        <Form.Item name={"node_summary"} initialValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)}>
+                          <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
+                        </Form.Item> 
+
                         Dictionary of values
                         <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
                           <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
@@ -901,16 +937,21 @@ const CreateGraph = (props) => {
                       </Form>
                       : 
                       <div>
-                      <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
-                      <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                      <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>            
                       
-                      <div style={{fontSize:'20px'}}>
+                      <div style={{fontSize:'20px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                         {res.data['nodes'][i]['name']}
                       </div>
 
                       <div>
+                        {res.data['nodes'][i]['node_summary']}
+                      </div>
+
+                      <div style={{border: '1px solid black'}}>
                         {rows}
                       </div> 
+
+                      <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
 
                       { res.data['nodes'][i]['result_type'] == 1 ?                     
                       <Bar
@@ -954,11 +995,12 @@ const CreateGraph = (props) => {
                         options={line_options}
                       />:null}
 
+                      {typeof cmatrix != 'undefined' ?
                       <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
-
                         {cmatrix}
-                        
                       </div>
+                      :
+                      null}
 
 
                       <div style={{marginTop: '15px'}}>
@@ -1116,7 +1158,7 @@ const CreateGraph = (props) => {
 
           <Dropdown overlay={files} trigger={['click']}>
             <Tooltip placement="top" title="Files">
-              <Button size="medium" shape="circle" style={{marginRight:'5px'}}> <FileOutlined /> </Button>
+              <Button size="medium" shape="circle" style={{marginLeft:'5px', marginRight:'5px'}}> <FileOutlined /> </Button>
             </Tooltip> 
           </Dropdown>
 
