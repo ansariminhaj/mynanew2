@@ -55,6 +55,11 @@ class Node(models.Model):
 	dataset_node = models.DecimalField(max_digits=1, decimal_places=0, null=True, default = 0)
 	result_type = models.DecimalField(max_digits=4, decimal_places=0, null=True, default = 0) # 0-undefined, 1-binary classification, etc...
 	date = models.DateTimeField(default=datetime.now, blank=True)
+
+
+class Images(models.Model):
+	run = models.ForeignKey(Run, on_delete=models.CASCADE, blank=True, null=True)
+	image= models.ImageField(upload_to='images', blank=True, null=True, max_length=1000)
 	
 
 class Results(models.Model):

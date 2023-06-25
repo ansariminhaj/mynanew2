@@ -435,7 +435,15 @@ class GetNodesView(CreateAPIView):
 				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
-			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'https://www.mynacode.com/media/'+str(run_obj.weights.name), 'network': 'https://www.mynacode.com/media/'+str(run_obj.network.name), 'files_list': files_list}
+			image_objs = Images.objects.filter(run = run_obj)
+
+			images_list = []
+
+			for image_obj in image_objs:
+				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+
+
+			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'weights': 'https://www.mynacode.com/media/'+str(run_obj.weights.name), 'network': 'https://www.mynacode.com/media/'+str(run_obj.network.name), 'files_list': files_list, 'images_list': images_list}
 			return Response(query)
 
 		return Response(ERROR)
@@ -736,6 +744,22 @@ class UploadFilesView(APIView):
 		try:
 			run_obj = Run.objects.get(id=request.data['run_id'])
 			file_obj = Files.objects.create(run = run_obj, file = request.FILES.get('file'))
+		except:
+			pass
+
+
+		return Response(OK)
+
+
+class UploadImagesView(APIView):
+
+	def post(self, request):
+		print(request.data)
+		print(request.FILES)
+
+		try:
+			run_obj = Run.objects.get(id=request.data['run_id'])
+			image_obj = Images.objects.create(run = run_obj, image = request.FILES.get('image'))
 		except:
 			pass
 

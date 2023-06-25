@@ -13,6 +13,7 @@ urlpatterns = [
 	path('get_all_user_info', GetAllUserInfoView.as_view()),
 	path('upload_pytorch_weights', UploadPytorchWeightsView.as_view()),
 	path('upload_file', UploadFilesView.as_view()),
+	path('upload_image', UploadImagesView.as_view()),
 	path('get_pytorch_weights', GetPytorchWeightsView.as_view()),
 	path('python_login', PythonLoginView.as_view()),
 	path('get_projects', GetProjectsView.as_view()),
