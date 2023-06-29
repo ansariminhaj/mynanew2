@@ -5,7 +5,7 @@ import IP from "../components/ipConfig";
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Layout, Menu, Divider, Affix, Button, Modal, notification, Tooltip, Dropdown, Switch} from 'antd';
 import CreateGraph from "../components/CreateGraph";
-import { LeftCircleOutlined, EditOutlined, DeleteOutlined, ShareAltOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { MoreOutlined, LeftCircleOutlined, EditOutlined, DeleteOutlined, ShareAltOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import "./index.css";
 import protocol from "../components/httpORhttps";
 import type { NotificationPlacement } from 'antd/es/notification/interface';
@@ -127,6 +127,42 @@ const FrontAfterLogin = (props) => {
         })
       })
   };
+
+
+  const duplicateRun = () => {
+      var csrftoken = Cookies.get('csrftoken');
+      axios({
+        withCredentials: true,
+        method: 'post',
+        url: protocol+'://'+IP+'/api/token/refresh/',
+        data: {'refresh': localStorage.getItem('refresh_token')},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken}} ) 
+      .then(res =>{
+          localStorage.setItem('access_token', res.data["access"])
+          localStorage.setItem('refresh_token', res.data["refresh"])
+
+          axios({
+          withCredentials: true,
+          method: 'post',
+          url: protocol+'://'+IP+'/api/duplicate_run',
+          data: {'run_id': editRunID},
+          headers: {
+            'Authorization': "JWT " + localStorage.getItem('access_token'),
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken}} )
+        .then(res => {
+           if(res.data == 'OK')
+              setIsRunModalOpen(false)
+              setRefresh((prevValue) => prevValue + 1) 
+        })
+        .catch(err => {
+          console.log(err.response.data);
+        })
+      })
+  };
+
 
   function getItem(label, key, children, type) {
     return {
@@ -449,7 +485,7 @@ const FrontAfterLogin = (props) => {
                 setRunID(runs[i]['id'])
               }
               items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
-                                      <EditOutlined style={{marginRight:'10px'}}  onClick={()=>editRunModalOpen(runs[i]['id'], runs[i]['run_name'])}/> 
+                                      <MoreOutlined style={{marginRight:'10px', fontSize:'20px'}}  onClick={()=>editRunModalOpen(runs[i]['id'], runs[i]['run_name'])}/> 
                                       <div style={{maxWidth:'100px'}} onClick={getNodes(runs[i]['id'], runs[i]['run_name'])}> {runs[i]['run_name'] } </div>
                                       <span style={{fontSize:'10px', marginLeft: 'auto', marginRight: 0}}>{runs[i]['run_date'].slice(0, 10) }</span>     
                                 </div>))
@@ -458,11 +494,10 @@ const FrontAfterLogin = (props) => {
           setMenu(<Menu
                 mode="inline"
                 style={{
-                  width: 225,
+                  width: 280,
                   fontFamily: 'Helvetica, Arial, sans-serif', 
                   fontSize: '15px',
                   backgroundColor:'white',
-                  color:'#404040',
                   //border:'4px solid #38b6ff',
                   fontWeight: 'bold'
                 }}
@@ -522,14 +557,14 @@ const FrontAfterLogin = (props) => {
               items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
                                   <Switch style={{marginRight:'10px'}} size="small" checked={projects[i]['enable']} onClick={()=>toggleEnable(projects[i]['id'])} />
                                   <div style={{maxWidth:'100px'}} onClick={()=>getRuns(projects[i]['id'], projects[i]['name'])}>{projects[i]['name']}</div> 
-                                  <EditOutlined style={{marginLeft: 'auto', marginRight: 0}} onClick={()=>editProjectModalOpen(projects[i]['id'], projects[i]['name'])}/>
+                                  <MoreOutlined style={{marginLeft: 'auto', marginRight: 0, fontSize:'20px'}} onClick={()=>editProjectModalOpen(projects[i]['id'], projects[i]['name'])}/>
                                 </div>))
           }
 
           setMenu(<Menu
                 mode="inline"
                 style={{
-                  width: 225,
+                  width: 280,
                   fontFamily: 'Helvetica, Arial, sans-serif', 
                   fontSize: '15px',
                   backgroundColor:'white',
@@ -579,7 +614,7 @@ const FrontAfterLogin = (props) => {
             <Form.Item name="run_name">
               <Input />
             </Form.Item>
-            <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>setIsRunDeleteModalOpen(true)}>Delete Run</u></div>
+            <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer', marginRight:'15px'}} onClick={()=>setIsRunDeleteModalOpen(true)}>Delete Run</u> <u style={{cursor:'pointer', color:'purple'}} onClick={duplicateRun}>Duplicate Run</u></div>
             <Form.Item>
               <Button onClick={()=>setIsRunModalOpen(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Update</Button>
             </Form.Item>

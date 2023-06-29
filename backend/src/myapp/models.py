@@ -36,8 +36,8 @@ class Run(models.Model):
 	project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
 	run_name = models.TextField(null=True, blank=True)
 	run_date = models.DateTimeField(default=datetime.now, blank=True)
-	weights = models.FileField(upload_to ='weights', null=True, blank=True)
-	network = models.FileField(upload_to ='network', null=True, blank=True)
+	# weights = models.FileField(upload_to ='weights', null=True, blank=True)
+	# network = models.FileField(upload_to ='network', null=True, blank=True)
 
 
 class Files(models.Model):
@@ -62,16 +62,6 @@ class Images(models.Model):
 	image= models.ImageField(upload_to='images', blank=True, null=True, max_length=1000)
 	
 
-class Results(models.Model):
-	node = models.ForeignKey(Node, on_delete=models.CASCADE, blank=True, null=True)
-	precision = models.DecimalField(max_digits=6, decimal_places=5, null=True, default=0)
-	recall = models.DecimalField(max_digits=6, decimal_places=5, null=True, default=0)
-	specificity = models.DecimalField(max_digits=6, decimal_places=5, null=True, default=0)
-	npv = models.DecimalField(max_digits=6, decimal_places=5, null=True, default=0)
-	f1 = models.DecimalField(max_digits=6, decimal_places=5, null=True, default=0)
-	accuracy = models.DecimalField(max_digits=6, decimal_places=5, null=True, default=0)
-	test_auc = models.DecimalField(max_digits=6, decimal_places=5, null=True, default=0)
-	c_matrix = models.TextField(blank=True, null=True)
 
 class subscription(models.Model):
 	subscriber = models.ForeignKey(myUser, on_delete=models.CASCADE, blank=True, null=True)

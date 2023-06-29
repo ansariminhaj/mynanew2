@@ -268,6 +268,7 @@ const CreateGraph = (props) => {
   };
 
   const editNode = (id) => {
+    console.log(id)
     setEditNodeViewModalDict(prevState => {
       return {
         ...prevState,
@@ -276,9 +277,11 @@ const CreateGraph = (props) => {
     });
     setEditNodeID(id)
     setRefresh((prevValue) => prevValue + 1) 
+    console.log(editNodeViewModalDict)
   };
 
   const closeEditNode = (id) => {
+    console.log(id)
     setEditNodeViewModalDict(prevState => {
       return {
         ...prevState,
@@ -286,6 +289,7 @@ const CreateGraph = (props) => {
       }
     });
     setRefresh((prevValue) => prevValue + 1) 
+    console.log(editNodeViewModalDict)
   }
 
 
@@ -412,8 +416,6 @@ const CreateGraph = (props) => {
           }
 
 
-          console.log(res.data['files_list'])
-
           if (res.data['files_list']){
             let files_list = []
             for(var i=0;i<res.data['files_list'].length;i++){
@@ -429,11 +431,11 @@ const CreateGraph = (props) => {
 
           if (res.data['images_list']){
             let images_list = []
-            for(var i=0;i<res.data['files_list'].length;i++){
+            for(var i=0;i<res.data['images_list'].length;i++){
               images_list.push(         
                   {key: i,
                   label: (
-                      <div><img src={res.data['images_list'][i]} /></div>
+                      <div><img width={500} src={res.data['images_list'][i]} /></div>
                   ),
                 })
             }
@@ -457,7 +459,7 @@ const CreateGraph = (props) => {
                     color = '#E0E0E0'
                   else
                     color = '#AECBB7'
-                  rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
+                  rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
                 }    
               }
               else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['csv_node'] == 1){
@@ -472,7 +474,7 @@ const CreateGraph = (props) => {
                   rows.push(<div> Size (in KB): {size}</div>)
                   rows.push(<div> Shape: {shape}</div>)
 
-                  rows.push(<div style={{fontSize:'17px', color:'white', marginTop: '10px', width:'100%', backgroundColor: '#38b6ff', display:'flex', flexDirection:'row', paddingBottom:'10px', paddingTop:'10px'}}><div style={{paddingLeft: '20px', width:'225px'}}>Column</div><div style={{width:'134px'}}>Unique</div><div style={{width:'130px'}}>Null</div><div style={{width:'134px'}}>Datatype</div></div>)
+                  rows.push(<div style={{fontSize:'18px', color:'white', marginTop: '10px', width:'100%', backgroundColor: '#38b6ff', display:'flex', flexDirection:'row', paddingBottom:'10px', paddingTop:'10px'}}><div style={{paddingLeft: '20px', width:'225px'}}>Column</div><div style={{width:'134px'}}>Unique</div><div style={{width:'130px'}}>Null</div><div style={{width:'134px'}}>Datatype</div></div>)
 
                   for(let i=0; i<parsed_columns.length; i++){
                     count+=1
@@ -480,7 +482,7 @@ const CreateGraph = (props) => {
                       color = '#E0E0E0'
                     else
                       color ='#89CFF0'
-                    rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '20px', width:'234px'}}>{parsed_columns[i]}</div><div style={{width:'134px'}}>{parsed_unique[i]}</div><div style={{width:'134px'}}>{parsed_null[i]}</div><div style={{width:'134px'}}>{parsed_dtypes[i]}</div></div>)
+                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '20px', width:'234px'}}>{parsed_columns[i]}</div><div style={{width:'134px'}}>{parsed_unique[i]}</div><div style={{width:'134px'}}>{parsed_null[i]}</div><div style={{width:'134px'}}>{parsed_dtypes[i]}</div></div>)
                    
                    }
                   }
@@ -493,7 +495,7 @@ const CreateGraph = (props) => {
                       color = '#E0E0E0'
                     else
                       color = '#F08080'
-                    rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
+                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
                   }          
                 }
               }
@@ -501,7 +503,6 @@ const CreateGraph = (props) => {
 
                 if (res.data['nodes'][i]['description']){
                   try{
-                    console.log(res.data['nodes'][i]['description']['c_matrix'])
                     let c_matrix = res.data['nodes'][i]['description']['c_matrix']
 
                     if (typeof c_matrix == 'undefined')
@@ -553,7 +554,7 @@ const CreateGraph = (props) => {
                       color = 'white'
                     else
                       color = '#E8E8E8'
-                    rows.push(<div style={{width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
+                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
                   }   
 
                 }
@@ -565,13 +566,13 @@ const CreateGraph = (props) => {
 
                     dataset_nodes.push( //Modal is in div. Therefore check if false before opening
                       <div>
-                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', color:'black', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
                             
-                            <div style={{paddingBottom: '10px', fontWeight: 'normal'}}>
+                            <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
 
-                            <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                            <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
                             </div>
                         </div>
@@ -639,8 +640,8 @@ const CreateGraph = (props) => {
 
                     csv_nodes.push(
                       <div>
-                        <div onClick={() => viewNode(index)} style={{fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            <div style={{marginTop:'15px', fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                        <div onClick={() => viewNode(index)} style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                            <div style={{marginTop:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
                             </div>
                         </div>
@@ -652,13 +653,13 @@ const CreateGraph = (props) => {
 
                     variable_nodes.push(
                       <div>
-                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
                             
-                            <div style={{paddingBottom: '10px', fontWeight: 'normal'}}>
+                            <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
 
-                            <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                            <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
                             </div>
                         </div>
@@ -730,13 +731,8 @@ const CreateGraph = (props) => {
 
 
                method_nodes.push(
-                <div>
-                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#34568B', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                    <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
-                  </div>
-
-                  <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
-
+                  <div style={{padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#34568B', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                    
                     {editNodeViewModalDict[res.data['nodes'][i]['id']] == true ?
 
                     <Form
@@ -746,34 +742,22 @@ const CreateGraph = (props) => {
                       style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
                         <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
-                        Description
                         <Form.Item name={"node_description"} initialValue={res.data['nodes'][i]['description']}>
-                          <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={res.data['nodes'][i]['description']} />
+                          <TextArea rows={4} showCount placeholder="Description" style={{width:'450px'}} defaultValue={res.data['nodes'][i]['description']} />
                         </Form.Item> 
 
                         <Form.Item>
                           <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                           <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
                         </Form.Item>
-                        <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
+                        <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node </u></div>
 
                       </Form>
                       :
-                      <div>
-                      <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
-                      <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize:'15px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                        {res.data['nodes'][i]['description']}
-                      </div>
-
-
-                      <div style={{marginTop: '15px'}}>
-                        <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
-                      </div>
-                      </div>
+                      <div onClick={() => editNode(index)} style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', paddingBottom:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
                     }
 
-                  </Modal>
-                </div>
+                    </div>
 
               )               
             }
@@ -832,11 +816,11 @@ const CreateGraph = (props) => {
 
                result_nodes.push(
                 <div>
-                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', fontWeight: 'bold', color:'black', fontSize:'15px', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor:'white', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor:'white', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
 
-                      <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px', marginTop:'15px'}}>
+                      <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px', marginTop:'15px'}}>
                       
-                      <div style={{paddingBottom: '10px', fontWeight: 'normal'}}>
+                      <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                         {res.data['nodes'][i]['node_summary']}
                       </div>
 
