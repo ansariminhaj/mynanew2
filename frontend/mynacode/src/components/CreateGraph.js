@@ -3,7 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import IP from "../components/ipConfig";
 import { useNavigate, Link } from 'react-router-dom';
-import { message, Button, Tooltip, Popover, Checkbox, Form, Input, Alert, Modal, Switch, Dropdown, Menu, Upload } from 'antd';
+import { Divider, message, Button, Tooltip, Popover, Checkbox, Form, Input, Alert, Modal, Switch, Dropdown, Menu, Upload } from 'antd';
 import { PlusCircleOutlined, EditOutlined, AlignLeftOutlined, ApartmentOutlined, FileImageOutlined, CloseOutlined, CheckOutlined, DesktopOutlined, InboxOutlined, FileOutlined, UploadOutlined } from '@ant-design/icons';
 import '../components/index.css';
 import protocol from "../components/httpORhttps";
@@ -90,7 +90,6 @@ const CreateGraph = (props) => {
   const [methodNodes, setMethodNodes] = useState([])
   const [resultNodes, setResultNodes] = useState([])
   const [objectiveNodes, setObjectiveNodes] = useState([])
-  const [nodeType, setNodeType] = useState(-1)
   const [nodeViewModalDict, setNodeViewModalDict] = useState({})
   const [editNodeViewModalDict, setEditNodeViewModalDict] = useState({})
   const [editNodeID, setEditNodeID] = useState(-1);
@@ -258,6 +257,7 @@ const CreateGraph = (props) => {
 
 
   const closeNode = (id) => {
+    console.log(id)
     setNodeViewModalDict(prevState => {
       return {
         ...prevState,
@@ -297,6 +297,7 @@ const CreateGraph = (props) => {
     closeNode(id)
     closeEditNode(id)
     setIsDeleteNodeModalOpen(true)
+    setEditNodeID(id)
     setRefresh((prevValue) => prevValue + 1) 
   };
 
@@ -360,7 +361,6 @@ const CreateGraph = (props) => {
           'Content-Type': 'application/json',
           'X-CSRFToken': csrftoken}} )
       .then(res => {  
-          console.log(res.data)
           let variable_nodes = []
           let csv_nodes = []
           let dataset_nodes = []
@@ -640,10 +640,16 @@ const CreateGraph = (props) => {
 
                     csv_nodes.push(
                       <div>
-                        <div onClick={() => viewNode(index)} style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            <div style={{marginTop:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                        <div style={{ width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                            <div onClick={() => viewNode(index)} style={{cursor:'pointer', marginTop:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                              Add a CSV file from your code.
                               {rows}
                             </div>
+
+                            <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
+                            <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
+                            <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeNode(index)} > < CloseOutlined /> </Button> 
+                            </Modal>
                         </div>
                       </div>
                   )
@@ -731,7 +737,7 @@ const CreateGraph = (props) => {
 
 
                method_nodes.push(
-                  <div style={{padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor: '#34568B', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                  <div style={{padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', margin:'20px', backgroundColor: '#34568B', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
                     
                     {editNodeViewModalDict[res.data['nodes'][i]['id']] == true ?
 
@@ -743,7 +749,7 @@ const CreateGraph = (props) => {
                         <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
                         <Form.Item name={"node_description"} initialValue={res.data['nodes'][i]['description']}>
-                          <TextArea rows={4} showCount placeholder="Description" style={{width:'450px'}} defaultValue={res.data['nodes'][i]['description']} />
+                          <TextArea rows={5} placeholder="Description" style={{minWidth:'600px'}} defaultValue={res.data['nodes'][i]['description']} />
                         </Form.Item> 
 
                         <Form.Item>
@@ -757,7 +763,7 @@ const CreateGraph = (props) => {
                       <div onClick={() => editNode(index)} style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', paddingBottom:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
                     }
 
-                    </div>
+                  </div>
 
               )               
             }
@@ -765,13 +771,8 @@ const CreateGraph = (props) => {
 
 
                objective_nodes.push(
-                <div>
-                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', padding:'10px', fontWeight: 'bold', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                    <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
-                  </div>
-
-                  <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
-
+               <div style={{padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', margin:'20px', backgroundColor: '#34568B', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                    
                     {editNodeViewModalDict[res.data['nodes'][i]['id']] == true ?
 
                     <Form
@@ -781,35 +782,22 @@ const CreateGraph = (props) => {
                       style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
                         <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
-                        Description
                         <Form.Item name={"node_description"} initialValue={res.data['nodes'][i]['description']}>
-                          <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={res.data['nodes'][i]['description']} />
+                          <TextArea rows={5} placeholder="Description" style={{minWidth:'600px'}} defaultValue={res.data['nodes'][i]['description']} />
                         </Form.Item> 
 
                         <Form.Item>
                           <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                           <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
                         </Form.Item>
-                        <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
+                        <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node </u></div>
 
                       </Form>
                       :
-                      <div>
-                      <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
-                      <div style={{whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize:'15px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                        {res.data['nodes'][i]['description']}
-                      </div>
-
-
-                      <div style={{marginTop: '15px'}}>
-                        <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
-                      </div>
-                      </div>
+                      <div onClick={() => editNode(index)} style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', paddingBottom:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
                     }
 
-                  </Modal>
                 </div>
-
               )               
             }
             else if(res.data['nodes'][i]['node_type'] == 2){
@@ -1020,20 +1008,7 @@ const CreateGraph = (props) => {
   }, [props, refresh]);
 
 
-  const createNodeModal = (node_type) => {
-    setIsCreateNodeModalOpen(true)
-    setNodeType(node_type)
-  }
-
-  const onNodeCreate = (values)  => {
-
-    let form_data = new FormData();
-
-    for (const [key, value] of Object.entries(values))
-      form_data.append(key, value)
-
-    form_data.append('run_id', props.run_id)
-    form_data.append('node_type', nodeType)
+  const onNodeCreate = (nodeType)  => {
 
     var csrftoken = Cookies.get('csrftoken');
     axios({
@@ -1051,10 +1026,9 @@ const CreateGraph = (props) => {
         withCredentials: true,
         method: 'post',
         url: protocol+'://'+IP+'/api/create_node',
-        data: form_data,
+        data: {'run_id': props.run_id, 'node_type': nodeType},
         headers: {
           'Authorization': "JWT " + localStorage.getItem('access_token'),
-          'content-type': 'multipart/form-data',
           'Content-Type': 'application/json',
           'X-CSRFToken': csrftoken}} )
       .then(res => { 
@@ -1074,40 +1048,6 @@ const CreateGraph = (props) => {
 
   return (
     <div>
-
-    <Modal visible={isCreateNodeModalOpen} closable={false} footer={null}>
-      <Form
-        form={form}
-        name="createNode"
-        {...layout}
-        onFinish={onNodeCreate}
-      >
-        
-
-        {nodeType != 2 ?
-        <div>
-          <div>Name</div>
-          <Form.Item name="node_name">
-              <TextArea rows={1} />
-          </Form.Item>
-        </div>
-        :
-        null}
-
-        {nodeType != 2 ?
-        <div>Dictionary of values</div>
-        :
-        <div>Description</div>}
-
-        <Form.Item name="node_description">
-            <TextArea rows={5} />
-        </Form.Item>
-
-        <Form.Item>
-          <Button onClick={()=>setIsCreateNodeModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'purple'}} htmlType="submit">Create</Button>
-        </Form.Item>
-      </Form>
-    </Modal>
 
     <Modal visible={isDeleteNodeModalOpen} closable={false}  footer={null}>
         <div style={{color:'red', marginBottom:'15px'}}><u>Are you sure you want to delete this Node? Deleted Nodes cannot be restored.</u></div>
@@ -1161,34 +1101,49 @@ const CreateGraph = (props) => {
           Run ID: {props.run_id}</div> 
  
 
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Objective <PlusCircleOutlined onClick={()=>createNodeModal(5)} /></div>
-          <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Objective</div>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {objectiveNodes}
+            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(5)} />
           </div>
 
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Dataset <PlusCircleOutlined onClick={()=>createNodeModal(0)} /></div>
-          <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+          <Divider style={{fontSize:'20px'}} />
+
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Dataset</div>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {datasetNodes}
+            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(0)} />
           </div>
 
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Variables <PlusCircleOutlined onClick={()=>createNodeModal(1)} /></div>
-          <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+          <Divider />
+
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Variables</div>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {variableNodes}
+            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(1)} />
           </div>
+
+          <Divider />
 
           <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>CSV</div>
-          <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {csvNodes}
           </div>
 
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Methodology <PlusCircleOutlined onClick={()=>createNodeModal(2)} /></div>
-          <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+          <Divider />
+
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Methodology</div>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {methodNodes}
+            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(2)} />
           </div>
 
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Results <PlusCircleOutlined onClick={()=>createNodeModal(3)} /></div>
-          <div style={{display:'flex', flexDirection:'row', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+          <Divider />
+
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Results</div>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {resultNodes}
+            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(3)} />
           </div>
         </div>
       :

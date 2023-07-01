@@ -176,15 +176,15 @@ class CreateNodeView(APIView):
 		run_obj = Run.objects.get(id=int(data["run_id"]))
 
 		if int(data['node_type']) == 0:
-			node_obj = Node.objects.create(run = run_obj, description=data['node_description'], name=data['node_name'], node_type = 0, dataset_node = 1)
+			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 0, dataset_node = 1)
 		elif int(data['node_type']) == 1:
-			node_obj = Node.objects.create(run = run_obj, description=data['node_description'], name=data['node_name'], node_type = 0)
+			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 0)
 		elif int(data['node_type']) == 2:
-			node_obj = Node.objects.create(run = run_obj, description=data['node_description'], node_type = 1)
+			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 1)
 		elif int(data['node_type']) == 3:
-			node_obj = Node.objects.create(run = run_obj, name=data['node_name'], description=data['node_description'], node_type = 2)
+			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 2)
 		elif int(data['node_type']) == 5:
-			node_obj = Node.objects.create(run = run_obj, name=data['node_name'], description=data['node_description'], node_type = 5)
+			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 5)
 		else:
 			pass
 				
