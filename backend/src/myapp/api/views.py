@@ -276,7 +276,6 @@ class AddResultsView(APIView):
 			print(description)
 
 			if isinstance(ast.literal_eval(data['results_dict']), Mapping):
-				print("YEEE")
 				if len(description) == 0:
 					description = ast.literal_eval(data['results_dict'])	
 				else:
@@ -327,6 +326,35 @@ class AddDatasetView(APIView):
 				Response(ERROR)
 
 
+
+		return Response(OK)
+
+
+
+class AddKeyValueView(APIView):
+
+	def post(self, request):
+		data = querydict_to_dict(request.data)
+
+		if Node.objects.filter(id = data["node_id"]).exists():
+			node_obj = Node.objects.get(id = data["node_id"])
+		else:
+			Response(ERROR)
+
+
+		description = node_obj.description 
+
+		if isinstance({data['key']:data['value']}, Mapping):
+			if len(description) == 0:
+				description = {data['key']:data['value']}	
+			else:
+				description = ast.literal_eval(description)
+				description.update({data['key']:data['value']})
+
+			node_obj.description = description
+			node_obj.save()	
+		else:
+			Response(ERROR)
 
 		return Response(OK)
 
@@ -479,6 +507,8 @@ class GetNodesView(CreateAPIView):
 				query_list.append({'id': node['id'], 'name': node['name'], 'description': input_dict, 'node_type' : node['node_type'], 'csv_node': node['csv_node'], 'dataset_node': node['dataset_node'], 'date': node['date'], 'node_summary': node['summary']})
 		
 			file_objs = Files.objects.filter(run = run_obj)
+
+			query_list.sort(key=lambda x:x['date'])
 
 			files_list = []
 

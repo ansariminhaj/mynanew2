@@ -92,6 +92,7 @@ const CreateGraph = (props) => {
   const [objectiveNodes, setObjectiveNodes] = useState([])
   const [nodeViewModalDict, setNodeViewModalDict] = useState({})
   const [editNodeViewModalDict, setEditNodeViewModalDict] = useState({})
+  const [addKeyValueDict, setAddKeyValueDict] = useState({})
   const [editNodeID, setEditNodeID] = useState(-1);
 
   const [systemInfo, setSystemInfo] = useState([]);
@@ -135,6 +136,47 @@ const CreateGraph = (props) => {
         withCredentials: true,
         method: 'post',
         url: protocol+'://'+IP+'/api/update_node_info',
+        data: form_data,
+        headers: {
+          'Authorization': "JWT " + localStorage.getItem('access_token'),
+          'Content-Type': 'application/json',
+          'content-type': 'multipart/form-data',
+          'X-CSRFToken': csrftoken}} )
+      .then(res => {
+        setRefresh((prevValue) => prevValue + 1) 
+      })
+    })
+    .catch(err => {
+      console.log(err.response.data);
+      navigate("/login")
+    })
+  }
+
+
+  const onFinishKeyValue = (values)  => {
+    let form_data = new FormData();
+
+    console.log(values)
+
+    for (const [key, value] of Object.entries(values))
+      form_data.append(key, value)
+
+    var csrftoken = Cookies.get('csrftoken');
+    axios({
+      withCredentials: true,
+      method: 'post',
+      url: protocol+'://'+IP+'/api/token/refresh/',
+      data: {'refresh': localStorage.getItem('refresh_token')},
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken}} ) 
+    .then(res =>{
+      localStorage.setItem('access_token', res.data["access"])
+      localStorage.setItem('refresh_token', res.data["refresh"])
+      axios({
+        withCredentials: true,
+        method: 'post',
+        url: protocol+'://'+IP+'/api/add_key_value',
         data: form_data,
         headers: {
           'Authorization': "JWT " + localStorage.getItem('access_token'),
@@ -242,7 +284,6 @@ const CreateGraph = (props) => {
 
  const dummyRequest = () => {
     console.log('lol')
-
   };
 
   const viewNode = (id) => {
@@ -277,7 +318,6 @@ const CreateGraph = (props) => {
     });
     setEditNodeID(id)
     setRefresh((prevValue) => prevValue + 1) 
-    console.log(editNodeViewModalDict)
   };
 
   const closeEditNode = (id) => {
@@ -290,6 +330,28 @@ const CreateGraph = (props) => {
     });
     setRefresh((prevValue) => prevValue + 1) 
     console.log(editNodeViewModalDict)
+  }
+
+  const addKeyValue = (id) => {
+    console.log(id)
+    setAddKeyValueDict(prevState => {
+      return {
+        ...prevState,
+        [id]: true
+      }
+    });
+    setRefresh((prevValue) => prevValue + 1) 
+  }
+
+  const closeAddKeyValue = (id) => {
+    console.log(id)
+    setAddKeyValueDict(prevState => {
+      return {
+        ...prevState,
+        [id]: false
+      }
+    });
+    setRefresh((prevValue) => prevValue + 1) 
   }
 
 
@@ -448,6 +510,7 @@ const CreateGraph = (props) => {
             for(var i=0;i<res.data['nodes'].length;i++){
               let index = res.data['nodes'][i]['id']
               let rows = []
+              let rows_keyval = []
               let cmatrix = ""
               let count = 0
               let color = 'white'
@@ -460,7 +523,33 @@ const CreateGraph = (props) => {
                   else
                     color = '#AECBB7'
                   rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
-                }    
+                }
+                  rows_keyval.push(
+                          <Form
+                            initialValues={{ remember: true,}}
+                            {...layout}
+                            onFinish={onFinishKeyValue}
+                            style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
+                              <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
+
+                              <div style={{display:'flex', justifyContent:'center'}}>                                
+                                <Form.Item name={"key"}> 
+                                  <Input placeholder="Key" style={{width:'165px', marginRight:'200px', marginLeft:'50px'}}/> 
+                                </Form.Item> 
+
+                                
+                                <Form.Item name={"value"}> 
+                                  <Input placeholder="Value" style={{width:'165px'}} /> 
+                                </Form.Item> 
+                              </div>
+
+                              <div style={{display:'flex', justifyContent:'center'}}>
+                              <Form.Item>
+                                <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>closeAddKeyValue(index)} > < CheckOutlined /> </Button>
+                              </Form.Item>
+                              </div>
+
+                            </Form> )   
               }
               else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['csv_node'] == 1){
                 if (res.data['nodes'][i]['description']){
@@ -497,6 +586,32 @@ const CreateGraph = (props) => {
                       color = '#F08080'
                     rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
                   }          
+                  rows_keyval.push(
+                          <Form
+                            initialValues={{ remember: true,}}
+                            {...layout}
+                            onFinish={onFinishKeyValue}
+                            style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
+                              <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
+
+                              <div style={{display:'flex', justifyContent:'center'}}>                                
+                                <Form.Item name={"key"}> 
+                                  <Input placeholder="Key" style={{width:'165px', marginRight:'200px', marginLeft:'50px'}}/> 
+                                </Form.Item> 
+
+                                
+                                <Form.Item name={"value"}> 
+                                  <Input placeholder="Value" style={{width:'165px'}} /> 
+                                </Form.Item> 
+                              </div>
+
+                              <div style={{display:'flex', justifyContent:'center'}}>
+                              <Form.Item>
+                                <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>closeAddKeyValue(index)} > < CheckOutlined /> </Button>
+                              </Form.Item>
+                              </div>
+
+                            </Form> ) 
                 }
               }
               else if (res.data['nodes'][i]['node_type'] == 2){
@@ -555,8 +670,33 @@ const CreateGraph = (props) => {
                     else
                       color = '#E8E8E8'
                     rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
-                  }   
+                  }
+                  rows_keyval.push(
+                          <Form
+                            initialValues={{ remember: true,}}
+                            {...layout}
+                            onFinish={onFinishKeyValue}
+                            style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
+                              <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
+                              <div style={{display:'flex', justifyContent:'center'}}>                                
+                                <Form.Item name={"key"}> 
+                                  <Input placeholder="Key" style={{width:'165px', marginRight:'200px', marginLeft:'50px'}}/> 
+                                </Form.Item> 
+
+                                
+                                <Form.Item name={"value"}> 
+                                  <Input placeholder="Value" style={{width:'165px'}} /> 
+                                </Form.Item> 
+                              </div>
+
+                              <div style={{display:'flex', justifyContent:'center'}}>
+                              <Form.Item>
+                                <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>closeAddKeyValue(index)} > < CheckOutlined /> </Button>
+                              </Form.Item>
+                              </div>
+
+                            </Form> )    
                 }
               }
 
@@ -566,14 +706,15 @@ const CreateGraph = (props) => {
 
                     dataset_nodes.push( //Modal is in div. Therefore check if false before opening
                       <div>
-                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', color:'black', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            
+                        <div style={{color:'black', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                            < EditOutlined onClick={() => viewNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                             <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
 
                             <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
+                              {rows_keyval}
                             </div>
                         </div>
 
@@ -659,14 +800,15 @@ const CreateGraph = (props) => {
 
                     variable_nodes.push(
                       <div>
-                        <div onClick={() => viewNode(index)} style={{cursor:'pointer', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            
+                        <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                            < EditOutlined onClick={() => viewNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                             <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
 
                             <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
+                              {rows_keyval}
                             </div>
                         </div>
 
@@ -804,8 +946,8 @@ const CreateGraph = (props) => {
 
                result_nodes.push(
                 <div>
-                  <div onClick={() => viewNode(index)} style={{cursor:'pointer', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor:'white', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-
+                  <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor:'white', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                      < EditOutlined onClick={() => viewNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                       <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px', marginTop:'15px'}}>
                       
                       <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
@@ -815,6 +957,7 @@ const CreateGraph = (props) => {
 
                       <div>
                         {rows}
+                        {rows_keyval}
                       </div>  
 
                       { res.data['nodes'][i]['result_type'] == 1 ?
