@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { Bar, Line } from "react-chartjs-2";
 import { Chart as ChartJS } from 'chart.js/auto'
 import { Chart }            from 'react-chartjs-2'
+window.ResizeObserver = undefined
 
 const { TextArea } = Input;
 const { Dragger } = Upload;
@@ -92,8 +93,8 @@ const CreateGraph = (props) => {
   const [objectiveNodes, setObjectiveNodes] = useState([])
   const [nodeViewModalDict, setNodeViewModalDict] = useState({})
   const [editNodeViewModalDict, setEditNodeViewModalDict] = useState({})
-  const [addKeyValueDict, setAddKeyValueDict] = useState({})
   const [editNodeID, setEditNodeID] = useState(-1);
+  const keyValueID = useRef(-1);
 
   const [systemInfo, setSystemInfo] = useState([]);
   const [libraries, setLibraries] = useState([]);
@@ -102,6 +103,7 @@ const CreateGraph = (props) => {
   const [bins, setBins] = useState([]);
   const [fpr, setTpr] = useState([]);
   const [tpr, setFpr] = useState([]);
+  const [node_description, setNode_description] = useState("");
 
   const [form] = Form.useForm();
 
@@ -156,10 +158,10 @@ const CreateGraph = (props) => {
   const onFinishKeyValue = (values)  => {
     let form_data = new FormData();
 
-    console.log(values)
-
     for (const [key, value] of Object.entries(values))
       form_data.append(key, value)
+
+    form_data.append('node_id', keyValueID.current)
 
     var csrftoken = Cookies.get('csrftoken');
     axios({
@@ -283,33 +285,10 @@ const CreateGraph = (props) => {
 
 
  const dummyRequest = () => {
-    console.log('lol')
+    console.log('mynacode')
   };
 
-  const viewNode = (id) => {
-    setNodeViewModalDict(prevState => {
-      return {
-        ...prevState,
-        [id]: true
-      }
-    });
-    setRefresh((prevValue) => prevValue + 1) 
-  };
-
-
-  const closeNode = (id) => {
-    console.log(id)
-    setNodeViewModalDict(prevState => {
-      return {
-        ...prevState,
-        [id]: false
-      }
-    });
-    setRefresh((prevValue) => prevValue + 1) 
-  };
-
-  const editNode = (id) => {
-    console.log(id)
+  const editNode = (id, desc) => {
     setEditNodeViewModalDict(prevState => {
       return {
         ...prevState,
@@ -317,11 +296,11 @@ const CreateGraph = (props) => {
       }
     });
     setEditNodeID(id)
+    form.setFieldsValue({node_description: desc})
     setRefresh((prevValue) => prevValue + 1) 
   };
 
   const closeEditNode = (id) => {
-    console.log(id)
     setEditNodeViewModalDict(prevState => {
       return {
         ...prevState,
@@ -329,34 +308,14 @@ const CreateGraph = (props) => {
       }
     });
     setRefresh((prevValue) => prevValue + 1) 
-    console.log(editNodeViewModalDict)
   }
 
   const addKeyValue = (id) => {
-    console.log(id)
-    setAddKeyValueDict(prevState => {
-      return {
-        ...prevState,
-        [id]: true
-      }
-    });
-    setRefresh((prevValue) => prevValue + 1) 
-  }
-
-  const closeAddKeyValue = (id) => {
-    console.log(id)
-    setAddKeyValueDict(prevState => {
-      return {
-        ...prevState,
-        [id]: false
-      }
-    });
-    setRefresh((prevValue) => prevValue + 1) 
+    keyValueID.current = id
   }
 
 
   const DeleteNode = (id) => {
-    closeNode(id)
     closeEditNode(id)
     setIsDeleteNodeModalOpen(true)
     setEditNodeID(id)
@@ -399,7 +358,6 @@ const CreateGraph = (props) => {
   };
 
 
-
   useEffect(() => {
     var csrftoken = Cookies.get('csrftoken');
     axios({
@@ -422,7 +380,8 @@ const CreateGraph = (props) => {
           'Authorization': "JWT " + localStorage.getItem('access_token'),
           'Content-Type': 'application/json',
           'X-CSRFToken': csrftoken}} )
-      .then(res => {  
+      .then(res => { 
+
           let variable_nodes = []
           let csv_nodes = []
           let dataset_nodes = []
@@ -503,14 +462,18 @@ const CreateGraph = (props) => {
             }
             setImages(<Menu items={images_list} style={{overflowY: 'auto', height:'600px'}}/>)
           }
-          
-          
 
+          
           if (res.data['nodes']){
             for(var i=0;i<res.data['nodes'].length;i++){
+               
+
+              // form.setFieldsValue({node_description: JSON.stringify(res.data['nodes'][i]['description'])})
+
+
               let index = res.data['nodes'][i]['id']
+              let desc = JSON.stringify(res.data['nodes'][i]['description'])
               let rows = []
-              let rows_keyval = []
               let cmatrix = ""
               let count = 0
               let color = 'white'
@@ -522,34 +485,8 @@ const CreateGraph = (props) => {
                     color = '#E0E0E0'
                   else
                     color = '#AECBB7'
-                  rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
+                  rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
                 }
-                  rows_keyval.push(
-                          <Form
-                            initialValues={{ remember: true,}}
-                            {...layout}
-                            onFinish={onFinishKeyValue}
-                            style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
-                              <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
-
-                              <div style={{display:'flex', justifyContent:'center'}}>                                
-                                <Form.Item name={"key"}> 
-                                  <Input placeholder="Key" style={{width:'165px', marginRight:'200px', marginLeft:'50px'}}/> 
-                                </Form.Item> 
-
-                                
-                                <Form.Item name={"value"}> 
-                                  <Input placeholder="Value" style={{width:'165px'}} /> 
-                                </Form.Item> 
-                              </div>
-
-                              <div style={{display:'flex', justifyContent:'center'}}>
-                              <Form.Item>
-                                <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>closeAddKeyValue(index)} > < CheckOutlined /> </Button>
-                              </Form.Item>
-                              </div>
-
-                            </Form> )   
               }
               else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['csv_node'] == 1){
                 if (res.data['nodes'][i]['description']){
@@ -584,34 +521,8 @@ const CreateGraph = (props) => {
                       color = '#E0E0E0'
                     else
                       color = '#F08080'
-                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
+                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
                   }          
-                  rows_keyval.push(
-                          <Form
-                            initialValues={{ remember: true,}}
-                            {...layout}
-                            onFinish={onFinishKeyValue}
-                            style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
-                              <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
-
-                              <div style={{display:'flex', justifyContent:'center'}}>                                
-                                <Form.Item name={"key"}> 
-                                  <Input placeholder="Key" style={{width:'165px', marginRight:'200px', marginLeft:'50px'}}/> 
-                                </Form.Item> 
-
-                                
-                                <Form.Item name={"value"}> 
-                                  <Input placeholder="Value" style={{width:'165px'}} /> 
-                                </Form.Item> 
-                              </div>
-
-                              <div style={{display:'flex', justifyContent:'center'}}>
-                              <Form.Item>
-                                <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>closeAddKeyValue(index)} > < CheckOutlined /> </Button>
-                              </Form.Item>
-                              </div>
-
-                            </Form> ) 
                 }
               }
               else if (res.data['nodes'][i]['node_type'] == 2){
@@ -623,7 +534,6 @@ const CreateGraph = (props) => {
                     if (typeof c_matrix == 'undefined')
                       cmatrix=undefined
                     else{
-                      console.log(c_matrix)
                       cmatrix=(
                           <div>
                           Confusion Matrix
@@ -669,19 +579,35 @@ const CreateGraph = (props) => {
                       color = 'white'
                     else
                       color = '#E8E8E8'
-                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value)}</div></div>)
-                  }
-                  rows_keyval.push(
+                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
+                  }   
+                }
+              }
+
+
+              if (res.data['nodes'][i]['node_type'] == 0){
+                if (res.data['nodes'][i]['dataset_node'] == 1){
+
+
+                    dataset_nodes.push( 
+                      <div>
+                        <div style={{color:'black', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                            < EditOutlined onClick={() => editNode(index, desc)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
+                            <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
+                              {res.data['nodes'][i]['node_summary']}
+                            </div>
+
+                            <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                              {rows}
                           <Form
                             initialValues={{ remember: true,}}
                             {...layout}
                             onFinish={onFinishKeyValue}
                             style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
-                              <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
                               <div style={{display:'flex', justifyContent:'center'}}>                                
                                 <Form.Item name={"key"}> 
-                                  <Input placeholder="Key" style={{width:'165px', marginRight:'200px', marginLeft:'50px'}}/> 
+                                  <Input placeholder="Key" style={{width:'165px', marginRight:'100px'}}/> 
                                 </Form.Item> 
 
                                 
@@ -692,38 +618,18 @@ const CreateGraph = (props) => {
 
                               <div style={{display:'flex', justifyContent:'center'}}>
                               <Form.Item>
-                                <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>closeAddKeyValue(index)} > < CheckOutlined /> </Button>
+                                <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>addKeyValue(index)} > < CheckOutlined /> </Button>
                               </Form.Item>
                               </div>
 
-                            </Form> )    
-                }
-              }
-
-
-              if (res.data['nodes'][i]['node_type'] == 0){
-                if (res.data['nodes'][i]['dataset_node'] == 1){
-
-                    dataset_nodes.push( //Modal is in div. Therefore check if false before opening
-                      <div>
-                        <div style={{color:'black', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            < EditOutlined onClick={() => viewNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
-                            <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
-                              {res.data['nodes'][i]['node_summary']}
-                            </div>
-
-                            <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                              {rows}
-                              {rows_keyval}
+                            </Form>
                             </div>
                         </div>
 
-                        <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
-
-                          {editNodeViewModalDict[res.data['nodes'][i]['id']] == true ?
+                        <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
 
                           <Form
-                            initialValues={{ remember: true,}}
+                            form={form}
                             {...layout}
                             onFinish={onFinish}
                             style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
@@ -734,14 +640,14 @@ const CreateGraph = (props) => {
                                 <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
                               </Form.Item> 
 
-                              Description
+                              Description 
                               <Form.Item name={"node_summary"} initialValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)}>
                                 <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
                               </Form.Item> 
 
                               Dictionary of values
                               <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
-                                <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
+                                <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} />
                               </Form.Item> 
 
                               <Form.Item>
@@ -751,25 +657,6 @@ const CreateGraph = (props) => {
                               <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
 
                             </Form>
-                            :
-                            <div>
-                            <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
-                            <div style={{fontSize:'20px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                              {res.data['nodes'][i]['name']}
-                            </div>
-
-                            <div>
-                              {res.data['nodes'][i]['node_summary']}
-                            </div>
-
-                            <div style={{border: '1px solid black'}}>
-                              {rows}
-                            </div>
-                            <div style={{marginTop: '15px'}}>
-                              <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
-                            </div>
-                            </div>
-                          }
 
                         </Modal>
                       </div>
@@ -782,14 +669,14 @@ const CreateGraph = (props) => {
                     csv_nodes.push(
                       <div>
                         <div style={{ width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            <div onClick={() => viewNode(index)} style={{cursor:'pointer', marginTop:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                            <div onClick={() => editNode(index)} style={{cursor:'pointer', marginTop:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               Add a CSV file from your code.
                               {rows}
                             </div>
 
-                            <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
+                            <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
                             <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
-                            <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeNode(index)} > < CloseOutlined /> </Button> 
+                            <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CloseOutlined /> </Button> 
                             </Modal>
                         </div>
                       </div>
@@ -801,20 +688,41 @@ const CreateGraph = (props) => {
                     variable_nodes.push(
                       <div>
                         <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            < EditOutlined onClick={() => viewNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
+                            < EditOutlined onClick={() => editNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                             <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
 
                             <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
                               {rows}
-                              {rows_keyval}
+                              <Form
+                                initialValues={{ remember: true,}}
+                                {...layout}
+                                onFinish={onFinishKeyValue}
+                                style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
+
+                                  <div style={{display:'flex', justifyContent:'center'}}>                                
+                                    <Form.Item name={"key"}> 
+                                      <Input placeholder="Key" style={{width:'165px', marginRight:'100px'}}/> 
+                                    </Form.Item> 
+
+                                    
+                                    <Form.Item name={"value"}> 
+                                      <Input placeholder="Value" style={{width:'165px'}} /> 
+                                    </Form.Item> 
+                                  </div>
+
+                                  <div style={{display:'flex', justifyContent:'center'}}>
+                                  <Form.Item>
+                                    <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>addKeyValue(index)} > < CheckOutlined /> </Button>
+                                  </Form.Item>
+                                  </div>
+
+                                </Form>
                             </div>
                         </div>
 
-                        <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
-
-                          {editNodeViewModalDict[res.data['nodes'][i]['id']] == true ?
+                        <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
 
                           <Form
                             initialValues={{ remember: true,}}
@@ -846,25 +754,6 @@ const CreateGraph = (props) => {
                               <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
 
                             </Form>
-                            :
-                            <div>
-                            <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>
-                            <div style={{fontSize:'20px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                              {res.data['nodes'][i]['name']}
-                            </div>
-
-                            <div>
-                              {res.data['nodes'][i]['node_summary']}
-                            </div>
-
-                            <div style={{border: '1px solid black'}}>
-                              {rows}
-                            </div>
-                            <div style={{marginTop: '15px'}}>
-                              <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
-                            </div>
-                            </div>
-                          }
 
                         </Modal>
                       </div>
@@ -946,8 +835,8 @@ const CreateGraph = (props) => {
 
                result_nodes.push(
                 <div>
-                  <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', backgroundColor:'white', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                      < EditOutlined onClick={() => viewNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
+                  <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                      < EditOutlined onClick={() => editNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                       <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px', marginTop:'15px'}}>
                       
                       <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
@@ -957,7 +846,30 @@ const CreateGraph = (props) => {
 
                       <div>
                         {rows}
-                        {rows_keyval}
+                        <Form
+                          initialValues={{ remember: true,}}
+                          {...layout}
+                          onFinish={onFinishKeyValue}
+                          style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
+
+                            <div style={{display:'flex', justifyContent:'center'}}>                                
+                              <Form.Item name={"key"}> 
+                                <Input placeholder="Key" style={{width:'165px', marginRight:'100px'}}/> 
+                              </Form.Item> 
+
+                              
+                              <Form.Item name={"value"}> 
+                                <Input placeholder="Value" style={{width:'165px'}} /> 
+                              </Form.Item> 
+                            </div>
+
+                            <div style={{display:'flex', justifyContent:'center'}}>
+                            <Form.Item>
+                              <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>addKeyValue(index)} > < CheckOutlined /> </Button>
+                            </Form.Item>
+                            </div>
+
+                          </Form>
                       </div>  
 
                       { res.data['nodes'][i]['result_type'] == 1 ?
@@ -1017,9 +929,7 @@ const CreateGraph = (props) => {
 
                   </div>
 
-                  <Modal visible={nodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
-
-                    {editNodeViewModalDict[res.data['nodes'][i]['id']] == true ?
+                  <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
 
                     <Form
                       initialValues={{ remember: true,}}
@@ -1050,81 +960,9 @@ const CreateGraph = (props) => {
                         <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
 
                       </Form>
-                      : 
-                      <div>
-                      <span style={{color:'blue'}}>Created {res.data['nodes'][i]['date'].slice(0, 10)}</span>            
-                      
-                      <div style={{fontSize:'20px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                        {res.data['nodes'][i]['name']}
-                      </div>
-
-                      <div>
-                        {res.data['nodes'][i]['node_summary']}
-                      </div>
-
-                      <div style={{border: '1px solid black'}}>
-                        {rows}
-                      </div> 
-
-                      <div style={{fontSize:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-
-                      { res.data['nodes'][i]['result_type'] == 1 ?                     
-                      <Bar
-                        data={{
-                          labels: bins,
-                          datasets: [
-                            {
-                              label: 'Prediction Histogram',
-                              lineTension: 0,
-                              fill: false,
-                              borderJoinStyle: "round",
-                              data: freq,
-                              borderWidth: 0.2,
-                              barPercentage: 1,
-                              categoryPercentage: 1,
-                              hoverBackgroundColor: "darkgray",
-                              barThickness: "flex",
-                              borderColor: 'rgb(53, 162, 235)',
-                              backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                            }
-                          ]
-                        }}
-                        options={bar_options}
-                      />:null}
-
-
-                      { res.data['nodes'][i]['result_type'] == 1 ? 
-                      <Line
-                        data={{
-                          labels: fpr,
-                          datasets: [
-                            {
-                              label: 'ROC Curve',
-                              data: tpr,
-                              borderWidth: 2,
-                              borderColor: 'rgb(255, 99, 132)',
-                              backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                            }
-                          ]
-                        }}
-                        options={line_options}
-                      />:null}
-
-                      {typeof cmatrix != 'undefined' ?
-                      <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
-                        {cmatrix}
-                      </div>
-                      :
-                      null}
-
-
-                      <div style={{marginTop: '15px'}}>
-                        <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeNode(index)}> < CloseOutlined /> </Button>  <Button onClick={() => editNode(index)} style={{marginRight:10, color:'blue'}}  shape="circle"> < EditOutlined /> </Button>
-                      </div>
-                      </div>
-                      </div>}
 
                   </Modal>
+
                 </div>
 
               )               

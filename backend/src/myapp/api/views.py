@@ -23,7 +23,7 @@ ERROR = "ERROR"
 PENDING = "PENDING"
 IP = '127.0.0.1:8000'
 
-def querydict_to_dict(query_dict): #since using QueryDict.dict() returns only one element in list
+def querydict_to_dict(query_dict):
     data = {}
     for key in query_dict.keys():
         v = query_dict.getlist(key)
@@ -38,6 +38,7 @@ class UpdateNodeView(APIView):
 	def post(self, request):
 
 		data = request.data 
+		print(data)
 		node_id = data['node_id']
 		node_description = data['node_description']
 
@@ -96,8 +97,6 @@ class UserInfoView(APIView):
 	def post(self, request):
 		print(request)
 
-		# if request.user.payment_status == 0:
-		# 	return Response(0)
 		query_dict={'id': request.user.id, 'user_type': request.user.user_type,'name': request.user.name}
 
 		return Response(query_dict)
@@ -165,7 +164,6 @@ class CreateProjectView(APIView):
 class CreateNodeView(APIView):
 
 	def post(self, request):
-		print(request.data)
 
 		data = request.data
 
@@ -176,15 +174,15 @@ class CreateNodeView(APIView):
 		run_obj = Run.objects.get(id=int(data["run_id"]))
 
 		if int(data['node_type']) == 0:
-			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 0, dataset_node = 1)
+			node_obj = Node.objects.create(run = run_obj, description='{}',summary="", node_type = 0, dataset_node = 1)
 		elif int(data['node_type']) == 1:
-			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 0)
+			node_obj = Node.objects.create(run = run_obj, description='{}',summary="", node_type = 0)
 		elif int(data['node_type']) == 2:
-			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 1)
+			node_obj = Node.objects.create(run = run_obj, description='Click to Edit',summary="", node_type = 1)
 		elif int(data['node_type']) == 3:
-			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 2)
+			node_obj = Node.objects.create(run = run_obj, description='{}',summary="", node_type = 2)
 		elif int(data['node_type']) == 5:
-			node_obj = Node.objects.create(run = run_obj, description='Click to Edit', node_type = 5)
+			node_obj = Node.objects.create(run = run_obj, description='Click to Edit',summary="", node_type = 5)
 		else:
 			pass
 				
@@ -206,14 +204,12 @@ class NodeDeleteView(CreateAPIView):
 class CreateRunView(APIView):
 
 	def initial_nodes(self, user_obj, run_obj):
-		objective_node = Node.objects.create(run = run_obj, name="Objective", description = "", node_type = 5)
-		data_node = Node.objects.create(run = run_obj, name="Datasets", description = "", node_type = 0, dataset_node = 1)
-		csv_node = Node.objects.create(run = run_obj, name="CSV", description = "", node_type = 0, csv_node=1)
-		hyperparameter_node = Node.objects.create(run = run_obj, name="Variables", description = "", node_type = 0)
-	
-		method1_node = Node.objects.create(run = run_obj, name="Method", description = "Method", node_type = 1)
-
-		results_node = Node.objects.create(run = run_obj, name="Results", description = "", node_type = 2)
+		objective_node = Node.objects.create(run = run_obj, name="Objective", description = "Click to Edit",summary="", node_type = 5)
+		data_node = Node.objects.create(run = run_obj, name="Datasets", description = "{}",summary="", node_type = 0, dataset_node = 1)
+		csv_node = Node.objects.create(run = run_obj, name="CSV", description = "",summary="", node_type = 0, csv_node=1)
+		variables_node = Node.objects.create(run = run_obj, name="Variables",summary="{}", description = "", node_type = 0)
+		methods_node = Node.objects.create(run = run_obj, name="Method", description = "Click to Edit",summary="", node_type = 1)
+		results_node = Node.objects.create(run = run_obj, name="Results", description = "{}",summary="", node_type = 2)
 		
 		return
 
@@ -270,7 +266,7 @@ class AddResultsView(APIView):
 			if Node.objects.filter(run = run_obj, name = data["node_name"]).exists():
 				node_obj = Node.objects.get(run = run_obj, name = data["node_name"])
 			else:
-				node_obj = Node.objects.create(run = run_obj, name=data["node_name"], description = "", node_type = 2)
+				node_obj = Node.objects.create(run = run_obj, name=data["node_name"], description = "",summary="", node_type = 2)
 
 			description = node_obj.description 
 			print(description)
@@ -308,7 +304,7 @@ class AddDatasetView(APIView):
 			if Node.objects.filter(run = run_obj, name = data["node_name"]).exists():
 				node_obj = Node.objects.get(run = run_obj, name = data["node_name"])
 			else:
-				node_obj = Node.objects.create(run = run_obj, description="", name=data["node_name"], node_type = 0, dataset_node = 1)
+				node_obj = Node.objects.create(run = run_obj, description="",summary="", name=data["node_name"], node_type = 0, dataset_node = 1)
 
 
 			description = node_obj.description 
@@ -335,11 +331,16 @@ class AddKeyValueView(APIView):
 
 	def post(self, request):
 		data = querydict_to_dict(request.data)
+		print(data)
 
 		if Node.objects.filter(id = data["node_id"]).exists():
 			node_obj = Node.objects.get(id = data["node_id"])
+			print('exists')
 		else:
-			Response(ERROR)
+			return Response(ERROR)
+
+		print('now we here')
+		print(node_obj)
 
 
 		description = node_obj.description 
@@ -399,7 +400,7 @@ class AddVariablesView(APIView):
 			if Node.objects.filter(run = run_obj, name = data["node_name"]).exists():
 				node_obj = Node.objects.get(run = run_obj, name = data["node_name"])
 			else:
-				node_obj = Node.objects.create(run = run_obj, description="", name=data["node_name"], node_type = 0)
+				node_obj = Node.objects.create(run = run_obj, description="", name=data["node_name"],summary="", node_type = 0)
 
 
 			description = node_obj.description 
@@ -422,7 +423,7 @@ class ToggleEnableView(CreateAPIView):
 	def post(self, request):
 		data = request.data
 
-		if Project.objects.filter(id = int(data['project_id'])).exists(): #Get all runs for a projects
+		if Project.objects.filter(id = int(data['project_id'])).exists(): 
 			project_obj = Project.objects.get(id = int(data['project_id']))
 
 		if project_obj.enable == 1:
@@ -459,7 +460,7 @@ class GetRunsView(CreateAPIView):
 		query_list = []
 
 
-		if Project.objects.filter(id = int(data['project_id'])).exists(): #Get all runs for a projects
+		if Project.objects.filter(id = int(data['project_id'])).exists():
 			project_obj_exists = Project.objects.get(id = int(data['project_id']))
 
 			if ProjectUser.objects.filter(user = request.user, project = project_obj_exists).exists():
@@ -467,7 +468,7 @@ class GetRunsView(CreateAPIView):
 				runs = runs.values()
 				for run in runs:
 					query_list.append({'run_name': run['run_name'], 'id': run['id'], 'run_date': run['run_date']})
-		else: # This is a run
+		else:
 			pass
 
 		query_dict = {'runs': query_list}
@@ -480,7 +481,6 @@ class GetNodesView(CreateAPIView):
 	def post(self, request):
 		data=request.data
 		query_list=[]
-		print(data['run_id'])
 
 		if Run.objects.filter(id = data['run_id']).exists():
 
@@ -496,7 +496,7 @@ class GetNodesView(CreateAPIView):
 				installed_packages = '["Metadata Not Saved"]'
 
 			for node in all_run_nodes:
-				if node['node_type'] == 0 or node['node_type'] == 2: #Input
+				if node['node_type'] == 0 or node['node_type'] == 2:
 					try:
 						input_dict = ast.literal_eval(node['description'])
 					except:
@@ -883,7 +883,6 @@ class GetPytorchWeightsView(APIView):
 		run_obj = Run.objects.get(id=request.data['run_id'])
 
 		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
-
 		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 

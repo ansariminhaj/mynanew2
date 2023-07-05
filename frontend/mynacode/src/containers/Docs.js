@@ -92,24 +92,30 @@ const Docs = (props) => {
 
                   </li>
 
-                  <li>To log system information (GPU, CPU, Memory, Installed Python Libraries etc), run:</li>
+                  <li>To log system information (GPU, CPU, Memory, Installed Python Libraries etc).</li>
                   <ul>
                   <li style={{marginBottom:'15px'}}><code style={{color:'purple', fontWeight:'bold'}}>mynacode.metadata(run_id)</code></li>
                   </ul>
 
-                  <li>To log csv file information (Null Values, Unique Values, Column Names etc), run (Note, this does not save the actual data):</li>
+                  <li>To log csv file information (Null Values, Unique Values, Column Names etc). Note, this does not save the actual data.</li>
                   <ul>
-                  <li style={{marginBottom:'15px'}}><code style={{color:'purple', fontWeight:'bold'}}>mynacode.csv(dataframe, run_id)</code></li>
+                  <li style={{marginBottom:'15px'}}><code style={{color:'purple', fontWeight:'bold'}}>mynacode.csv(run_id, dataframe, node_name)</code></li>
                   </ul>
 
-                  <li>To log datasets information (Min, Max, Mean, Median, Shape, Outliers), run (Note, except for the statistics mentioned, this does not save the actual data) :</li>
+
+                  <li>To log variables.</li>
                   <ul>
-                  <li style={{marginBottom:'15px'}}><code style={{color:'purple', fontWeight:'bold'}}>mynacode.datasets(train_array, test_array, val_array, run_id)</code></li>
+                  <li style={{marginBottom:'15px'}}><code style={{color:'purple', fontWeight:'bold'}}>mynacode.variables(run_id, variables_dict = {'{'}{'}'}, node_name)</code></li>
                   </ul>
 
-                  <li>To log results (Senstivity, Specificity, AUC etc), run:</li>
+                  <li>To log dataset information. </li>
                   <ul>
-                  <li><code style={{color:'purple', fontWeight:'bold'}}>mynacode.results(predicted_array, test_labels, run_id, threshold = 0.5, problem_type = 'binary classification')</code></li>
+                  <li style={{marginBottom:'15px'}}><code style={{color:'purple', fontWeight:'bold'}}>mynacode.datasets(run_id, dataset_dict = {'{'}{'}'}, node_name)</code></li>
+                  </ul>
+
+                  <li>To log results (Senstivity, Specificity, AUC etc).</li>
+                  <ul>
+                  <li><code style={{color:'purple', fontWeight:'bold'}}>mynacode.results(run_id, y_true = [], y_predicted = [], results_dict = {'{'}{'}'}, node_name="Results", problem_type = 'binary classification', hist_bins=20)</code></li>
                   </ul>
 
                   </ol>

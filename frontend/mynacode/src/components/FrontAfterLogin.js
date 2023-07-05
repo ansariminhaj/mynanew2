@@ -27,7 +27,7 @@ const layout = {
 const FrontAfterLogin = (props) => {
   const navigate = useNavigate()
   const [menu, setMenu] = useState([]);
-  const [parent, refreshParent] = useState(0);
+  const [refreshParent, setRefreshParent] = useState(0);
 
   const [runID, setRunID] = useState(-1);
   const [editRunID, setEditRunID] = useState(-1);
@@ -451,7 +451,6 @@ const FrontAfterLogin = (props) => {
   }
 
   const getRuns = (projectID, projectName) => {
-    console.log(projectID)
     setProjectID(projectID)
 
     var csrftoken = Cookies.get('csrftoken');
@@ -708,7 +707,7 @@ const FrontAfterLogin = (props) => {
         <Content style={{minHeight:'100vh', padding: '10px 0px 10px 30px', fontFamily: 'Helvetica, Arial, sans-serif', display: 'flex', flexDirection:'column'}}>
           <Layout>
 
-              <CreateGraph run_id = {runID} refreshParent = {refreshParent}/>
+              <CreateGraph run_id = {runID} refresh = {refresh}/>
 
           </Layout>
         </Content>
