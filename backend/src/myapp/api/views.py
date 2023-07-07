@@ -207,7 +207,7 @@ class CreateRunView(APIView):
 		objective_node = Node.objects.create(run = run_obj, name="Objective", description = "Click to Edit",summary="", node_type = 5)
 		data_node = Node.objects.create(run = run_obj, name="Datasets", description = "{}",summary="", node_type = 0, dataset_node = 1)
 		csv_node = Node.objects.create(run = run_obj, name="CSV", description = "",summary="", node_type = 0, csv_node=1)
-		variables_node = Node.objects.create(run = run_obj, name="Variables",summary="{}", description = "", node_type = 0)
+		variables_node = Node.objects.create(run = run_obj, name="Variables",summary="", description = "{}", node_type = 0)
 		methods_node = Node.objects.create(run = run_obj, name="Method", description = "Click to Edit",summary="", node_type = 1)
 		results_node = Node.objects.create(run = run_obj, name="Results", description = "{}",summary="", node_type = 2)
 		
@@ -269,7 +269,8 @@ class AddResultsView(APIView):
 				node_obj = Node.objects.create(run = run_obj, name=data["node_name"], description = "",summary="", node_type = 2)
 
 			description = node_obj.description 
-			print(description)
+
+			print(data['results_dict'])
 
 			if isinstance(ast.literal_eval(data['results_dict']), Mapping):
 				if len(description) == 0:

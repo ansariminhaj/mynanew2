@@ -9,13 +9,14 @@ import '../components/index.css';
 import protocol from "../components/httpORhttps";
 import * as actions from '../store/actions/actions';
 import { connect } from 'react-redux';
-import { Bar, Line } from "react-chartjs-2";
+import { Bar, Line, Scatter } from "react-chartjs-2";
 import { Chart as ChartJS } from 'chart.js/auto'
 import { Chart }            from 'react-chartjs-2'
-window.ResizeObserver = undefined
 
 const { TextArea } = Input;
 const { Dragger } = Upload;
+
+
 
 const layout = {
   labelCol: {
@@ -23,6 +24,24 @@ const layout = {
   },
   wrapperCol: {
     span: 18,
+  },
+};
+
+const scatter_options = {
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: "Data Count"
+      }
+    },
+    y: {
+      title: {
+        display: true,
+        text: "Probability"
+      },
+      beginAtZero: true,
+    },
   },
 };
 
@@ -37,14 +56,14 @@ const bar_options = {
       },
       title: {
         display: true,
-        text: "Predictions"
+        text: "Points"
       }
     },
 
     y: {
       title: {
         display: true,
-        text: "Frequency"
+        text: "Probability"
       }
     }
   }
@@ -99,10 +118,6 @@ const CreateGraph = (props) => {
   const [systemInfo, setSystemInfo] = useState([]);
   const [libraries, setLibraries] = useState([]);
   const [filepaths, setFilepaths] = useState([]);
-  const [freq, setFreq] = useState([]);
-  const [bins, setBins] = useState([]);
-  const [fpr, setTpr] = useState([]);
-  const [tpr, setFpr] = useState([]);
   const [node_description, setNode_description] = useState("");
 
   const [form] = Form.useForm();
@@ -288,7 +303,7 @@ const CreateGraph = (props) => {
     console.log('mynacode')
   };
 
-  const editNode = (id, desc) => {
+  const editNode = (id, desc, name, summary) => {
     setEditNodeViewModalDict(prevState => {
       return {
         ...prevState,
@@ -296,7 +311,7 @@ const CreateGraph = (props) => {
       }
     });
     setEditNodeID(id)
-    form.setFieldsValue({node_description: desc})
+    form.setFieldsValue({node_description: desc, node_id: id, node_name: name, node_summary: summary})
     setRefresh((prevValue) => prevValue + 1) 
   };
 
@@ -382,6 +397,8 @@ const CreateGraph = (props) => {
           'X-CSRFToken': csrftoken}} )
       .then(res => { 
 
+        console.log(res.data)
+
           let variable_nodes = []
           let csv_nodes = []
           let dataset_nodes = []
@@ -390,6 +407,14 @@ const CreateGraph = (props) => {
           let objective_nodes = []
           let system_info_list = []
           let library_list = []
+          // let freq 
+          // let bins 
+          let zero_prob
+          let one_prob
+          let fpr 
+          let tpr 
+          let length
+          let threshold
 
           let node_view_dict = {}
           let edit_node_view_dict = {}
@@ -473,8 +498,11 @@ const CreateGraph = (props) => {
 
               let index = res.data['nodes'][i]['id']
               let desc = JSON.stringify(res.data['nodes'][i]['description'])
+              let name = res.data['nodes'][i]['name']
+              let summary = JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)
+
               let rows = []
-              let cmatrix = ""
+              let cmatrix 
               let count = 0
               let color = 'white'
 
@@ -555,23 +583,36 @@ const CreateGraph = (props) => {
                     console.log(err)
                   }
 
- 
                   try {
-                    let freq = res.data['nodes'][i]['description']['freq']
-                    let bins = res.data['nodes'][i]['description']['bins']
-                    let fpr = res.data['nodes'][i]['description']['fpr']
-                    let tpr = res.data['nodes'][i]['description']['tpr']
-                    setFreq(freq)
-                    setBins(bins)
-                    setFpr(fpr)
-                    setTpr(tpr)
+                    // freq = res.data['nodes'][i]['description']['freq']
+                    // bins = res.data['nodes'][i]['description']['bins']
+                    fpr = res.data['nodes'][i]['description']['fpr']
+                    tpr = res.data['nodes'][i]['description']['tpr']
+                    zero_prob = res.data['nodes'][i]['description']['zero_prob']
+                    one_prob = res.data['nodes'][i]['description']['one_prob']
+                    threshold = res.data['nodes'][i]['description']['threshold']
+
+                    if(zero_prob.length > one_prob.length)
+                      length = zero_prob.length
+                    else
+                      length = one_prob.length
+
+                    console.log(length)
+
+                    var label_length = [];
+
+                    for (var i = 1; i <= length; i++) {
+                       label_length.push(i);
+                    }
+
+
                   }
                   catch(err){
                     console.log(err)
                   }
 
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-                    if (key == 'freq' || key == 'bins' || key == 'fpr' || key == 'tpr' || key == 'c_matrix')
+                    if (key == 'freq' || key == 'bins' || key == 'fpr' || key == 'tpr' || key == 'c_matrix' || key == 'zero_prob' || key == 'one_prob')
                       continue
 
                     count+=1
@@ -592,7 +633,7 @@ const CreateGraph = (props) => {
                     dataset_nodes.push( 
                       <div>
                         <div style={{color:'black', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            < EditOutlined onClick={() => editNode(index, desc)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
+                            < EditOutlined onClick={() => editNode(index, desc, name, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                             <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
@@ -688,7 +729,7 @@ const CreateGraph = (props) => {
                     variable_nodes.push(
                       <div>
                         <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            < EditOutlined onClick={() => editNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
+                            < EditOutlined onClick={() => editNode(index, desc, name, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                             <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
@@ -725,6 +766,7 @@ const CreateGraph = (props) => {
                         <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
 
                           <Form
+                            form={form}
                             initialValues={{ remember: true,}}
                             {...layout}
                             onFinish={onFinish}
@@ -836,7 +878,7 @@ const CreateGraph = (props) => {
                result_nodes.push(
                 <div>
                   <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                      < EditOutlined onClick={() => editNode(index)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
+                      < EditOutlined onClick={() => editNode(index, desc, name, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                       <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px', marginTop:'15px'}}>
                       
                       <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
@@ -872,17 +914,18 @@ const CreateGraph = (props) => {
                           </Form>
                       </div>  
 
-                      { res.data['nodes'][i]['result_type'] == 1 ?
-                      <Bar
+
+                      {typeof zero_prob != 'undefined' ?
+                      <Scatter
                         data={{
-                          labels: bins,
+                          labels: label_length,
                           datasets: [
                             {
-                              label: 'Prediction Histogram',
+                              label: 'Class 0',
                               lineTension: 0,
                               fill: false,
                               borderJoinStyle: "round",
-                              data: freq,
+                              data: zero_prob,
                               borderWidth: 0.2,
                               barPercentage: 1,
                               categoryPercentage: 1,
@@ -891,22 +934,44 @@ const CreateGraph = (props) => {
                               borderColor: 'rgb(53, 162, 235)',
                               backgroundColor: 'rgba(53, 162, 235, 0.5)',
                               fontSize:'15px'
-                            }
+                            },
+                           {
+                              label: 'Class 1',
+                              lineTension: 0,
+                              fill: false,
+                              borderJoinStyle: "round",
+                              data: one_prob,
+                              borderWidth: 0.2,
+                              barPercentage: 1,
+                              categoryPercentage: 1,
+                              hoverBackgroundColor: "darkgray",
+                              barThickness: "flex",
+                              borderColor: 'rgb(255, 99, 132)',
+                              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                              fontSize:'15px'
+                            },
+                            {
+                              label: 'Threshold: ' +threshold,
+                              type: 'line',
+                              data: [
+                                {x: 1, y:threshold},
+                                {x: length, y:threshold}
+                              ]
+                            },
                           ]
                         }}
-                        options={bar_options}
-                      />
-                      :
+                        options={scatter_options}
+                      />:
                       null}
 
-                      { res.data['nodes'][i]['result_type'] == 1 ?
+                      {typeof fpr != 'undefined' ?
                       <Line
                         data={{
-                          labels: fpr,
+                          labels: Array.from(fpr),
                           datasets: [
                             {
                               label: 'ROC Curve',
-                              data: tpr,
+                              data: Array.from(tpr),
                               borderWidth: 2,
                               borderColor: 'rgb(255, 99, 132)',
                               backgroundColor: 'rgba(255, 99, 132, 0.5)',                             
@@ -914,9 +979,10 @@ const CreateGraph = (props) => {
                           ]
                         }}
                         options={line_options}
-                      />
-                      :
+                      />:
                       null}
+
+
 
                       {typeof cmatrix != 'undefined' ?
                       <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
@@ -931,7 +997,8 @@ const CreateGraph = (props) => {
 
                   <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
 
-                    <Form
+                    <Form 
+                      form={form}
                       initialValues={{ remember: true,}}
                       {...layout}
                       onFinish={onFinish}
