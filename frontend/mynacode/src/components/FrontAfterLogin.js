@@ -5,6 +5,7 @@ import IP from "../components/ipConfig";
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Layout, Menu, Divider, Affix, Button, Modal, notification, Tooltip, Dropdown, Switch} from 'antd';
 import CreateGraph from "../components/CreateGraph";
+import Outline from "../components/Outline";
 import { MoreOutlined, LeftCircleOutlined, EditOutlined, DeleteOutlined, ShareAltOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import "./index.css";
 import protocol from "../components/httpORhttps";
@@ -47,6 +48,8 @@ const FrontAfterLogin = (props) => {
 
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
   const [isCreateRunModalOpen, setIsCreateRunModalOpen] = useState(false);
+
+  const [showOutline, setShowOutline] = useState("")
 
   const [refresh, setRefresh] = useState(0)
 
@@ -450,6 +453,10 @@ const FrontAfterLogin = (props) => {
       }) 
   }
 
+  const getOutline = () => {
+    setShowOutline(1)  
+  }
+
   const getRuns = (projectID, projectName) => {
     setProjectID(projectID)
 
@@ -479,6 +486,10 @@ const FrontAfterLogin = (props) => {
 
           let items = [getItem(<div id={-1} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', fontWeight:'bold', color:'#38b6ff'}}><button onClick={getProjects}>Projects</button> <span style={{marginRight:'60px'}}>Runs <PlusCircleOutlined onClick={()=>setIsCreateRunModalOpen(true)} /></span></div>)]
         
+          items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
+                                  <div style={{maxWidth:'100px'}} onClick={()=>getOutline(projectID)}>Outline</div> 
+                      </div>))
+
           for(let i=0;i<runs.length;i++){
               if(i == 0 && runID==-1){
                 setRunID(runs[i]['id'])
@@ -585,6 +596,7 @@ const FrontAfterLogin = (props) => {
 
   const getNodes = (runID, runName) => (e) => {
     console.log(runID)
+    setShowOutline(0)
     setRunID(runID)
   }
 
@@ -706,8 +718,11 @@ const FrontAfterLogin = (props) => {
 
         <Content style={{minHeight:'100vh', padding: '10px 0px 10px 30px', fontFamily: 'Helvetica, Arial, sans-serif', display: 'flex', flexDirection:'column'}}>
           <Layout>
-
-              <CreateGraph run_id = {runID} refresh = {refresh}/>
+              {showOutline == 1 ?
+                <Outline project_id = {projectID} />
+                :
+                <CreateGraph run_id = {runID} refresh = {refresh}/>
+              }
 
           </Layout>
         </Content>

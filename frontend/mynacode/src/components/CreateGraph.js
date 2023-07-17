@@ -547,22 +547,46 @@ const CreateGraph = (props) => {
 
                 if('train_count' in res.data['nodes'][i]['description']){
                   train_count = res.data['nodes'][i]['description']['train_count']
-                  for (var j = 0; j < train_count.length; j++) {
-                    train_count_label.push(String(j));
+                  if('train_labels' in res.data['nodes'][i]['description']){
+                    train_count_label = res.data['nodes'][i]['description']['train_labels']
+                    for (var j = 0; j < train_count_label.length; j++) {
+                      train_count_label[j] = String(train_count_label[j]);
+                    }
+                  }
+                  else{
+                    for (var j = 0; j < train_count.length; j++) {
+                      train_count_label.push(String(j));
+                    }
                   }
                 }
 
                 if('val_count' in res.data['nodes'][i]['description']){
                   val_count = res.data['nodes'][i]['description']['val_count']
-                  for (var j = 0; j < val_count.length; j++) {
-                    val_count_label.push(String(j));
+                  if('val_labels' in res.data['nodes'][i]['description']){
+                    val_count_label = res.data['nodes'][i]['description']['val_labels']
+                    for (var j = 0; j < val_count_label.length; j++) {
+                      val_count_label[j] = String(val_count_label[j]);
+                    }
+                  }
+                  else{
+                    for (var j = 0; j < val_count.length; j++) {
+                      val_count_label.push(String(j));
+                    }
                   }
                 }
 
                 if('test_count' in res.data['nodes'][i]['description']){
                   test_count = res.data['nodes'][i]['description']['test_count']
-                  for (var j = 0; j < test_count.length; j++) {
-                    test_count_label.push(String(j));
+                  if('test_labels' in res.data['nodes'][i]['description']){
+                    test_count_label = res.data['nodes'][i]['description']['test_labels'] 
+                    for (var j = 0; j < test_count_label.length; j++) {
+                      test_count_label[j] = String(test_count_label[j]);
+                    }
+                  }
+                  else{                 
+                    for (var j = 0; j < test_count.length; j++) {
+                      test_count_label.push(String(j));
+                    }
                   }
                 }
 
@@ -572,6 +596,9 @@ const CreateGraph = (props) => {
                   threshold = res.data['nodes'][i]['description']['threshold']               
                 if (res.data['nodes'][i]['description']){              
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
+                    if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'train_labels' || key == 'val_labels' || key == 'test_labels' || key == 'one_prob')
+                      continue
+
                     count+=1
                     if(count%2==0)
                       color = '#E0E0E0'
@@ -658,13 +685,13 @@ const CreateGraph = (props) => {
 
                     dataset_nodes.push( 
                       <div>
-                        <div style={{color:'black', width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                        <div style={{color:'black', minWidth: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
                             < EditOutlined onClick={() => editNode(index, desc, name, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                             <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
 
-                              <div style={{display:'flex'}}>
+                              <div style={{display:'flex', marginBottom:'15px'}}>
                                 {typeof train_count != 'undefined' ?
                                 <div style={{width:'250px'}}>
                                 <Pie data = {{
@@ -697,7 +724,10 @@ const CreateGraph = (props) => {
                                           title: {
                                               display: true,
                                               text: 'TRAIN LABELS COUNT'
-                                          }
+                                          },
+                                          legend: {
+                                            display: false
+                                          }                                          
                                       }}
                                   } /></div> : null}
 
@@ -733,7 +763,10 @@ const CreateGraph = (props) => {
                                           title: {
                                               display: true,
                                               text: 'VAL LABELS COUNT'
-                                          }
+                                          },
+                                          legend: {
+                                            display: false
+                                          }                                         
                                       }}
                                   } /></div> : null}
 
@@ -765,13 +798,18 @@ const CreateGraph = (props) => {
                                     },
                                   ]}} 
                                   options = {{
+
                                       plugins: {
                                           title: {
                                               display: true,
                                               text: 'TEST LABELS COUNT'
+                                          },
+                                          legend: {
+                                            display: false
                                           }
                                       }}
-                                  } /></div>: null}
+                                  } />
+                                  </div>: null}
 
                             </div>
 
@@ -1014,7 +1052,7 @@ const CreateGraph = (props) => {
 
                result_nodes.push(
                 <div>
-                  <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                  <div style={{minWidth: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
                       < EditOutlined onClick={() => editNode(index, desc, name, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                       <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px', marginTop:'15px'}}>
                       
@@ -1053,6 +1091,7 @@ const CreateGraph = (props) => {
 
 
                       {typeof zero_prob != 'undefined' ?
+                      <div style={{width:'650px', marginBottom:'15px'}}>
                       <Scatter
                         data={{
                           labels: label_length,
@@ -1098,7 +1137,7 @@ const CreateGraph = (props) => {
                           ]
                         }}
                         options={scatter_options}
-                      />:
+                      /></div>:
                       null}
 
                       {typeof fpr != 'undefined' ?

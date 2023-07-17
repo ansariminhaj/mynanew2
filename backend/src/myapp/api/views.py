@@ -514,8 +514,8 @@ class GetNodesView(CreateAPIView):
 			files_list = []
 
 			for file_obj in file_objs:
-				files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
-				#files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
+				#files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
+				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
 			image_objs = Images.objects.filter(run = run_obj)
@@ -523,8 +523,8 @@ class GetNodesView(CreateAPIView):
 			images_list = []
 
 			for image_obj in image_objs:
-				images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
-				#images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+				#images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
+				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
 
 			
 			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'files_list': files_list, 'images_list': images_list}
@@ -615,6 +615,28 @@ class ProjectShareView(CreateAPIView):
 
 		return Response(OK)
 
+class GetOutlineView(CreateAPIView):
+
+	def post(self, request):
+		data = request.data
+
+		if Project.objects.filter(id = int(data['project_id'])).exists():
+			project_obj_exists = Project.objects.get(id = int(data['project_id']))
+		else:
+			return Response(ERROR)
+
+		runs = project_obj_exists.run_set.all()
+
+		objectives_list = []
+
+		for run_obj in runs:
+			if Node.objects.filter(run = run_obj, node_type=5).exists():
+				objective_nodes = Node.objects.filter(run = run_obj, node_type=5)
+				for obj_node in objective_nodes:
+					objectives_list.append(obj_node.description)
+					break
+
+		return Response(objectives_list)
 
 
 
@@ -883,8 +905,8 @@ class GetPytorchWeightsView(APIView):
 
 		run_obj = Run.objects.get(id=request.data['run_id'])
 
-		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
-		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
+		return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
+		#return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 
 
