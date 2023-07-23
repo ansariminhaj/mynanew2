@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { Bar, Line, Scatter, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Legend } from 'chart.js/auto'
 import { Chart }            from 'react-chartjs-2'
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(ArcElement, Legend);
 
@@ -544,7 +545,7 @@ const CreateGraph = (props) => {
                   }
               }
               else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['dataset_node'] == 1){
-
+                if (res.data['nodes'][i]['description']){
                 if('train_count' in res.data['nodes'][i]['description']){
                   train_count = res.data['nodes'][i]['description']['train_count']
                   if('train_labels' in res.data['nodes'][i]['description']){
@@ -594,7 +595,7 @@ const CreateGraph = (props) => {
                   zero_prob = res.data['nodes'][i]['description']['zero_prob']
                   one_prob = res.data['nodes'][i]['description']['one_prob']
                   threshold = res.data['nodes'][i]['description']['threshold']               
-                if (res.data['nodes'][i]['description']){              
+             
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
                     if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'train_labels' || key == 'val_labels' || key == 'test_labels' || key == 'one_prob')
                       continue
@@ -719,6 +720,8 @@ const CreateGraph = (props) => {
                                     },
                                   ]}}
 
+                                  plugins = {[ChartDataLabels]}
+
                                   options = {{
                                       plugins: {
                                           title: {
@@ -727,7 +730,7 @@ const CreateGraph = (props) => {
                                           },
                                           legend: {
                                             display: false
-                                          }                                          
+                                          }                                      
                                       }}
                                   } /></div> : null}
 
@@ -758,6 +761,9 @@ const CreateGraph = (props) => {
                                       borderWidth: 1,
                                     },
                                   ]}} 
+
+                                  plugins = {[ChartDataLabels]}
+
                                   options = {{
                                       plugins: {
                                           title: {
@@ -795,8 +801,12 @@ const CreateGraph = (props) => {
                                         'rgba(255, 159, 64, 1)',
                                       ],
                                       borderWidth: 1,
+                                      
                                     },
                                   ]}} 
+
+                                  plugins = {[ChartDataLabels]}
+
                                   options = {{
 
                                       plugins: {
@@ -886,8 +896,10 @@ const CreateGraph = (props) => {
                       <div>
                         <div style={{ width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
                             <div onClick={() => editNode(index)} style={{cursor:'pointer', marginTop:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                              Add a CSV file from your code.
-                              {rows}
+                              {rows.length == 0 ?
+                              <div>Add a CSV file from your code</div>
+                              :
+                              rows}
                             </div>
 
                             <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
@@ -997,14 +1009,14 @@ const CreateGraph = (props) => {
                         <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
                         <Form.Item name={"node_description"} initialValue={res.data['nodes'][i]['description']}>
-                          <TextArea rows={5} placeholder="Description" style={{minWidth:'600px'}} defaultValue={res.data['nodes'][i]['description']} />
+                          <TextArea rows={15} placeholder="Description" style={{minWidth:'600px'}} defaultValue={res.data['nodes'][i]['description']} />
                         </Form.Item> 
 
                         <Form.Item>
                           <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                           <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
                         </Form.Item>
-                        <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node </u></div>
+                        {/*<div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node </u></div>*/}
 
                       </Form>
                       :
@@ -1038,7 +1050,7 @@ const CreateGraph = (props) => {
                           <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                           <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
                         </Form.Item>
-                        <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node </u></div>
+                        {/*<div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node </u></div>*/}
 
                       </Form>
                       :
@@ -1292,7 +1304,7 @@ const CreateGraph = (props) => {
             </Dragger>
 
            <Dropdown overlay={images} trigger={['click']}>
-            <Tooltip placement="top" title="Libraries">
+            <Tooltip placement="top" title="Images">
               <Button size="medium" shape="circle" style={{marginLeft:'5px', marginRight:'5px'}}> <FileImageOutlined /> </Button>
             </Tooltip> 
           </Dropdown>
@@ -1310,17 +1322,17 @@ const CreateGraph = (props) => {
             </Tooltip> 
           </Dropdown>
 
-          <Dropdown overlay={systemInfo}>
+         {/* <Dropdown overlay={systemInfo}>
             <Tooltip placement="top" title="System">
               <Button size="medium" shape="circle" style={{marginRight:'5px'}}> <DesktopOutlined /> </Button> 
             </Tooltip>
           </Dropdown>
 
           <Dropdown overlay={libraries}>
-            <Tooltip placement="top" title="Images">
+            <Tooltip placement="top" title="Libraries">
               <Button size="medium" shape="circle" style={{marginRight:'5px'}}> <ApartmentOutlined /> </Button>
             </Tooltip> 
-          </Dropdown>
+          </Dropdown> */}
 
           Run ID: {props.run_id}</div> 
  
@@ -1328,38 +1340,7 @@ const CreateGraph = (props) => {
           <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Objective</div>
           <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {objectiveNodes}
-            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(5)} />
-          </div>
-
-          <Divider style={{fontSize:'20px'}} />
-
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Dataset</div>
-          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
-            {datasetNodes}
-            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(0)} />
-          </div>
-
-          <Divider />
-
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Variables</div>
-          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
-            {variableNodes}
-            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(1)} />
-          </div>
-
-          <Divider />
-
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>CSV</div>
-          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
-            {csvNodes}
-          </div>
-
-          <Divider />
-
-          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Methodology</div>
-          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
-            {methodNodes}
-            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(2)} />
+            {/*<PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(5)} />*/}
           </div>
 
           <Divider />
@@ -1369,6 +1350,30 @@ const CreateGraph = (props) => {
             {resultNodes}
             <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(3)} />
           </div>
+
+          <Divider />
+
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Notes</div>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+            {methodNodes}
+            {/* <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(2)} /> */}
+          </div>
+
+          <Divider style={{fontSize:'20px'}} />
+
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Data & Variables</div>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+            {datasetNodes}
+            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(0)} />
+          </div>
+
+          <Divider /> 
+
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>CSV</div>
+          <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+            {csvNodes}
+          </div>
+
         </div>
       :
         null}

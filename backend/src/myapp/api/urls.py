@@ -35,10 +35,12 @@ urlpatterns = [
 	path('add_metadata', AddMetadataView.as_view()),
 	path('add_results', AddResultsView.as_view()),
 	path('add_dataset', AddDatasetView.as_view()),
-	path('add_variables', AddVariablesView.as_view()),
+	# path('add_variables', AddVariablesView.as_view()),
 	path('add_csv', AddCsvView.as_view()),
 	path('add_key_value', AddKeyValueView.as_view()),
 	path('toggle_enable', ToggleEnableView.as_view()),
 	path('duplicate_run', DuplicateRunView.as_view()),
-	path('get_outline', GetOutlineView.as_view())
+	path('get_outline', GetOutlineView.as_view()),
+	path('create_project_python', CreatePythonProjectView.as_view()),
+	path('create_run_python', CreatePythonRunView.as_view())
 ]

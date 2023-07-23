@@ -19,12 +19,13 @@ class myUser(AbstractUser):
 	REQUIRED_FIELDS = ['name', 'email', 'phone', 'user_type']
 
 class Project(models.Model):
-	# user = models.ForeignKey(myUser, on_delete=models.CASCADE, blank=True, null=True)
+	#user = models.ForeignKey(myUser, on_delete=models.CASCADE, blank=True, null=True)
 	problem_objective = models.TextField(null=True, blank=True)
 	name = models.TextField(null=True, blank=True)
 	date = models.DateTimeField(default=datetime.now, blank=True)
 	latest_run_index = models.DecimalField(max_digits=6, decimal_places=0, null=True, default = 0)
 	enable = models.DecimalField(max_digits=1, decimal_places=0, null=True, default = 1)
+	outline_key = models.TextField(null=True, blank=True)
 
 
 class ProjectUser(models.Model):

@@ -90,10 +90,10 @@ const Docs = (props) => {
 
                   </li>
 
-                  <li style={{marginBottom:'6px'}}>To log system information (GPU, CPU, Memory, Installed Python Libraries etc).</li>
+                  {/*<li style={{marginBottom:'6px'}}>To log system information (GPU, CPU, Memory, Installed Python Libraries etc).</li>
                   <ul>
                   <li style={{marginBottom:'15px', color:'purple', fontWeight:'bold'}}><code>mynacode.metadata(run_id)</code></li>
-                  </ul>
+                  </ul>*/}
 
                   <li style={{marginBottom:'6px'}}>To log csv file information (Null Values, Unique Values, Column Names etc). Note, this does not save the actual data.</li>
                   <ul>
@@ -101,15 +101,15 @@ const Docs = (props) => {
                   </ul>
 
 
-                  <li style={{marginBottom:'6px'}}>To log variables.</li>
+                  {/*<li style={{marginBottom:'6px'}}>To log variables.</li>
                   <ul>
                   <li style={{marginBottom:'15px', color:'purple', fontWeight:'bold'}}><code>mynacode.variables(run_id, variables_dict = {'{'}{'}'}, node_name)</code></li>
-                  </ul>
+                  </ul>*/}
 
-                  <li style={{marginBottom:'6px'}}>To log dataset information. Note, this does not save the actual data. Only the label count, mean, min, and max of all three sets is saved. </li>
+                  <li style={{marginBottom:'6px'}}>To log dataset information or variables. Note, this does not save the actual data. Only the label count, mean, min, and max of the dataset is saved. </li>
                   <ul>
-                  <li style={{color:'purple', fontWeight:'bold', marginBottom:'10px'}}><code>mynacode.datasets(run_id, dataset_dict = {'{'}{'}'}, train_set = [], train_labels = [], test_set = [], test_labels = [], val_set = [], val_labels = [], problem_type = 'binary classification', node_name)</code></li>
-                  <div style={{marginBottom:'10px'}}> Note that all sets and labels must be in either numpy array or list format. For PyTorch, if the dataset is in a dataloader object, please convert it to a list using this code: </div>
+                  <li style={{color:'purple', fontWeight:'bold', marginBottom:'10px'}}><code>mynacode.data(run_id, dataset_dict = {'{'}{'}'}, train_set = [], train_labels = [], test_set = [], test_labels = [], val_set = [], val_labels = [], problem_type = 'binary classification', node_name)</code></li>
+                  <div style={{marginBottom:'10px'}}> Note that all sets and labels must be converted to a numpy array or list. For PyTorch, if the dataset is in a dataloader object, please convert it to a list using this code: </div>
 
                   <div style={{color:'purple', marginBottom:'5px'}}><code>labels = [np.array(dataloader_object.dataset[i][1]) for i in range(len(dataloader_object.dataset))] </code></div>
                   <div style={{color:'purple', marginBottom:'15px'}}><code>data = [np.array(dataloader_object.dataset[i][0]) for i in range(len(dataloader_object.dataset))]</code></div>
