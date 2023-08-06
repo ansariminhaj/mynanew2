@@ -416,6 +416,9 @@ const CreateGraph = (props) => {
           let tpr 
           let length
           let threshold
+          let metric_values
+          let metric_name
+          let metric_index
           let train_count_label = []
           let val_count_label = []
           let test_count_label = []
@@ -639,6 +642,11 @@ const CreateGraph = (props) => {
                     console.log(err)
                   }
 
+                  if('metric_values' in res.data['nodes'][i]['description'])
+                    metric_values = res.data['nodes'][i]['description']['metric_values']
+                    metric_name = res.data['nodes'][i]['description']['metric_name']
+                    metric_index = res.data['nodes'][i]['description']['best_metric_index']
+
                   try {
                     // freq = res.data['nodes'][i]['description']['freq']
                     // bins = res.data['nodes'][i]['description']['bins']
@@ -666,7 +674,7 @@ const CreateGraph = (props) => {
                   }
 
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-                    if (key == 'freq' || key == 'bins' || key == 'fpr' || key == 'tpr' || key == 'c_matrix' || key == 'zero_prob' || key == 'one_prob')
+                    if (key == 'freq' || key == 'bins' || key == 'fpr' || key == 'tpr' || key == 'c_matrix' || key == 'zero_prob' || key == 'one_prob' || key == 'metric_values' || key == 'best_metric_index')
                       continue
 
                     count+=1
@@ -1060,6 +1068,7 @@ const CreateGraph = (props) => {
                 </div>
               )               
             }
+
             else if(res.data['nodes'][i]['node_type'] == 2){
 
                result_nodes.push(
@@ -1164,6 +1173,36 @@ const CreateGraph = (props) => {
                               borderColor: 'rgb(255, 99, 132)',
                               backgroundColor: 'rgba(255, 99, 132, 0.5)',                             
                             }
+                          ]
+                        }}
+                        options={line_options}
+                      />:
+                      null}
+
+
+
+                      {typeof metric_values != 'undefined' ?
+                      <Line
+                        data={{
+                          labels: Array.from(Array(metric_values.length).keys()),
+                          datasets: [
+                            {
+                              label: metric_name,
+                              data: Array.from(metric_values),
+                              borderWidth: 2,
+                              borderColor: 'rgb(255, 99, 132)',
+                              backgroundColor: 'rgba(255, 99, 132, 0.5)',                             
+                            },
+                            {
+                              label: 'Best '+metric_name+' = '+String(Array.from(metric_values)[metric_index]) ,
+                              type: 'line',
+                              backgroundColor: 'rgb(75, 192, 192)',
+                              borderColor: 'rgb(75, 192, 192)',
+                              data: [
+                                {x: metric_index, y:0},
+                                {x: metric_index, y:Math.max( ...Array.from(metric_values) )}
+                              ]
+                            },
                           ]
                         }}
                         options={line_options}
@@ -1364,7 +1403,7 @@ const CreateGraph = (props) => {
           <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Data & Variables</div>
           <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {datasetNodes}
-            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(0)} />
+            {/* <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(0)} /> */}
           </div>
 
           <Divider /> 

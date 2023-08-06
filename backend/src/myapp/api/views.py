@@ -172,8 +172,11 @@ class CreatePythonProjectView(APIView):
 		else:
 			return Response(0)
 
-		project_obj_new = Project.objects.create(name=data["project_name"])
-		ProjectUser.objects.create(user = user_obj, project = project_obj_new)
+		if Project.objects.filter(name=data["project_name"]).exists():
+			project_obj_new = Project.objects.get(name=data["project_name"])
+		else:
+			project_obj_new = Project.objects.create(name=data["project_name"])
+			ProjectUser.objects.create(user = user_obj, project = project_obj_new)
 
 		print(project_obj_new.id)
 
@@ -264,10 +267,10 @@ class CreatePythonRunView(APIView):
 			Response(0)
 
 		project_obj = Project.objects.get(id = data['project_id'])
-		run_obj_new = Run.objects.create(project = project_obj, run_name=str(project_obj.latest_run_index))
+		run_obj_new = Run.objects.create(project = project_obj, run_name="Run "+str(project_obj.latest_run_index))
 		project_obj.latest_run_index += 1
 		project_obj.save()
-		
+
 		self.initial_nodes(user_obj, run_obj_new)
 
 		return Response(run_obj_new.id)
@@ -304,6 +307,7 @@ class AddResultsView(APIView):
 
 	def post(self, request):
 		data = querydict_to_dict(request.data)
+		print(data)
 
 		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
 			return Response(0)
@@ -339,7 +343,7 @@ class AddResultsView(APIView):
 		return Response(OK)
 
 
-class AddDatasetView(APIView):
+class AddDataView(APIView):
 
 	def post(self, request):
 		data = querydict_to_dict(request.data)
@@ -360,12 +364,12 @@ class AddDatasetView(APIView):
 
 			description = node_obj.description 
 
-			if isinstance(ast.literal_eval(data['dataset_dict']), Mapping):
+			if isinstance(ast.literal_eval(data['config_dict']), Mapping):
 				if len(description) == 0:
-					description = ast.literal_eval(data['dataset_dict'])	
+					description = ast.literal_eval(data['config_dict'])	
 				else:
 					description = ast.literal_eval(description)
-					description.update(ast.literal_eval(data['dataset_dict']))
+					description.update(ast.literal_eval(data['config_dict']))
 
 				node_obj.description = description
 				node_obj.save()	
