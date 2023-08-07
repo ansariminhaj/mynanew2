@@ -1179,8 +1179,6 @@ const CreateGraph = (props) => {
                       />:
                       null}
 
-
-
                       {typeof metric_values != 'undefined' ?
                       <Line
                         data={{
@@ -1191,10 +1189,11 @@ const CreateGraph = (props) => {
                               data: Array.from(metric_values),
                               borderWidth: 2,
                               borderColor: 'rgb(255, 99, 132)',
-                              backgroundColor: 'rgba(255, 99, 132, 0.5)',                             
+                              backgroundColor: 'rgba(255, 99, 132, 0.5)',  
+                              tooltip: false                           
                             },
                             {
-                              label: 'Best '+metric_name+' = '+String(Array.from(metric_values)[metric_index]) ,
+                              label: 'Best '+metric_name+' = '+String(Array.from(metric_values)[metric_index]),
                               type: 'line',
                               backgroundColor: 'rgb(75, 192, 192)',
                               borderColor: 'rgb(75, 192, 192)',
@@ -1205,11 +1204,37 @@ const CreateGraph = (props) => {
                             },
                           ]
                         }}
-                        options={line_options}
+                        options={{
+                          plugins:{
+                            tooltip: {
+                                filter: function (tooltipItem) {
+                                    return tooltipItem.datasetIndex === 0;
+                                }
+                            }
+                          },
+                          scales: {
+                            x: {
+                              type: "linear",
+                              offset: false,
+                              gridLines: {
+                                offsetGridLines: false
+                              },
+                              title: {
+                                display: true,
+                                text: metric_name
+                              }
+                            },
+                            y: {
+                              title: {
+                                display: true,
+                                text: "Epochs"
+                              }
+                            }
+                          }
+
+                          }}
                       />:
                       null}
-
-
 
                       {typeof cmatrix != 'undefined' ?
                       <div style={{marginTop:'20px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}}>
