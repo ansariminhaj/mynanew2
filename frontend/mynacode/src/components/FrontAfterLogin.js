@@ -10,6 +10,12 @@ import { MoreOutlined, LeftCircleOutlined, EditOutlined, DeleteOutlined, ShareAl
 import "./index.css";
 import protocol from "../components/httpORhttps";
 import type { NotificationPlacement } from 'antd/es/notification/interface';
+import { Bar, Line, Scatter, Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Legend } from 'chart.js/auto'
+import { Chart }            from 'react-chartjs-2'
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+ChartJS.register(ArcElement, Legend);
 
 const { TextArea } = Input;
 
@@ -538,6 +544,7 @@ const FrontAfterLogin = (props) => {
   function getProjects(){
     setRunID(-1)
     setProjectID(-1)
+    setShowOutline(-1)
     var csrftoken = Cookies.get('csrftoken');
     axios({
       withCredentials: true,
@@ -558,7 +565,7 @@ const FrontAfterLogin = (props) => {
           'Authorization': "JWT " + localStorage.getItem('access_token'),
           'Content-Type': 'application/json',
           'X-CSRFToken': csrftoken}} )
-      .then(res => {            
+      .then(res => {         
           let projects = res.data
 
           let items = [getItem(<div style={{ display:'flex', justifyContent:'center', alignItems:'center', fontWeight:'bold', color:'#38b6ff', fontSize:'17px'}}><span style={{marginRight: '10px'}}>Projects</span> <PlusCircleOutlined onClick={()=>setIsCreateProjectModalOpen(true)} /></div>)]

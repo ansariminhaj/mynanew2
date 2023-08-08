@@ -15,34 +15,15 @@ import { Chart }            from 'react-chartjs-2'
 ChartJS.register(ArcElement, Legend);
 
 
-const line_options = {
-  scales: {
-    x: {
-      type: "linear",
-      offset: false,
-      gridLines: {
-        offsetGridLines: false
-      },
-      title: {
-        display: true,
-        text: "FPR"
-      }
-    },
-    y: {
-      title: {
-        display: true,
-        text: "TPR"
-      }
-    }
-  }
-};
-
 const Outline = (props) => {
 
   const [refresh, setRefresh] = useState(0)
   const navigate = useNavigate()
   const [objectiveNodes, setObjectiveNodes] = useState([])
   const [metricKeys, setMetricKeys] = useState([])
+  const [metric, setMetric] = useState("")
+  const [metricValues, setMetricValues] = useState([])
+  const [runNames, setRunNames] = useState([])
 
 
 const handleChange = (value) => {
@@ -75,7 +56,7 @@ const handleChange = (value) => {
           for(let j=0; j<res.data['objectives_list'].length;j++){
                objective_nodes.push(
                <div style={{padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', margin:'20px', backgroundColor: '#34568B', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>                    
-                  <div style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['objectives_list'][j]}</div>
+                  <div style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['run_names_list'][j]} : {res.data['objectives_list'][j]}</div>
                   <Divider style={{backgroundColor:'white'}}/>
                   {res.data['key'] !== null ?
                   <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center'}}>{res.data['key']} : {res.data['key_values'][j]}</div>
@@ -85,6 +66,9 @@ const handleChange = (value) => {
               )   
           } 
 
+          setMetric(res.data['key'])
+          setRunNames(res.data['run_names_list'])
+
           let metric_keys = []
 
           for(let j=0; j<res.data['keys_list'].length;j++){
@@ -93,6 +77,7 @@ const handleChange = (value) => {
        
 
           setObjectiveNodes(objective_nodes) 
+          setMetricValues(res.data['key_values'])
           setMetricKeys(metric_keys)
           // setRefresh((prevValue) => prevValue + 1) 
 
@@ -136,7 +121,7 @@ const handleChange = (value) => {
           for(let j=0; j<res.data['objectives_list'].length;j++){
                objective_nodes.push(
                <div style={{padding:'10px', fontWeight: 'bold', color:'white', fontSize:'15px', width: '650px', minHeight: '70px', border: '1px solid black', margin:'20px', backgroundColor: '#34568B', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>                    
-                  <div style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['objectives_list'][j]}</div>
+                  <div style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['run_names_list'][j]} : {res.data['objectives_list'][j]}</div>
                   <Divider style={{backgroundColor:'white'}}/>
                   {res.data['key'] !== null ?
                   <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center'}}>{res.data['key']} : {res.data['key_values'][j]}</div>
@@ -145,6 +130,10 @@ const handleChange = (value) => {
                 </div>
               )   
           } 
+
+          setMetric(res.data['key'])
+          setMetricValues(res.data['key_values'])
+          setRunNames(res.data['run_names_list'])
 
           let metric_keys = []
 
@@ -180,10 +169,58 @@ const handleChange = (value) => {
             <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold', paddingTop:'30px'}}>Outline</div>
             <Select
               defaultValue="Select Metric"
-              style={{ width: 140,  marginTop:'30px' }}
+              style={{ width: 140,  marginTop:'30px', marginBottom:'15px' }}
               onChange={handleChange}
               options={metricKeys}
             />
+
+            <Line
+              data={{
+                labels: Array.from(Array(metricValues.length).keys()),
+                datasets: [
+                  {
+                    label: metric,
+                    data: metricValues,
+                    borderWidth: 2,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',                             
+                  }
+                ]
+              }}
+              options={{
+                      plugins:{
+                        tooltip: {
+                           callbacks: {
+                              label: function(tooltipItem, data) {
+                                console.log(tooltipItem)
+                                 var label = runNames[tooltipItem.dataIndex];
+                                 return label + ': ' + tooltipItem.formattedValue 
+                              }
+                           }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          type: "linear",
+                          offset: false,
+                          gridLines: {
+                            offsetGridLines: false
+                          },
+                          title: {
+                            display: true,
+                            text: "Run"
+                          }
+                        },
+                        y: {
+                          title: {
+                            display: true,
+                            text: metric
+                          }
+                        }
+                      }
+                    }}
+            />
+
             <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
               {objectiveNodes}
             </div>

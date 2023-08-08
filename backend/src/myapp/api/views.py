@@ -663,13 +663,18 @@ class GetOutlineView(CreateAPIView):
 		objectives_list = []
 		keys_list = []
 		key_values = []
+		run_names_list = []
 
 		for run_obj in runs:
+			run_names_list.append(run_obj.run_name)
 			if Node.objects.filter(run = run_obj, node_type=5).exists():
-				objective_nodes = Node.objects.filter(run = run_obj, node_type=5)
-				for obj_node in objective_nodes:
-					objectives_list.append(obj_node.description)
-					break
+				objective_node = Node.objects.get(run = run_obj, node_type=5)
+				if objective_node.description == 'Click to Edit':
+					objectives_list.append("")
+				else:
+					objectives_list.append(objective_node.description)
+			else:
+				objectives_list.append("")
 
 			if Node.objects.filter(run = run_obj, node_type=2).exists():
 				result_nodes = Node.objects.filter(run = run_obj, node_type=2)
@@ -686,11 +691,12 @@ class GetOutlineView(CreateAPIView):
 								flag = 1
 					if flag == 1:
 						key_values.append(value)
-					else:
-						key_values.append("undefined")
+						break
+				if flag == 0:
+					key_values.append("")
 
 
-		return Response({'objectives_list':objectives_list, 'keys_list': list(set(keys_list)), 'key': outline_key, 'key_values': key_values})
+		return Response({'run_names_list': run_names_list, 'objectives_list':objectives_list, 'keys_list': list(set(keys_list)), 'key': outline_key, 'key_values': key_values})
 
 
 
