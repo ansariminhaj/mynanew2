@@ -267,7 +267,15 @@ class CreatePythonRunView(APIView):
 			Response(0)
 
 		project_obj = Project.objects.get(id = data['project_id'])
-		run_obj_new = Run.objects.create(project = project_obj, run_name="Run "+str(project_obj.latest_run_index))
+
+		print(data)
+		print(type(data['sweep']))
+
+		if data['sweep'] == 'True':
+			run_obj_new = Run.objects.create(project = project_obj, run_name= data['sweep_name'])
+		else:
+			run_obj_new = Run.objects.create(project = project_obj, run_name="Run "+str(project_obj.latest_run_index))
+		
 		project_obj.latest_run_index += 1
 		project_obj.save()
 
@@ -539,8 +547,8 @@ class GetNodesView(CreateAPIView):
 			files_list = []
 
 			for file_obj in file_objs:
-				files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
-				#files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
+				#files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
+				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
 			image_objs = Images.objects.filter(run = run_obj)
@@ -548,8 +556,8 @@ class GetNodesView(CreateAPIView):
 			images_list = []
 
 			for image_obj in image_objs:
-				images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
-				#images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+				#images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
+				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
 
 			
 			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'files_list': files_list, 'images_list': images_list}
@@ -667,15 +675,6 @@ class GetOutlineView(CreateAPIView):
 
 		for run_obj in runs:
 			run_names_list.append(run_obj.run_name)
-			if Node.objects.filter(run = run_obj, node_type=5).exists():
-				objective_node = Node.objects.get(run = run_obj, node_type=5)
-				if objective_node.description == 'Click to Edit':
-					objectives_list.append("")
-				else:
-					objectives_list.append(objective_node.description)
-			else:
-				objectives_list.append("")
-
 			if Node.objects.filter(run = run_obj, node_type=2).exists():
 				result_nodes = Node.objects.filter(run = run_obj, node_type=2)
 
@@ -695,9 +694,31 @@ class GetOutlineView(CreateAPIView):
 				if flag == 0:
 					key_values.append("")
 
+		if project_obj_exists.notes is None:
+			notes = 'Click to Edit'
+		else:
+			if len(project_obj_exists.notes) == 0:
+				notes = 'Click to Edit'
+			else:
+				notes = project_obj_exists.notes
 
-		return Response({'run_names_list': run_names_list, 'objectives_list':objectives_list, 'keys_list': list(set(keys_list)), 'key': outline_key, 'key_values': key_values})
 
+		return Response({'project_id': project_obj_exists.id, 'run_names_list': run_names_list, 'project_notes':notes, 'keys_list': list(set(keys_list)), 'key': outline_key, 'key_values': key_values})
+
+
+
+class UpdateProjectNotesView(CreateAPIView):
+
+	def post(self, request):
+		data = request.data
+
+		if Project.objects.filter(id = int(data['project_id'])).exists():
+			project_obj_exists = Project.objects.get(id = int(data['project_id']))
+
+		project_obj_exists.notes = data['project_notes']
+		project_obj_exists.save()
+
+		return Response(OK)
 
 
 class ProfileView(APIView):
@@ -965,8 +986,8 @@ class GetPytorchWeightsView(APIView):
 
 		run_obj = Run.objects.get(id=request.data['run_id'])
 
-		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
-		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
+		return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
+		#return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 
 

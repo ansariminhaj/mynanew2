@@ -19,8 +19,7 @@ class myUser(AbstractUser):
 	REQUIRED_FIELDS = ['name', 'email', 'phone', 'user_type']
 
 class Project(models.Model):
-	#user = models.ForeignKey(myUser, on_delete=models.CASCADE, blank=True, null=True)
-	problem_objective = models.TextField(null=True, blank=True)
+	notes = models.TextField(null=True, blank=True)
 	name = models.TextField(null=True, blank=True)
 	date = models.DateTimeField(default=datetime.now, blank=True)
 	latest_run_index = models.DecimalField(max_digits=6, decimal_places=0, null=True, default = 0)
@@ -37,8 +36,6 @@ class Run(models.Model):
 	project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
 	run_name = models.TextField(null=True, blank=True)
 	run_date = models.DateTimeField(default=datetime.now, blank=True)
-	# weights = models.FileField(upload_to ='weights', null=True, blank=True)
-	# network = models.FileField(upload_to ='network', null=True, blank=True)
 
 
 class Files(models.Model):

@@ -1187,7 +1187,8 @@ const CreateGraph = (props) => {
                             {
                               label: metric_name,
                               data: Array.from(metric_values),
-                              borderWidth: 2,
+                              borderWidth: 1.3,
+                              pointRadius: 1,
                               borderColor: 'rgb(255, 99, 132)',
                               backgroundColor: 'rgba(255, 99, 132, 0.5)',  
                               tooltip: false                           
@@ -1221,13 +1222,13 @@ const CreateGraph = (props) => {
                               },
                               title: {
                                 display: true,
-                                text: metric_name
+                                text: "Total Epochs"
                               }
                             },
                             y: {
                               title: {
                                 display: true,
-                                text: "Epochs"
+                                text: metric_name
                               }
                             }
                           }
