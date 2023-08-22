@@ -500,9 +500,9 @@ const FrontAfterLogin = (props) => {
               if(i == 0 && runID==-1){
                 setRunID(runs[i]['id'])
               }
-              items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
+              items.push(getItem(<div onClick={getNodes(runs[i]['id'], runs[i]['run_name'])} style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
                                       <MoreOutlined style={{marginRight:'10px', fontSize:'20px'}}  onClick={()=>editRunModalOpen(runs[i]['id'], runs[i]['run_name'])}/> 
-                                      <div style={{maxWidth:'100px'}} onClick={getNodes(runs[i]['id'], runs[i]['run_name'])}> {runs[i]['run_name'] } </div>
+                                      <div style={{maxWidth:'100px'}}> {runs[i]['run_name'] } </div>
                                       <span style={{fontSize:'10px', marginLeft: 'auto', marginRight: 0}}>{runs[i]['run_date'].slice(0, 10) }</span>     
                                 </div>))
           }

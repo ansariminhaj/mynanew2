@@ -220,7 +220,7 @@ const handleChange = (value) => {
             <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold', paddingTop:'30px'}}>Outline</div>
             <Select
               defaultValue="Select Metric"
-              style={{ width: 140,  marginTop:'30px', marginBottom:'15px' }}
+              style={{ width: 210,  marginTop:'30px', marginBottom:'15px' }}
               onChange={handleChange}
               options={metricKeys}
             />

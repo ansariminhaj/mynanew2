@@ -315,7 +315,6 @@ class AddResultsView(APIView):
 
 	def post(self, request):
 		data = querydict_to_dict(request.data)
-		print(data)
 
 		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
 			return Response(0)
@@ -547,8 +546,8 @@ class GetNodesView(CreateAPIView):
 			files_list = []
 
 			for file_obj in file_objs:
-				#files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
-				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
+				files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
+				#files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
 			image_objs = Images.objects.filter(run = run_obj)
@@ -556,8 +555,8 @@ class GetNodesView(CreateAPIView):
 			images_list = []
 
 			for image_obj in image_objs:
-				#images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
-				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+				images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
+				#images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
 
 			
 			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'files_list': files_list, 'images_list': images_list}
@@ -986,8 +985,8 @@ class GetPytorchWeightsView(APIView):
 
 		run_obj = Run.objects.get(id=request.data['run_id'])
 
-		return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
-		#return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
+		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
+		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 
 

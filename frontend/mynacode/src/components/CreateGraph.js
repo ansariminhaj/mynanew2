@@ -674,7 +674,7 @@ const CreateGraph = (props) => {
                   }
 
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-                    if (key == 'freq' || key == 'bins' || key == 'fpr' || key == 'tpr' || key == 'c_matrix' || key == 'zero_prob' || key == 'one_prob' || key == 'metric_values' || key == 'best_metric_index')
+                    if (key == 'freq' || key == 'bins' || key == 'fpr' || key == 'tpr' || key == 'c_matrix' || key == 'zero_prob' || key == 'one_prob' || key == 'metric_values' || key == 'best_metric_index' || key == 'hist_one_bins' || key == 'hist_zero_bins' || key == 'hist_one_freq' || key == 'hist_zero_freq')
                       continue
 
                     count+=1
@@ -1108,58 +1108,135 @@ const CreateGraph = (props) => {
                             </div>
 
                           </Form>
-                      </div>  
+                      </div> 
 
-
-                      {typeof zero_prob != 'undefined' ?
-                      <div style={{width:'650px', marginBottom:'15px'}}>
-                      <Scatter
+                      <Bar
                         data={{
-                          labels: label_length,
+                          labels: [0.03199881, 0.07861491, 0.12523102, 0.17184713, 0.21846324,
+       0.26507934, 0.31169545, 0.35831156, 0.40492766, 0.45154377,
+       0.49815988, 0.54477598, 0.59139209, 0.6380082 , 0.68462431,
+       0.73124041, 0.77785652, 0.82447263, 0.87108873, 0.91770484],
                           datasets: [
                             {
-                              label: 'Class 0',
+                              borderColor: "blac",
                               lineTension: 0,
                               fill: false,
                               borderJoinStyle: "round",
-                              data: zero_prob,
+                              data: [4., 2., 7., 3., 1., 1., 2., 2., 1., 0., 3., 6., 2., 3., 1., 2., 0.,2., 2., 6.],
                               borderWidth: 0.2,
                               barPercentage: 1,
                               categoryPercentage: 1,
                               hoverBackgroundColor: "darkgray",
-                              barThickness: "flex",
-                              borderColor: 'rgb(53, 162, 235)',
-                              backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                              fontSize:'15px'
-                            },
-                           {
-                              label: 'Class 1',
-                              lineTension: 0,
-                              fill: false,
-                              borderJoinStyle: "round",
-                              data: one_prob,
-                              borderWidth: 0.2,
-                              barPercentage: 1,
-                              categoryPercentage: 1,
-                              hoverBackgroundColor: "darkgray",
-                              barThickness: "flex",
-                              borderColor: 'rgb(255, 99, 132)',
-                              backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                              fontSize:'15px'
-                            },
-                            {
-                              label: 'Threshold: ' +threshold,
-                              type: 'line',
-                              data: [
-                                {x: 1, y:threshold},
-                                {x: length, y:threshold}
-                              ]
-                            },
+                              barThickness: "flex"
+                            }
                           ]
                         }}
-                        options={scatter_options}
-                      /></div>:
-                      null}
+
+                        options={{scales: {
+                                  x: {
+                                      type: 'linear',
+                                      offset: false,
+                                      grid: {
+                                        offset: false
+                                      },
+                                      ticks: {
+                                        stepSize: 0.1
+                                      },
+                                      title: {
+                                        display: true,
+                                        text: 'Probability',
+                                        font: {
+                                            size: 14
+                                        }
+                                      }
+                                  }, 
+                                  y: {
+                                      title: {
+                                        display: true,
+                                        text: 'Frequency',
+                                        font: {
+                                            size: 14
+                                        }
+                                      }
+                                  }
+                                },
+                                plugins: {
+                                legend: {
+                                    display: false,
+                                  },
+                                tooltip: {
+                                  callbacks: {
+                                    title: (items) => {
+                                      return ``;
+                                    }
+                                  }
+                                }
+                              }
+                          }}
+                      />
+
+
+                      <Bar
+                        data={{
+                          labels: [0.75, 1.25, 1.75, 2.25],
+                          datasets: [
+                            {
+                              borderColor: "blac",
+                              lineTension: 0,
+                              fill: false,
+                              borderJoinStyle: "round",
+                              data: [1, 2, 3, 4],
+                              borderWidth: 0.2,
+                              barPercentage: 1,
+                              categoryPercentage: 1,
+                              hoverBackgroundColor: "darkgray",
+                              barThickness: "flex"
+                            }
+                          ]
+                        }}
+
+                        options={{scales: {
+                                  x: {
+                                      type: 'linear',
+                                      offset: false,
+                                      grid: {
+                                        offset: false
+                                      },
+                                      ticks: {
+                                        stepSize: 0.1
+                                      },
+                                      title: {
+                                        display: true,
+                                        text: 'Probability',
+                                        font: {
+                                            size: 14
+                                        }
+                                      }
+                                  }, 
+                                  y: {
+                                      title: {
+                                        display: true,
+                                        text: 'Frequency',
+                                        font: {
+                                            size: 14
+                                        }
+                                      }
+                                  }
+                                },
+                                plugins: {
+                                legend: {
+                                    display: false,
+                                  },
+                                tooltip: {
+                                  callbacks: {
+                                    title: (items) => {
+                                      return ``;
+                                    }
+                                  }
+                                }
+                              }
+                          }}
+                      />
 
                       {typeof fpr != 'undefined' ?
                       <Line
@@ -1187,8 +1264,8 @@ const CreateGraph = (props) => {
                             {
                               label: metric_name,
                               data: Array.from(metric_values),
-                              borderWidth: 1.3,
-                              pointRadius: 1,
+                              borderWidth: 2,
+                              pointRadius: 2,
                               borderColor: 'rgb(255, 99, 132)',
                               backgroundColor: 'rgba(255, 99, 132, 0.5)',  
                               tooltip: false                           
