@@ -408,13 +408,16 @@ const CreateGraph = (props) => {
           let objective_nodes = []
           let system_info_list = []
           let library_list = []
-          // let freq 
-          // let bins 
+          let zero_freq 
+          let zero_bins 
+          let one_freq
+          let one_bins
           let zero_prob
           let one_prob
           let fpr 
           let tpr 
-          let length
+          let length_one
+          let length_zero
           let threshold
           let metric_values
           let metric_name
@@ -425,6 +428,9 @@ const CreateGraph = (props) => {
           let train_count
           let val_count 
           let test_count
+          let mid_zero_bins
+          let mid_one_bins
+          let test_auc
 
           let node_view_dict = {}
           let edit_node_view_dict = {}
@@ -592,15 +598,10 @@ const CreateGraph = (props) => {
                       test_count_label.push(String(j));
                     }
                   }
-                }
-
-                  tpr = res.data['nodes'][i]['description']['tpr']
-                  zero_prob = res.data['nodes'][i]['description']['zero_prob']
-                  one_prob = res.data['nodes'][i]['description']['one_prob']
-                  threshold = res.data['nodes'][i]['description']['threshold']               
+                }          
              
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-                    if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'train_labels' || key == 'val_labels' || key == 'test_labels' || key == 'one_prob')
+                    if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'labels_train' || key == 'labels_val' || key == 'labels_test' || key == 'one_prob')
                       continue
 
                     count+=1
@@ -623,7 +624,7 @@ const CreateGraph = (props) => {
                     else{
                       cmatrix=(
                           <div>
-                          Confusion Matrix
+                          Test Confusion Matrix
                           <table border="1">
                             <tr>
                               <td style={{padding:20}}>TP: {c_matrix[3]}</td>
@@ -644,28 +645,33 @@ const CreateGraph = (props) => {
 
                   if('metric_values' in res.data['nodes'][i]['description'])
                     metric_values = res.data['nodes'][i]['description']['metric_values']
-                    metric_name = res.data['nodes'][i]['description']['metric_name']
+                    metric_name = res.data['nodes'][i]['description']['val_metric_name']
                     metric_index = res.data['nodes'][i]['description']['best_metric_index']
 
                   try {
-                    // freq = res.data['nodes'][i]['description']['freq']
-                    // bins = res.data['nodes'][i]['description']['bins']
                     fpr = res.data['nodes'][i]['description']['fpr']
                     tpr = res.data['nodes'][i]['description']['tpr']
                     zero_prob = res.data['nodes'][i]['description']['zero_prob']
                     one_prob = res.data['nodes'][i]['description']['one_prob']
                     threshold = res.data['nodes'][i]['description']['threshold']
+                    zero_bins = res.data['nodes'][i]['description']['hist_zero_bins']
+                    one_bins = res.data['nodes'][i]['description']['hist_one_bins']
+                    zero_freq = res.data['nodes'][i]['description']['hist_zero_freq']
+                    one_freq = res.data['nodes'][i]['description']['hist_one_freq'] 
+                    test_auc = res.data['nodes'][i]['description']['test_auc'] 
 
-                    if(zero_prob.length > one_prob.length)
-                      length = zero_prob.length
-                    else
-                      length = one_prob.length
+                    const consecutiveAverage = arr => {
+                       return arr.map((el, ind, array) => {
+                          return ((el + (array[ind-1] || 0)) / (1 + !!ind));
+                       });
+                    };
 
-                    var label_length = [];
+                    mid_zero_bins = consecutiveAverage(zero_bins).slice(1)
+                    mid_one_bins = consecutiveAverage(one_bins).slice(1)
 
-                    for (var j = 1; j <= length; j++) {
-                       label_length.push(j);
-                    }
+
+                    length_one = Math.max(...one_freq)
+                    length_zero = Math.max(...zero_freq)
 
 
                   }
@@ -1110,24 +1116,35 @@ const CreateGraph = (props) => {
                           </Form>
                       </div> 
 
+                      {typeof zero_bins != 'undefined' ?
                       <Bar
                         data={{
-                          labels: [0.03199881, 0.07861491, 0.12523102, 0.17184713, 0.21846324,
-       0.26507934, 0.31169545, 0.35831156, 0.40492766, 0.45154377,
-       0.49815988, 0.54477598, 0.59139209, 0.6380082 , 0.68462431,
-       0.73124041, 0.77785652, 0.82447263, 0.87108873, 0.91770484],
+                          labels: mid_zero_bins,
                           datasets: [
+                           {
+                              label: 'Threshold: ' +threshold,
+                              type: 'line',
+                              backgroundColor:'red',
+                              borderWidth: 2,
+                              borderColor: 'red',
+                              data: [
+                                {x: threshold, y:0},
+                                {x: threshold, y:length_zero}
+                              ]
+                            },
                             {
+                              label: 'Class 0 Predictions Test',
                               borderColor: "blac",
                               lineTension: 0,
                               fill: false,
                               borderJoinStyle: "round",
-                              data: [4., 2., 7., 3., 1., 1., 2., 2., 1., 0., 3., 6., 2., 3., 1., 2., 0.,2., 2., 6.],
+                              data: zero_freq,
                               borderWidth: 0.2,
                               barPercentage: 1,
                               categoryPercentage: 1,
                               hoverBackgroundColor: "darkgray",
-                              barThickness: "flex"
+                              barThickness: "flex",
+                              backgroundColor: "#29AB87"
                             }
                           ]
                         }}
@@ -1161,9 +1178,6 @@ const CreateGraph = (props) => {
                                   }
                                 },
                                 plugins: {
-                                legend: {
-                                    display: false,
-                                  },
                                 tooltip: {
                                   callbacks: {
                                     title: (items) => {
@@ -1173,25 +1187,40 @@ const CreateGraph = (props) => {
                                 }
                               }
                           }}
-                      />
+                      />:
+                      null}
 
-
+                      {typeof one_bins != 'undefined' ?
                       <Bar
                         data={{
-                          labels: [0.75, 1.25, 1.75, 2.25],
+                          labels: mid_one_bins,
                           datasets: [
                             {
+                              label: 'Val Threshold: ' +threshold,
+                              type: 'line',
+                              backgroundColor:'red',
+                              borderColor: 'red',
+                              borderWidth: 2,
+                              data: [
+                                {x: threshold, y:0},
+                                {x: threshold, y:length_one}
+                              ]
+                            },
+                            {
+                              label: 'Class 1 Predictions Test',
                               borderColor: "blac",
                               lineTension: 0,
                               fill: false,
                               borderJoinStyle: "round",
-                              data: [1, 2, 3, 4],
+                              data: one_freq,
                               borderWidth: 0.2,
                               barPercentage: 1,
                               categoryPercentage: 1,
                               hoverBackgroundColor: "darkgray",
-                              barThickness: "flex"
+                              barThickness: "flex",
+                              backgroundColor: "#8AC7DB"
                             }
+
                           ]
                         }}
 
@@ -1224,9 +1253,6 @@ const CreateGraph = (props) => {
                                   }
                                 },
                                 plugins: {
-                                legend: {
-                                    display: false,
-                                  },
                                 tooltip: {
                                   callbacks: {
                                     title: (items) => {
@@ -1236,7 +1262,8 @@ const CreateGraph = (props) => {
                                 }
                               }
                           }}
-                      />
+                      />:
+                        null}
 
                       {typeof fpr != 'undefined' ?
                       <Line
@@ -1244,7 +1271,7 @@ const CreateGraph = (props) => {
                           labels: Array.from(fpr),
                           datasets: [
                             {
-                              label: 'ROC Curve',
+                              label: 'Test ROC AUC = '+String(test_auc),
                               data: Array.from(tpr),
                               borderWidth: 2,
                               borderColor: 'rgb(255, 99, 132)',
@@ -1259,10 +1286,10 @@ const CreateGraph = (props) => {
                       {typeof metric_values != 'undefined' ?
                       <Line
                         data={{
-                          labels: Array.from(Array(metric_values.length).keys()),
+                          labels: Array.from(Array(metric_values.length).keys()).map(n => n + 1),
                           datasets: [
                             {
-                              label: metric_name,
+                              label: 'Val '+metric_name,
                               data: Array.from(metric_values),
                               borderWidth: 2,
                               pointRadius: 2,
@@ -1271,7 +1298,7 @@ const CreateGraph = (props) => {
                               tooltip: false                           
                             },
                             {
-                              label: 'Best '+metric_name+' = '+String(Array.from(metric_values)[metric_index]),
+                              label: 'Best Val '+metric_name+' = '+String(Array.from(metric_values)[metric_index]),
                               type: 'line',
                               backgroundColor: 'rgb(75, 192, 192)',
                               borderColor: 'rgb(75, 192, 192)',
@@ -1299,7 +1326,7 @@ const CreateGraph = (props) => {
                               },
                               title: {
                                 display: true,
-                                text: "Total Epochs"
+                                text: "Total Epochs (Start index: 1)"
                               }
                             },
                             y: {

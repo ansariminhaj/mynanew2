@@ -38,7 +38,6 @@ class UpdateNodeView(APIView):
 	def post(self, request):
 
 		data = request.data 
-		print(data)
 		node_id = data['node_id']
 		node_description = data['node_description']
 
@@ -165,8 +164,6 @@ class CreatePythonProjectView(APIView):
 	def post(self, request):
 		data=request.data
 
-		print(data['username'], data['key'])
-
 		if myUser.objects.filter(username = data['username'], key = data['key']).exists():
 			user_obj = myUser.objects.get(username = data['username'], key = data['key'])
 		else:
@@ -177,8 +174,6 @@ class CreatePythonProjectView(APIView):
 		else:
 			project_obj_new = Project.objects.create(name=data["project_name"])
 			ProjectUser.objects.create(user = user_obj, project = project_obj_new)
-
-		print(project_obj_new.id)
 
 		return Response(project_obj_new.id)
 
@@ -268,9 +263,6 @@ class CreatePythonRunView(APIView):
 
 		project_obj = Project.objects.get(id = data['project_id'])
 
-		print(data)
-		print(type(data['sweep']))
-
 		if data['sweep'] == 'True':
 			run_obj_new = Run.objects.create(project = project_obj, run_name= data['sweep_name'])
 		else:
@@ -331,8 +323,6 @@ class AddResultsView(APIView):
 
 			description = node_obj.description 
 
-			print(data['results_dict'])
-
 			if isinstance(ast.literal_eval(data['results_dict']), Mapping):
 				if len(description) == 0:
 					description = ast.literal_eval(data['results_dict'])	
@@ -341,7 +331,6 @@ class AddResultsView(APIView):
 					description.update(ast.literal_eval(data['results_dict']))
 
 
-				print(description)
 				node_obj.description = description
 				node_obj.save()	
 			else:
@@ -362,16 +351,47 @@ class AddDataView(APIView):
 
 		if Run.objects.filter(id=int(data["run_id"])).exists():
 			run_obj = Run.objects.get(id=int(data["run_id"]))
+			project_obj = Project.objects.get(id = run_obj.project.id)
 
 			if Node.objects.filter(run = run_obj, name = data["node_name"]).exists():
 				node_obj = Node.objects.get(run = run_obj, name = data["node_name"])
 			else:
 				node_obj = Node.objects.create(run = run_obj, description="",summary="", name=data["node_name"], node_type = 0, dataset_node = 1)
+		else:
+			return Response(ERROR)
+
+		if isinstance(ast.literal_eval(data['config_dict']), Mapping):
+			config_dict = ast.literal_eval(data['config_dict'])	
+		else:
+			return Response(ERROR)
+
+		print(data)
+
+		if 'prev_saved_data' in config_dict:
+			print("IN")
+			if str(config_dict['prev_saved_data']) == 'True':
+				latest_dataset_run_id = project_obj.latest_dataset_run_id
+				latest_dataset_run_nodename = project_obj.latest_dataset_run_nodename
+				latest_dataset_run_obj = Run.objects.get(id=int(latest_dataset_run_id))
+				latest_dataset_node_obj = Node.objects.get(run = latest_dataset_run_obj, name = latest_dataset_run_nodename)
+
+				description = ast.literal_eval(latest_dataset_node_obj.description)
+				new_dict = {}
+
+				for key in description:
+					if key in ['train_count', 'val_count', 'test_count', 'train_labels', 'train_dataloader', 'val_dataloader', 'test_dataloader', 'labels_train', 'labels_val', 'labels_test', 'train_set', 'val_set', 'test_set']:
+						new_dict.update({key: description[key]})
+
+				print("NEW DICT")
+				print(new_dict)
+
+				node_obj.description = new_dict
+				node_obj.save()
 
 
-			description = node_obj.description 
+			else:
+				description = node_obj.description 
 
-			if isinstance(ast.literal_eval(data['config_dict']), Mapping):
 				if len(description) == 0:
 					description = ast.literal_eval(data['config_dict'])	
 				else:
@@ -379,10 +399,22 @@ class AddDataView(APIView):
 					description.update(ast.literal_eval(data['config_dict']))
 
 				node_obj.description = description
-				node_obj.save()	
-			else:
-				Response(ERROR)
+				node_obj.save()
 
+				project_obj.latest_dataset_run_id = int(data["run_id"])
+				project_obj.latest_dataset_run_nodename = data["node_name"]
+				project_obj.save()
+		else:
+			description = node_obj.description 
+
+			if len(description) == 0:
+				description = ast.literal_eval(data['config_dict'])	
+			else:
+				description = ast.literal_eval(description)
+				description.update(ast.literal_eval(data['config_dict']))
+
+			node_obj.description = description
+			node_obj.save()
 
 
 		return Response(OK)
@@ -393,7 +425,6 @@ class AddKeyValueView(APIView):
 
 	def post(self, request):
 		data = querydict_to_dict(request.data)
-		print(data)
 
 		if Node.objects.filter(id = data["node_id"]).exists():
 			node_obj = Node.objects.get(id = data["node_id"])
@@ -924,8 +955,6 @@ class GetAllUserInfoView(APIView):
 class UploadFilesView(APIView):
 
 	def post(self, request):
-		print(request.data)
-		print(request.FILES)
 
 		try:
 			run_obj = Run.objects.get(id=request.data['run_id'])
@@ -940,8 +969,6 @@ class UploadFilesView(APIView):
 class UploadImagesView(APIView):
 
 	def post(self, request):
-		print(request.data)
-		print(request.FILES)
 
 		try:
 			run_obj = Run.objects.get(id=request.data['run_id'])
@@ -956,8 +983,6 @@ class UploadImagesView(APIView):
 class UploadPytorchWeightsView(APIView):
 
 	def post(self, request):
-		print(request.data)
-		print(request.FILES)
 		data = querydict_to_dict(request.data)
 
 		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
@@ -977,7 +1002,6 @@ class UploadPytorchWeightsView(APIView):
 class GetPytorchWeightsView(APIView):
 
 	def post(self, request):
-		print(request.data)
 		data = querydict_to_dict(request.data)
 
 		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():

@@ -25,6 +25,8 @@ class Project(models.Model):
 	latest_run_index = models.DecimalField(max_digits=6, decimal_places=0, null=True, default = 0)
 	enable = models.DecimalField(max_digits=1, decimal_places=0, null=True, default = 1)
 	outline_key = models.TextField(null=True, blank=True)
+	latest_dataset_run_id = models.TextField(null=True, blank=True)
+	latest_dataset_run_nodename = models.TextField(null=True, blank=True)
 
 
 class ProjectUser(models.Model):
