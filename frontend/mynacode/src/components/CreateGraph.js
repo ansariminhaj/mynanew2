@@ -1289,7 +1289,7 @@ const CreateGraph = (props) => {
                           labels: Array.from(Array(metric_values.length).keys()).map(n => n + 1),
                           datasets: [
                             {
-                              label: 'Val '+metric_name,
+                              label: metric_name,
                               data: Array.from(metric_values),
                               borderWidth: 2,
                               pointRadius: 2,
@@ -1298,7 +1298,7 @@ const CreateGraph = (props) => {
                               tooltip: false                           
                             },
                             {
-                              label: 'Best Val '+metric_name+' = '+String(Array.from(metric_values)[metric_index]),
+                              label: metric_name+' = '+String(Array.from(metric_values)[metric_index]),
                               type: 'line',
                               backgroundColor: 'rgb(75, 192, 192)',
                               borderColor: 'rgb(75, 192, 192)',
