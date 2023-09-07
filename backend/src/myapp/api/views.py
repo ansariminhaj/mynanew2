@@ -264,7 +264,7 @@ class CreatePythonRunView(APIView):
 		project_obj = Project.objects.get(id = data['project_id'])
 
 		if data['sweep'] == 'True':
-			run_obj_new = Run.objects.create(project = project_obj, run_name= data['sweep_name'])
+			run_obj_new = Run.objects.create(project = project_obj, run_name= data['sweep_name']+" "+str(project_obj.latest_run_index))
 		else:
 			run_obj_new = Run.objects.create(project = project_obj, run_name="Run "+str(project_obj.latest_run_index))
 		

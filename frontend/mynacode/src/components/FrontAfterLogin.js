@@ -510,7 +510,7 @@ const FrontAfterLogin = (props) => {
           setMenu(<Menu
                 mode="inline"
                 style={{
-                  width: 280,
+                  width: 300,
                   fontFamily: 'Helvetica, Arial, sans-serif', 
                   fontSize: '15px',
                   backgroundColor:'white',

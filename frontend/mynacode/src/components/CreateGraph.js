@@ -557,8 +557,8 @@ const CreateGraph = (props) => {
                 if (res.data['nodes'][i]['description']){
                 if('train_count' in res.data['nodes'][i]['description']){
                   train_count = res.data['nodes'][i]['description']['train_count']
-                  if('train_labels' in res.data['nodes'][i]['description']){
-                    train_count_label = res.data['nodes'][i]['description']['train_labels']
+                  if('label_names_train' in res.data['nodes'][i]['description']){
+                    train_count_label = res.data['nodes'][i]['description']['label_names_train']
                     for (var j = 0; j < train_count_label.length; j++) {
                       train_count_label[j] = String(train_count_label[j]);
                     }
@@ -572,8 +572,8 @@ const CreateGraph = (props) => {
 
                 if('val_count' in res.data['nodes'][i]['description']){
                   val_count = res.data['nodes'][i]['description']['val_count']
-                  if('val_labels' in res.data['nodes'][i]['description']){
-                    val_count_label = res.data['nodes'][i]['description']['val_labels']
+                  if('label_names_val' in res.data['nodes'][i]['description']){
+                    val_count_label = res.data['nodes'][i]['description']['label_names_val']
                     for (var j = 0; j < val_count_label.length; j++) {
                       val_count_label[j] = String(val_count_label[j]);
                     }
@@ -587,8 +587,8 @@ const CreateGraph = (props) => {
 
                 if('test_count' in res.data['nodes'][i]['description']){
                   test_count = res.data['nodes'][i]['description']['test_count']
-                  if('test_labels' in res.data['nodes'][i]['description']){
-                    test_count_label = res.data['nodes'][i]['description']['test_labels'] 
+                  if('label_names_test' in res.data['nodes'][i]['description']){
+                    test_count_label = res.data['nodes'][i]['description']['label_names_test'] 
                     for (var j = 0; j < test_count_label.length; j++) {
                       test_count_label[j] = String(test_count_label[j]);
                     }
@@ -601,7 +601,7 @@ const CreateGraph = (props) => {
                 }          
              
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-                    if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'labels_train' || key == 'labels_val' || key == 'labels_test' || key == 'one_prob')
+                    if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'labels_train' || key == 'labels_val' || key == 'labels_test' || key == 'prev_saved_data')
                       continue
 
                     count+=1
@@ -645,7 +645,7 @@ const CreateGraph = (props) => {
 
                   if('metric_values' in res.data['nodes'][i]['description'])
                     metric_values = res.data['nodes'][i]['description']['metric_values']
-                    metric_name = res.data['nodes'][i]['description']['val_metric_name']
+                    metric_name = res.data['nodes'][i]['description']['metric_name']
                     metric_index = res.data['nodes'][i]['description']['best_metric_index']
 
                   try {
@@ -1298,13 +1298,13 @@ const CreateGraph = (props) => {
                               tooltip: false                           
                             },
                             {
-                              label: metric_name+' = '+String(Array.from(metric_values)[metric_index]),
+                              label: 'Best '+metric_name+' = '+String(Array.from(metric_values)[metric_index]),
                               type: 'line',
                               backgroundColor: 'rgb(75, 192, 192)',
                               borderColor: 'rgb(75, 192, 192)',
                               data: [
-                                {x: metric_index, y:0},
-                                {x: metric_index, y:Math.max( ...Array.from(metric_values) )}
+                                {x: (metric_index+1), y:0}, 
+                                {x: (metric_index+1), y:Math.max( ...Array.from(metric_values) )}
                               ]
                             },
                           ]
