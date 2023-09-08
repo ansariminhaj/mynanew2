@@ -601,7 +601,7 @@ const CreateGraph = (props) => {
                 }          
              
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-                    if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'labels_train' || key == 'labels_val' || key == 'labels_test' || key == 'prev_saved_data')
+                    if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'label_names_train' || key == 'label_names_val' || key == 'label_names_test' || key == 'prev_saved_data')
                       continue
 
                     count+=1
@@ -697,6 +697,7 @@ const CreateGraph = (props) => {
               if (res.data['nodes'][i]['node_type'] == 0){
                 if (res.data['nodes'][i]['dataset_node'] == 1){
 
+                    /// DATASETS ///
 
                     dataset_nodes.push( 
                       <div>
@@ -885,11 +886,6 @@ const CreateGraph = (props) => {
                                 <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
                               </Form.Item> 
 
-                              Dictionary of values
-                              <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
-                                <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} />
-                              </Form.Item> 
-
                               <Form.Item>
                                 <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                                     <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
@@ -905,6 +901,8 @@ const CreateGraph = (props) => {
                 }
 
               else if(res.data['nodes'][i]['csv_node'] == 1){
+
+                    /// CSV ///
 
                     csv_nodes.push(
                       <div>
@@ -924,87 +922,6 @@ const CreateGraph = (props) => {
                       </div>
                   )
               }
-
-              else if(res.data['nodes'][i]['csv_node'] == 0 && res.data['nodes'][i]['dataset_node'] == 0){
-
-                    variable_nodes.push(
-                      <div>
-                        <div style={{width: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            < EditOutlined onClick={() => editNode(index, desc, name, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
-                            <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
-                              {res.data['nodes'][i]['node_summary']}
-                            </div>
-
-                            <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
-                              {rows}
-                              <Form
-                                initialValues={{ remember: true,}}
-                                {...layout}
-                                onFinish={onFinishKeyValue}
-                                style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}>
-
-                                  <div style={{display:'flex', justifyContent:'center'}}>                                
-                                    <Form.Item name={"key"}> 
-                                      <Input placeholder="Key" style={{width:'165px', marginRight:'100px'}}/> 
-                                    </Form.Item> 
-
-                                    
-                                    <Form.Item name={"value"}> 
-                                      <Input placeholder="Value" style={{width:'165px'}} /> 
-                                    </Form.Item> 
-                                  </div>
-
-                                  <div style={{display:'flex', justifyContent:'center'}}>
-                                  <Form.Item>
-                                    <Button htmlType="submit" style={{color:'blue'}} shape="circle" onClick={()=>addKeyValue(index)} > < CheckOutlined /> </Button>
-                                  </Form.Item>
-                                  </div>
-
-                                </Form>
-                            </div>
-                        </div>
-
-                        <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
-
-                          <Form
-                            form={form}
-                            initialValues={{ remember: true,}}
-                            {...layout}
-                            onFinish={onFinish}
-                            style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
-                              <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
-
-                              Name
-                              <Form.Item name={"node_name"} initialValue={res.data['nodes'][i]['name']}> 
-                                <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
-                              </Form.Item> 
-
-                              Description
-                              <Form.Item name={"node_summary"} initialValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)}>
-                                <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
-                              </Form.Item> 
-
-
-                              Dictionary of values
-                              <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
-                                <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
-                              </Form.Item> 
-
-                              <Form.Item>
-                                <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
-                                    <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
-                              </Form.Item>
-                              <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
-
-                            </Form>
-
-                        </Modal>
-                      </div>
-                  )
-
-              }
-
-
  
             }
             else if(res.data['nodes'][i]['node_type'] == 1){
@@ -1022,8 +939,8 @@ const CreateGraph = (props) => {
                       style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
                         <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
-                        <Form.Item name={"node_description"} initialValue={res.data['nodes'][i]['description']}>
-                          <TextArea rows={15} placeholder="Description" style={{minWidth:'600px'}} defaultValue={res.data['nodes'][i]['description']} />
+                        <Form.Item name={"node_summary"} initialValue={res.data['nodes'][i]['node_summary']}>
+                          <TextArea rows={15} placeholder="Description" style={{minWidth:'600px'}} defaultValue={res.data['nodes'][i]['node_summary']} />
                         </Form.Item> 
 
                         <Form.Item>
@@ -1056,8 +973,8 @@ const CreateGraph = (props) => {
                       style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
                         <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
-                        <Form.Item name={"node_description"} initialValue={res.data['nodes'][i]['description']}>
-                          <TextArea rows={5} placeholder="Description" style={{minWidth:'600px'}} defaultValue={res.data['nodes'][i]['description']} />
+                        <Form.Item name={"node_summary"} initialValue={res.data['nodes'][i]['node_summary']}>
+                          <TextArea rows={5} placeholder="Description" style={{minWidth:'600px'}} defaultValue={res.data['nodes'][i]['node_summary']} />
                         </Form.Item> 
 
                         <Form.Item>
@@ -1370,11 +1287,6 @@ const CreateGraph = (props) => {
                         Description
                         <Form.Item name={"node_summary"} initialValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)}>
                           <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
-                        </Form.Item> 
-
-                        Dictionary of values
-                        <Form.Item name={"node_description"} initialValue={JSON.stringify(res.data['nodes'][i]['description'])}>
-                          <TextArea rows={8} showCount placeholder="Description" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['description'])} />
                         </Form.Item> 
 
                         <Form.Item>

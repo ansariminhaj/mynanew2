@@ -39,11 +39,8 @@ class UpdateNodeView(APIView):
 
 		data = request.data 
 		node_id = data['node_id']
-		node_description = data['node_description']
-
 
 		node_obj = Node.objects.get(id = int(node_id))
-		node_obj.description = node_description
 		if 'node_summary' in data:
 			node_obj.summary = data['node_summary']
 		node_obj.save()
@@ -225,7 +222,6 @@ class CreateRunView(APIView):
 		objective_node = Node.objects.create(run = run_obj, name="Objective", description = "Click to Edit",summary="", node_type = 5)
 		data_node = Node.objects.create(run = run_obj, name="Datasets", description = "{}",summary="", node_type = 0, dataset_node = 1)
 		csv_node = Node.objects.create(run = run_obj, name="CSV", description = "",summary="", node_type = 0, csv_node=1)
-		variables_node = Node.objects.create(run = run_obj, name="Variables",summary="", description = "{}", node_type = 0)
 		methods_node = Node.objects.create(run = run_obj, name="Method", description = "Click to Edit",summary="", node_type = 1)
 		results_node = Node.objects.create(run = run_obj, name="Results", description = "{}",summary="", node_type = 2)
 		
@@ -247,7 +243,6 @@ class CreatePythonRunView(APIView):
 		objective_node = Node.objects.create(run = run_obj, name="Objective", description = "Click to Edit",summary="", node_type = 5)
 		data_node = Node.objects.create(run = run_obj, name="Datasets", description = "{}",summary="", node_type = 0, dataset_node = 1)
 		csv_node = Node.objects.create(run = run_obj, name="CSV", description = "",summary="", node_type = 0, csv_node=1)
-		variables_node = Node.objects.create(run = run_obj, name="Variables",summary="", description = "{}", node_type = 0)
 		methods_node = Node.objects.create(run = run_obj, name="Method", description = "Click to Edit",summary="", node_type = 1)
 		results_node = Node.objects.create(run = run_obj, name="Results", description = "{}",summary="", node_type = 2)
 		
@@ -426,6 +421,7 @@ class AddKeyValueView(APIView):
 	def post(self, request):
 		data = querydict_to_dict(request.data)
 
+
 		if Node.objects.filter(id = data["node_id"]).exists():
 			node_obj = Node.objects.get(id = data["node_id"])
 			print('exists')
@@ -436,19 +432,25 @@ class AddKeyValueView(APIView):
 
 		if isinstance({data['key']:data['value']}, Mapping):
 			if len(description) == 0:
-				description = {data['key']:ast.literal_eval(data['value'])}	
+				if data['value'] is None or not data['value'].strip() or data['value'] == 'undefined':
+					description = {data['key']:ast.literal_eval(data['value'])}	
+				else:
+					pass
 			else:
 				description = ast.literal_eval(description)
 
-				try: 
-					ast.literal_eval(data['value']) # Filepaths throw error on ast
+				if data['value'] is None or not data['value'].strip() or data['value'] == 'undefined':
+					description.pop(data['key'], None)
+				else:
+					try: 
+						ast.literal_eval(data['value']) # Filepaths throw error on ast
 
-					if isinstance(ast.literal_eval(data['value']), list):
-						description.update({data['key']:ast.literal_eval(data['value'])})
-					else:
+						if isinstance(ast.literal_eval(data['value']), list):
+							description.update({data['key']:ast.literal_eval(data['value'])})
+						else:
+							description.update({data['key']:data['value']})
+					except:
 						description.update({data['key']:data['value']})
-				except:
-					description.update({data['key']:data['value']})
 
 			node_obj.description = description
 			node_obj.save()	
@@ -577,8 +579,8 @@ class GetNodesView(CreateAPIView):
 			files_list = []
 
 			for file_obj in file_objs:
-				files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
-				#files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
+				#files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
+				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
 			image_objs = Images.objects.filter(run = run_obj)
@@ -586,8 +588,8 @@ class GetNodesView(CreateAPIView):
 			images_list = []
 
 			for image_obj in image_objs:
-				images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
-				#images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+				#images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
+				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
 
 			
 			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'files_list': files_list, 'images_list': images_list}
@@ -1009,8 +1011,8 @@ class GetPytorchWeightsView(APIView):
 
 		run_obj = Run.objects.get(id=request.data['run_id'])
 
-		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
-		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
+		return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
+		#return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 
 
