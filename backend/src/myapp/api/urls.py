@@ -32,7 +32,6 @@ urlpatterns = [
 	path('project_delete', ProjectDeleteView.as_view()),
 	path('project_update', ProjectUpdateView.as_view()),
 	path('project_share', ProjectShareView.as_view()),
-	path('add_metadata', AddMetadataView.as_view()),
 	path('add_results', AddResultsView.as_view()),
 	path('add_data', AddDataView.as_view()),
 	# path('add_variables', AddVariablesView.as_view()),

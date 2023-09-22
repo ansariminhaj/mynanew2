@@ -75,9 +75,3 @@ class Feedback(models.Model):
 	user = models.ForeignKey(myUser, on_delete=models.CASCADE, blank=True, null=True)
 	feedback = models.TextField(blank=True, null=True)
 	feedback_date = models.DateTimeField(auto_now=True, null=True)
-
-
-class Metadata(models.Model):
-	run = models.ForeignKey(Run, on_delete=models.CASCADE, blank=True, null=True)
-	installed_packages = models.TextField(blank=True, null=True)
-	system_information = models.TextField(blank=True, null=True)

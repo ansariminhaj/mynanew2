@@ -435,21 +435,6 @@ const CreateGraph = (props) => {
           let node_view_dict = {}
           let edit_node_view_dict = {}
 
-
-          if (res.data['installed_packages']){
-              let libraries = JSON.parse(res.data['installed_packages'].replace(/'/g, '"'))
-              for(let i = 0; i<libraries.length;i++){
-                library_list.push( 
-                       {key: i,
-                        label: (
-                            <div>{libraries[i]}</div>
-                        ),
-                      })
-                }
-
-              setLibraries(<Menu items={library_list} style={{overflowY: 'auto', height:'300px'}}/>)
-          }
-
           
 
           if (res.data['system_info']){
@@ -518,17 +503,17 @@ const CreateGraph = (props) => {
               let count = 0
               let color = 'white'
 
-              if(res.data['nodes'][i]['node_type'] == 0  && res.data['nodes'][i]['csv_node'] == 0 && res.data['nodes'][i]['dataset_node'] == 0){
-                for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-                  count+=1
-                  if(count%2==0)
-                    color = '#E0E0E0'
-                  else
-                    color = '#AECBB7'
-                  rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
-                }
-              }
-              else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['csv_node'] == 1){
+              // if(res.data['nodes'][i]['node_type'] == 0  && res.data['nodes'][i]['csv_node'] == 0 && res.data['nodes'][i]['dataset_node'] == 0){
+              //   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
+              //     count+=1
+              //     if(count%2==0)
+              //       color = '#E0E0E0'
+              //     else
+              //       color = '#AECBB7'
+              //     rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
+              //   }
+              // }
+              if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['csv_node'] == 1){
                 if (res.data['nodes'][i]['description']){
                   let parsed_columns = JSON.parse(res.data['nodes'][i]['description']['columns list'].replace(/'/g, '"'))
                   let parsed_null = JSON.parse(res.data['nodes'][i]['description']['isnull list'].replace(/'/g, '"'))
@@ -598,8 +583,33 @@ const CreateGraph = (props) => {
                       test_count_label.push(String(j));
                     }
                   }
-                }          
-             
+                }     
+
+                if ('installed_packages' in res.data['nodes'][i]['description']){
+                  console.log(res.data['nodes'][i]['description']['installed_packages'])
+                  let libraries = res.data['nodes'][i]['description']['installed_packages']
+                  for(let i = 0; i<libraries.length;i++){
+                    library_list.push( 
+                           {key: i,
+                            label: (
+                                <div>{libraries[i]}</div>
+                            ),
+                          })
+                    }
+
+                  setLibraries(<Menu items={library_list} style={{overflowY: 'auto', height:'300px'}}/>)
+                 } 
+                 else{
+                    library_list.push( 
+                       {key: 0,
+                        label: (
+                            <div>{'No Libraries'}</div>
+                        ),
+                      })
+
+                    setLibraries(<Menu items={library_list} style={{overflowY: 'auto', height:'300px'}}/>)
+                 }    
+                 
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
                     if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'label_names_train' || key == 'label_names_val' || key == 'label_names_test' || key == 'prev_saved_data')
                       continue
@@ -1039,7 +1049,7 @@ const CreateGraph = (props) => {
                           labels: mid_zero_bins,
                           datasets: [
                            {
-                              label: 'Threshold: ' +threshold,
+                              label: 'Val Threshold: ' +threshold,
                               type: 'line',
                               backgroundColor:'red',
                               borderWidth: 2,
@@ -1096,11 +1106,7 @@ const CreateGraph = (props) => {
                                 },
                                 plugins: {
                                 tooltip: {
-                                  callbacks: {
-                                    title: (items) => {
-                                      return ``;
-                                    }
-                                  }
+                                  enabled:false
                                 }
                               }
                           }}
@@ -1171,11 +1177,7 @@ const CreateGraph = (props) => {
                                 },
                                 plugins: {
                                 tooltip: {
-                                  callbacks: {
-                                    title: (items) => {
-                                      return ``;
-                                    }
-                                  }
+                                  enabled:false
                                 }
                               }
                           }}
@@ -1196,7 +1198,32 @@ const CreateGraph = (props) => {
                             }
                           ]
                         }}
-                        options={line_options}
+                        options={{
+                                scales: {
+                                  x: {
+                                    type: "linear",
+                                    offset: false,
+                                    gridLines: {
+                                      offsetGridLines: false
+                                    },
+                                    title: {
+                                      display: true,
+                                      text: "FPR"
+                                    }
+                                  },
+                                  y: {
+                                    title: {
+                                      display: true,
+                                      text: "TPR"
+                                    }
+                                  }
+                                },
+                                plugins: {
+                                tooltip: {
+                                  enabled:false
+                                }
+                              }
+                              }}
                       />:
                       null}
 
@@ -1407,13 +1434,13 @@ const CreateGraph = (props) => {
             <Tooltip placement="top" title="System">
               <Button size="medium" shape="circle" style={{marginRight:'5px'}}> <DesktopOutlined /> </Button> 
             </Tooltip>
-          </Dropdown>
+          </Dropdown> */}
 
           <Dropdown overlay={libraries}>
             <Tooltip placement="top" title="Libraries">
               <Button size="medium" shape="circle" style={{marginRight:'5px'}}> <ApartmentOutlined /> </Button>
             </Tooltip> 
-          </Dropdown> */}
+          </Dropdown> 
 
           Run ID: {props.run_id}</div> 
  

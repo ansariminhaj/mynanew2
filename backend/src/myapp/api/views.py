@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 import random, string, os, jwt, operator
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from itertools import chain
 from django.db.models import F
 import copy, ast
@@ -60,7 +60,6 @@ class DuplicateRunView(APIView):
 		images = run_obj.images_set.all()
 		nodes = run_obj.node_set.all()
 		files = run_obj.files_set.all()
-		metadatas = run_obj.metadata_set.all()
 
 		run_obj_new = Run.objects.create(project = run_obj.project, run_name = run_obj.run_name)
 
@@ -78,11 +77,6 @@ class DuplicateRunView(APIView):
 			file.pk = None 
 			file.run = run_obj_new
 			file.save()
-
-		for metadata in metadatas:
-			metadata.pk = None 
-			metadata.run = run_obj_new
-			metadata.save()
 
 
 		return Response(OK)
@@ -259,9 +253,13 @@ class CreatePythonRunView(APIView):
 		project_obj = Project.objects.get(id = data['project_id'])
 
 		if data['sweep'] == 'True':
-			run_obj_new = Run.objects.create(project = project_obj, run_name= data['sweep_name']+" "+str(project_obj.latest_run_index))
+			run_obj_new = Run.objects.create(project = project_obj, run_name="S "+ data['sweep_name'])
+			run_obj_new.run_name = "S"+str(run_obj_new.id)+" "+data['sweep_name']
+			run_obj_new.save()
 		else:
-			run_obj_new = Run.objects.create(project = project_obj, run_name="Run "+str(project_obj.latest_run_index))
+			run_obj_new = Run.objects.create(project = project_obj, run_name="R " + data['run_name'])
+			run_obj_new.run_name = "R"+str(run_obj_new.id)+" "+data['run_name']
+			run_obj_new.save()
 		
 		project_obj.latest_run_index += 1
 		project_obj.save()
@@ -269,33 +267,6 @@ class CreatePythonRunView(APIView):
 		self.initial_nodes(user_obj, run_obj_new)
 
 		return Response(run_obj_new.id)
-
-
-
-class AddMetadataView(APIView):
-
-	def post(self, request):
-		data = querydict_to_dict(request.data)
-
-		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
-			return Response(0)
-
-		user_obj = myUser.objects.get(username = data['username'], key = data['key'])
-
-		if Run.objects.filter(id=int(data["run_id"])).exists():
-			run_obj = Run.objects.get(id=int(data["run_id"]))
-			if Metadata.objects.filter(run = run_obj).exists():
-				metadata_obj = Metadata.objects.get(run = run_obj)
-				metadata_obj.installed_packages = data['installed_packages']
-				metadata_obj.system_information = data['system_information']
-				metadata_obj.save()
-			else:
-				metadata_obj = Metadata.objects.create(run = run_obj, installed_packages = data['installed_packages'], system_information = data['system_information'] )
-
-		else:
-			return Response(0)
-
-		return Response(OK)
 
 
 class AddResultsView(APIView):
@@ -360,10 +331,7 @@ class AddDataView(APIView):
 		else:
 			return Response(ERROR)
 
-		print(data)
-
 		if 'prev_saved_data' in config_dict:
-			print("IN")
 			if str(config_dict['prev_saved_data']) == 'True':
 				latest_dataset_run_id = project_obj.latest_dataset_run_id
 				latest_dataset_run_nodename = project_obj.latest_dataset_run_nodename
@@ -376,9 +344,6 @@ class AddDataView(APIView):
 				for key in description:
 					if key in ['train_count', 'val_count', 'test_count', 'train_labels', 'train_dataloader', 'val_dataloader', 'test_dataloader', 'labels_train', 'labels_val', 'labels_test', 'train_set', 'val_set', 'test_set']:
 						new_dict.update({key: description[key]})
-
-				print("NEW DICT")
-				print(new_dict)
 
 				node_obj.description = new_dict
 				node_obj.save()
@@ -525,6 +490,12 @@ class GetRunsView(CreateAPIView):
 		query_dict = {}
 		query_list = []
 
+		# Define time intervals
+		one_hour = timedelta(hours=1)
+		one_day = timedelta(days=1)
+		one_month = timedelta(days=30)
+		one_year = timedelta(days=365)
+
 
 		if Project.objects.filter(id = int(data['project_id'])).exists():
 			project_obj_exists = Project.objects.get(id = int(data['project_id']))
@@ -533,7 +504,26 @@ class GetRunsView(CreateAPIView):
 				runs = Run.objects.filter(project = project_obj_exists)
 				runs = runs.values()
 				for run in runs:
-					query_list.append({'run_name': run['run_name'], 'id': run['id'], 'run_date': run['run_date']})
+					time_difference = datetime.now(timezone.utc) - run['run_date']
+
+					if time_difference < one_hour:
+					    minutes_difference = time_difference.total_seconds() / 60
+					    difference = f"{int(minutes_difference)} minutes ago"
+					elif time_difference < one_day:
+					    hours_difference = time_difference.total_seconds() / 3600
+					    difference = f"{int(hours_difference)} hours ago"
+					elif time_difference < one_month:
+					    days_difference = time_difference.days
+					    difference = f"{days_difference} days ago"
+					elif time_difference < one_year:
+					    months_difference = time_difference.days // 30
+					    difference = f"{months_difference} months ago"
+					else:
+					    years_difference = time_difference.days // 365
+					    difference = f"{years_difference} years ago"
+
+					print(time_difference)
+					query_list.append({'run_name': run['run_name'], 'id': run['id'], 'run_date': run['run_date'], 'created': difference})
 		else:
 			pass
 
@@ -553,13 +543,6 @@ class GetNodesView(CreateAPIView):
 			run_obj = Run.objects.get(id = data['run_id'])
 			all_run_nodes = Node.objects.filter(run = run_obj)
 			all_run_nodes = all_run_nodes.values()
-			if Metadata.objects.filter(run = run_obj).exists():
-				metadata_obj = Metadata.objects.get(run = run_obj)
-				installed_packages = metadata_obj.installed_packages
-				system_information = metadata_obj.system_information
-			else:
-				system_information = '["Metadata Not Saved"]'
-				installed_packages = '["Metadata Not Saved"]'
 
 			for node in all_run_nodes:
 				if node['node_type'] == 0 or node['node_type'] == 2:
@@ -579,8 +562,8 @@ class GetNodesView(CreateAPIView):
 			files_list = []
 
 			for file_obj in file_objs:
-				#files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
-				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
+				files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
+				#files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
 			image_objs = Images.objects.filter(run = run_obj)
@@ -588,11 +571,11 @@ class GetNodesView(CreateAPIView):
 			images_list = []
 
 			for image_obj in image_objs:
-				#images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
-				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+				images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
+				#images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
 
 			
-			query = {'nodes': query_list, 'installed_packages': installed_packages, 'system_info': system_information, 'files_list': files_list, 'images_list': images_list}
+			query = {'nodes': query_list, 'files_list': files_list, 'images_list': images_list}
 			return Response(query)
 
 		return Response(ERROR)
@@ -1011,8 +994,8 @@ class GetPytorchWeightsView(APIView):
 
 		run_obj = Run.objects.get(id=request.data['run_id'])
 
-		return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
-		#return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
+		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
+		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 
 

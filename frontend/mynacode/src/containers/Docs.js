@@ -82,18 +82,6 @@ const Docs = (props) => {
                     </ul>
                   </li>
 
-                  <li style={{marginBottom:'30px'}}>
-                    Create a new Project. 
-                    <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{marginBottom:'10px'}}><code>mynacode.start(base_folder='', project_name='')</code></li>
-                    
-                      <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
-                        <tr><td>base_folder:</td> <td>Base directory path of your project.</td></tr>
-                        <tr><td>project_name:</td> <td>Name of the project.</td></tr>
-                      </table>
-                    </ul>
-                  </li>
-
                   <li style={{marginBottom:'30px'}}>Paste the following at the start of your code. Your 
                     Username and Key can be accessed from your account.  
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
@@ -104,6 +92,33 @@ const Docs = (props) => {
                         <tr><td>key:</td> <td>Account key.</td></tr>
                       </table>
 
+                    </ul>
+                  </li>
+
+                  <li style={{marginBottom:'30px'}}>
+                    Create a new Project. 
+                    <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
+                      <li style={{marginBottom:'10px'}}><code>mynacode.start(base_folder='', project='')</code></li>
+                    
+                      <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
+                        <tr><td>base_folder:</td> <td>Base directory path of your project.</td></tr>
+                        <tr><td>project:</td> <td>Name of the project.</td></tr>
+                      </table>
+                    </ul>
+                  </li>
+
+
+                  <li style={{marginBottom:'30px'}}>
+                    Initialize a Run or a Sweep. 
+                    <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
+                      <li style={{marginBottom:'10px'}}><code>mynacode.init(sweep = False, sweep_name = "", run_name="", save_files = False)</code></li>
+                    
+                      <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
+                        <tr><td>sweep:</td> <td>Specify if current initialization is for a sweep.</td></tr>
+                        <tr><td>sweep_name:</td> <td>If sweep == True, specify sweep name.</td></tr>
+                        <tr><td>run_name:</td> <td>If current initialization is for a run (sweep == False), specify run name.</td></tr>
+                        <tr><td>save_files:</td> <td>If save_files == True, all python and jupyter notebooks within the working directory are saved.</td></tr>
+                      </table>
                     </ul>
                   </li>
 
@@ -132,16 +147,15 @@ const Docs = (props) => {
                     <div style={{marginTop:'15px', fontWeight: 'bold'}}>PyTorch Dataloaders</div>
 
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.torch_data(train_dataloader=None, val_dataloader=None, test_dataloader=None, dataset_name="", label_index=1,
-         problem_type = 'binary classification',  node_name="Datasets", if_sweep_save_once=True, run_id=None)</code></li>
+                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.torch_dataloader(train=None, val=None, test=None, dataset_name="", label_index=1,
+         node_name="Datasets", if_sweep_save_once=True, run_id=None)</code></li>
                     
                       <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
-                        <tr><td>train_dataloader:</td> <td>Train dataloader object.</td></tr>
-                        <tr><td>val_dataloader:</td> <td>Val dataloader object.</td></tr>
-                        <tr><td>test_dataloader:</td> <td>Test dataloader object.</td></tr>
+                        <tr><td>train:</td> <td>Train dataloader object.</td></tr>
+                        <tr><td>val:</td> <td>Val dataloader object.</td></tr>
+                        <tr><td>test:</td> <td>Test dataloader object.</td></tr>
                         <tr><td>dataset_name:</td> <td>Dataset name (This will be the name of the local directory where the datasets are stored).</td></tr>
                         <tr><td>label_index:</td> <td>Index of labels in the dataloader object.</td></tr>
-                        <tr><td>problem_type:</td> <td>Problem type.</td></tr>
                         <tr><td>node_name:</td> <td>Node to store dataset path information.</td></tr>
                         <tr><td>if_sweep_save_once:</td> <td>In hyperparameter sweeps, datasets will only be saved once for optimization.</td></tr>
                         <tr><td>run_id:</td> <td>Run ID to log dataset paths. If None, the run ID generated automatically after calling the init function will be used.</td></tr>
@@ -151,18 +165,17 @@ const Docs = (props) => {
                     <div style={{marginTop:'10px', fontWeight: 'bold'}}>NumPy Datasets</div>
 
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.data(train_set=[], train_labels=[], val_set=[], val_labels=[], test_set=[], test_labels=[], dataset_name="",
-         problem_type='binary classification',  node_name="Datasets", if_sweep_save_once=True, run_id=None)</code></li>
+                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.np_data(train=[], train_labels=[], val=[], val_labels=[], test=[], test_labels=[], dataset_name="",
+         node_name="Datasets", if_sweep_save_once=True, run_id=None)</code></li>
                     
                       <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
-                        <tr><td>train_set:</td> <td>NumPy array for the training dataset.</td></tr>
+                        <tr><td>train:</td> <td>NumPy array for the training dataset.</td></tr>
                         <tr><td>train_labels:</td> <td>NumPy array for the training labels.</td></tr>
-                        <tr><td>val_set:</td> <td>NumPy array for the validation dataset.</td></tr>
+                        <tr><td>val:</td> <td>NumPy array for the validation dataset.</td></tr>
                         <tr><td>val_labels:</td> <td>NumPy array for the validation labels.</td></tr>
-                        <tr><td>test_set:</td> <td>NumPy array for the testing dataset.</td></tr>
+                        <tr><td>test:</td> <td>NumPy array for the testing dataset.</td></tr>
                         <tr><td>test_labels:</td> <td>NumPy array for the testing labels.</td></tr>
                         <tr><td>dataset_name:</td> <td>Dataset name (This will be the name of the local directory where the datasets are stored).</td></tr>
-                        <tr><td>problem_type:</td> <td>Problem type.</td></tr>
                         <tr><td>node_name:</td> <td>Node to store dataset path information.</td></tr>
                         <tr><td>if_sweep_save_once:</td> <td>In hyperparameter sweeps, datasets will only be saved once for optimization.</td></tr>
                         <tr><td>run_id:</td> <td>Run ID to log dataset paths. If None, the run ID generated automatically after calling the init function will be used.</td></tr>
@@ -175,7 +188,7 @@ const Docs = (props) => {
                   <li style={{marginBottom:'30px'}}> 
                     To log a dictionary of model configuration parameters. 
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.config(config_dict=&#123;&#125;, node_name="Datasets", track=False, run_id=None)</code></li>
+                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.config(config_dict=&#123;&#125;, node_name="Datasets", run_id=None)</code></li>
                     
                       <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
                         <tr><td>config_dict:</td> <td>Parameter configuration dictionary.</td></tr>
@@ -218,11 +231,11 @@ const Docs = (props) => {
                   <li style={{marginBottom:'30px'}}> 
                     To log test dataset results (Senstivity, Specificity, AUC etc). 
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.results(y_true=[], y_predicted=[], threshold=0.5, results_dict=&#123;&#125;, node_name="Results", problem_type='binary classification', run_id=None)</code></li>
+                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.results(y_true=[], y_pred=[], threshold=0.5, results_dict=&#123;&#125;, node_name="Results", problem_type='binary classification', run_id=None)</code></li>
                     
                       <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
                         <tr><td>y_true:</td> <td>Numpy array of truth labels.</td></tr>
-                        <tr><td>y_predicted:</td> <td>Numpy array of predicted values.</td></tr>
+                        <tr><td>y_pred:</td> <td>Numpy array of predicted values.</td></tr>
                         <tr><td>threshold:</td> <td>Threshold for the binary classification.</td></tr>
                         <tr><td>results_dict:</td> <td>Dictionary of any additional results metric-value pairs.</td></tr>
                         <tr><td>node_name:</td> <td>Index of labels in the dataloader object.</td></tr>
@@ -261,18 +274,6 @@ const Docs = (props) => {
                     </ul>
                   </li>
 
-                  <li style={{marginBottom:'30px'}}>
-                    Create a new Project. 
-                    <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{marginBottom:'10px'}}><code>mynacode.start(base_folder='', project_name='')</code></li>
-                    
-                      <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
-                        <tr><td>base_folder:</td> <td>Base directory path of your project.</td></tr>
-                        <tr><td>project_name:</td> <td>Name of the project.</td></tr>
-                      </table>
-                    </ul>
-                  </li>
-
                   <li style={{marginBottom:'30px'}}>Paste the following at the start of your code. Your 
                     Username and Key can be accessed from your account.  
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
@@ -285,6 +286,34 @@ const Docs = (props) => {
 
                     </ul>
                   </li>
+
+                  <li style={{marginBottom:'30px'}}>
+                    Create a new Project. 
+                    <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
+                      <li style={{marginBottom:'10px'}}><code>mynacode.start(base_folder='', project='')</code></li>
+                    
+                      <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
+                        <tr><td>base_folder:</td> <td>Base directory path of your project.</td></tr>
+                        <tr><td>project:</td> <td>Name of the project.</td></tr>
+                      </table>
+                    </ul>
+                  </li>
+
+
+                  <li style={{marginBottom:'30px'}}>
+                    Initialize a Run or a Sweep. 
+                    <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
+                      <li style={{marginBottom:'10px'}}><code>mynacode.init(sweep = False, sweep_name = "", run_name="", save_files = False)</code></li>
+                    
+                      <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
+                        <tr><td>sweep:</td> <td>Specify if current initialization is for a sweep.</td></tr>
+                        <tr><td>sweep_name:</td> <td>If sweep == True, specify sweep name.</td></tr>
+                        <tr><td>run_name:</td> <td>If current initialization is for a run (sweep == False), specify run name.</td></tr>
+                        <tr><td>save_files:</td> <td>If save_files == True, all python and jupyter notebooks within the working directory are saved.</td></tr>
+                      </table>
+                    </ul>
+                  </li>
+
 
                   </ol>
 
@@ -311,16 +340,15 @@ const Docs = (props) => {
                     <div style={{marginTop:'15px', fontWeight: 'bold'}}>Tensorflow Datasets</div>
 
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.tensorflow_data(train_dataset=None, val_dataset=None, test_dataset=None, dataset_name="", label_index=1,
-         problem_type='binary classification',  node_name="Datasets", if_sweep_save_once=True, run_id=None)</code></li>
+                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.tf_dataset(train=None, val=None, test=None, dataset_name="", label_index=1,
+         node_name="Datasets", if_sweep_save_once=True, run_id=None)</code></li>
                     
                       <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
-                        <tr><td>train_dataset:</td> <td>Train dataset object.</td></tr>
-                        <tr><td>val_dataset:</td> <td>Val dataset object.</td></tr>
-                        <tr><td>test_dataset:</td> <td>Test dataset object.</td></tr>
+                        <tr><td>train:</td> <td>Train dataset object.</td></tr>
+                        <tr><td>val:</td> <td>Val dataset object.</td></tr>
+                        <tr><td>test:</td> <td>Test dataset object.</td></tr>
                         <tr><td>dataset_name:</td> <td>Dataset name (This will be the name of the local directory where the datasets are stored).</td></tr>
                         <tr><td>label_index:</td> <td>Index of labels in the dataloader object.</td></tr>
-                        <tr><td>problem_type:</td> <td>Problem type.</td></tr>
                         <tr><td>node_name:</td> <td>Node to store dataset path information.</td></tr>
                         <tr><td>if_sweep_save_once:</td> <td>In hyperparameter sweeps, datasets will only be saved once for optimization.</td></tr>
                         <tr><td>run_id:</td> <td>Run ID to log dataset paths. If None, the run ID generated automatically after calling the init function will be used.</td></tr>
@@ -331,18 +359,17 @@ const Docs = (props) => {
                     <div style={{marginTop:'10px', fontWeight: 'bold'}}>NumPy Datasets</div>
 
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.data(train_set=[], train_labels=[], val_set=[], val_labels=[], test_set=[], test_labels=[], dataset_name="",
-         problem_type='binary classification',  node_name="Datasets", if_sweep_save_once=True, run_id=None)</code></li>
+                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.np_data(train=[], train_labels=[], val=[], val_labels=[], test=[], test_labels=[], dataset_name="",
+         node_name="Datasets", if_sweep_save_once=True, run_id=None)</code></li>
                     
                       <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
-                        <tr><td>train_set:</td> <td>NumPy array for the training dataset.</td></tr>
+                        <tr><td>train:</td> <td>NumPy array for the training dataset.</td></tr>
                         <tr><td>train_labels:</td> <td>NumPy array for the training labels.</td></tr>
-                        <tr><td>val_set:</td> <td>NumPy array for the validation dataset.</td></tr>
+                        <tr><td>val:</td> <td>NumPy array for the validation dataset.</td></tr>
                         <tr><td>val_labels:</td> <td>NumPy array for the validation labels.</td></tr>
-                        <tr><td>test_set:</td> <td>NumPy array for the testing dataset.</td></tr>
+                        <tr><td>test:</td> <td>NumPy array for the testing dataset.</td></tr>
                         <tr><td>test_labels:</td> <td>NumPy array for the testing labels.</td></tr>
                         <tr><td>dataset_name:</td> <td>Dataset name (This will be the name of the local directory where the datasets are stored).</td></tr>
-                        <tr><td>problem_type:</td> <td>Problem type.</td></tr>
                         <tr><td>node_name:</td> <td>Node to store dataset path information.</td></tr>
                         <tr><td>if_sweep_save_once:</td> <td>In hyperparameter sweeps, datasets will only be saved once for optimization.</td></tr>
                         <tr><td>run_id:</td> <td>Run ID to log dataset paths. If None, the run ID generated automatically after calling the init function will be used.</td></tr>
@@ -354,7 +381,7 @@ const Docs = (props) => {
                   <li style={{marginBottom:'30px'}}> 
                     To log a dictionary of model configuration parameters. 
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.config(config_dict=&#123;&#125;, node_name="Datasets", track=False, run_id=None)</code></li>
+                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.config(config_dict=&#123;&#125;, node_name="Datasets", run_id=None)</code></li>
                     
                       <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
                         <tr><td>config_dict:</td> <td>Parameter configuration dictionary.</td></tr>
@@ -383,11 +410,11 @@ const Docs = (props) => {
                   <li style={{marginBottom:'30px'}}> 
                     To log test dataset results (Senstivity, Specificity, AUC etc). 
                     <ul style={{color:'purple', fontWeight:'bold', marginTop:'5px'}}>
-                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.results(y_true=[], y_predicted=[], threshold=0.5, results_dict=&#123;&#125;, node_name="Results", problem_type='binary classification', run_id=None)</code></li>
+                      <li style={{color:'purple', fontWeight:'bold', marginBottom:'20px'}}><code>mynacode.results(y_true=[], y_pred=[], threshold=0.5, results_dict=&#123;&#125;, node_name="Results", problem_type='binary classification', run_id=None)</code></li>
                     
                       <table style={{color:'#505050', 'borderSpacing': '25px 0px'}}>
                         <tr><td>y_true:</td> <td>Numpy array of truth labels.</td></tr>
-                        <tr><td>y_predicted:</td> <td>Numpy array of predicted values.</td></tr>
+                        <tr><td>y_pred:</td> <td>Numpy array of predicted values.</td></tr>
                         <tr><td>threshold:</td> <td>Threshold for the binary classification.</td></tr>
                         <tr><td>results_dict:</td> <td>Dictionary of any additional results metric-value pairs.</td></tr>
                         <tr><td>node_name:</td> <td>Index of labels in the dataloader object.</td></tr>

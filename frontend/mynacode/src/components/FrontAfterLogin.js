@@ -183,7 +183,6 @@ const FrontAfterLogin = (props) => {
   }
 
   const editRunModalOpen = (runID, runName) => {
-    console.log("t")
     setEditRunID(runID)
     setEditRunName(runName)
     setIsRunModalOpen(true)
@@ -490,22 +489,28 @@ const FrontAfterLogin = (props) => {
       .then(res => {            
           let runs = res.data.runs
 
-          let items = [getItem(<div id={-1} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', fontWeight:'bold', color:'#38b6ff'}}><button onClick={getProjects}>Projects</button> <span style={{marginRight:'60px'}}>Runs <PlusCircleOutlined onClick={()=>setIsCreateRunModalOpen(true)} /></span></div>)]
+          let items = [<Menu.Item id={-1} style={{ marginTop:'5px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', fontWeight:'bold', color:'#38b6ff'}}><button onClick={getProjects}>Projects</button> <span style={{paddingLeft:'10px', fontSize:'20px'}}>Runs <PlusCircleOutlined onClick={()=>setIsCreateRunModalOpen(true)} /></span></Menu.Item>]
         
-          items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
-                                  <div style={{maxWidth:'100px'}} onClick={()=>getOutline(projectID)}>Outline</div> 
-                      </div>))
+          items.push(<Menu.Item style={{ display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', fontWeight:'bold', fontSize:'17px'}}>
+                                  <div onClick={()=>getOutline(projectID)}>Outline</div> 
+                      </Menu.Item>)
 
           for(let i=0;i<runs.length;i++){
               if(i == 0 && runID==-1){
                 setRunID(runs[i]['id'])
               }
-              items.push(getItem(<div onClick={getNodes(runs[i]['id'], runs[i]['run_name'])} style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
-                                      <MoreOutlined style={{marginRight:'10px', fontSize:'20px'}}  onClick={()=>editRunModalOpen(runs[i]['id'], runs[i]['run_name'])}/> 
-                                      <div style={{maxWidth:'100px'}}> {runs[i]['run_name'] } </div>
-                                      <span style={{fontSize:'10px', marginLeft: 'auto', marginRight: 0}}>{runs[i]['run_date'].slice(0, 10) }</span>     
-                                </div>))
+              items.push(
+                  <Menu.Item style={{ paddingTop: '50px', paddingBottom: '50px' }}> 
+                      <div onClick={getNodes(runs[i]['id'], runs[i]['run_name'])} style={{ display:'flex', flexDirection:'row', alignItems:'center', fontWeight:'bold'}}>
+                            <div style={{fontSize:'17px'}}> {runs[i]['run_name'] } </div> 
+                            <MoreOutlined style={{fontSize:'20px', marginRight:0, marginLeft:'auto'}}  onClick={()=>editRunModalOpen(runs[i]['id'], runs[i]['run_name'])}/> 
+                      </div>
+                      <div style={{fontSize:'13px'}}>{runs[i]['run_date'].slice(0, 10) } ({runs[i]['created']})</div>
+                  </Menu.Item>
+                )
           }
+
+
 
           setMenu(<Menu
                 mode="inline"
@@ -516,9 +521,10 @@ const FrontAfterLogin = (props) => {
                   backgroundColor:'white',
                   //border:'4px solid #38b6ff',
                   fontWeight: 'bold'
-                }}
-                items={items}
-              />)
+                }}             
+              >
+              {items}
+              </Menu>)
 
         })
     })

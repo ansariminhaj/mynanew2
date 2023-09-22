@@ -70,12 +70,6 @@ const CustomLayout = (props) => {
 
           <Menu.Item style={{fontSize:'15px', fontWeight:'bold'}} key="8"><a href={"/docs"} style={{color:'#38b6ff'}} >Docs</a></Menu.Item>
           
-          { props.isAuthenticated == 'true' || localStorage.getItem('isAuthenticated') == 'true' ? 
-
-            <Menu.Item style={{fontSize:'15px', fontWeight:'bold'}} key="9"><a href= {"/feedback"} style={{color:'#38b6ff'}} >Feedback</a></Menu.Item>:
-            null
-
-          }
 
           { (props.isAuthenticated == 'true' || localStorage.getItem('isAuthenticated') == 'true') && props.user_type == 2 ? 
 
