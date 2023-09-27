@@ -160,10 +160,10 @@ class CreatePythonProjectView(APIView):
 		else:
 			return Response(0)
 
-		if Project.objects.filter(name=data["project_name"]).exists():
-			project_obj_new = Project.objects.get(name=data["project_name"])
+		if Project.objects.filter(name=data["project_name"], directory=data["project_directory"]).exists():
+			project_obj_new = Project.objects.get(name=data["project_name"], directory=data["project_directory"])
 		else:
-			project_obj_new = Project.objects.create(name=data["project_name"])
+			project_obj_new = Project.objects.create(name=data["project_name"], directory=data["project_directory"])
 			ProjectUser.objects.create(user = user_obj, project = project_obj_new)
 
 		return Response(project_obj_new.id)
@@ -267,6 +267,28 @@ class CreatePythonRunView(APIView):
 		self.initial_nodes(user_obj, run_obj_new)
 
 		return Response(run_obj_new.id)
+
+
+class GetRunView(APIView):
+
+	def post(self, request):
+
+		data = request.data 
+		run_id = data['run_id']
+
+		if myUser.objects.filter(username = data['username'], key = data['key']).exists():
+			user_obj = myUser.objects.get(username = data['username'], key = data['key'])
+		else:
+			Response(0)
+
+		run_obj = Run.objects.get(id = int(run_id))
+
+
+		if 'node_summary' in data:
+			node_obj.summary = data['node_summary']
+		node_obj.save()
+
+		return Response(OK)
 
 
 class AddResultsView(APIView):
@@ -478,7 +500,7 @@ class GetProjectsView(CreateAPIView):
 		projects_user = projects_user.values()
 		for project_user in projects_user:
 			project_obj = Project.objects.get(id = project_user['project_id'])
-			query_list.append({'name': project_obj.name, 'id': project_obj.id, 'enable': project_obj.enable, 'project_date': project_obj.date})
+			query_list.append({'name': project_obj.name, 'directory': project_obj.directory.rsplit(project_obj.name, 1)[0], 'id': project_obj.id, 'enable': project_obj.enable, 'project_date': project_obj.date})
 
 
 		return Response(query_list)
@@ -490,7 +512,6 @@ class GetRunsView(CreateAPIView):
 		query_dict = {}
 		query_list = []
 
-		# Define time intervals
 		one_hour = timedelta(hours=1)
 		one_day = timedelta(days=1)
 		one_month = timedelta(days=30)
@@ -562,8 +583,8 @@ class GetNodesView(CreateAPIView):
 			files_list = []
 
 			for file_obj in file_objs:
-				files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
-				#files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
+				#files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
+				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
 			image_objs = Images.objects.filter(run = run_obj)
@@ -571,8 +592,8 @@ class GetNodesView(CreateAPIView):
 			images_list = []
 
 			for image_obj in image_objs:
-				images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
-				#images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+				#images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
+				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
 
 			
 			query = {'nodes': query_list, 'files_list': files_list, 'images_list': images_list}
@@ -625,12 +646,53 @@ class ProjectUpdateView(CreateAPIView):
 
 	def post(self, request):
 		data = request.data
+		change_flag = 0
+
 		project_id = int(data['project_id'])
-		project_name = data['project_name']
+		# project_name = data['project_name']
+		project_directory = data['project_directory']
 
 		project_obj = Project.objects.get(id = project_id)
-		project_obj.name = project_name
+		# project_obj.name = project_name
+
+		if project_obj.directory != project_directory:
+			project_obj.directory = project_directory
+			change_flag = 1
+
 		project_obj.save()
+
+		if change_flag == 1:
+			runs = project_obj.run_set.all()
+
+			for run_obj in runs:
+				if Node.objects.filter(run = run_obj, node_type=2).exists():
+					node_obj = Node.objects.get(run = run_obj, node_type=2)
+
+					description = node_obj.description
+					if len(description) != 0:
+						description = ast.literal_eval(description)
+						for key in description:
+							if 'path' in str(key):
+								temp = description[key].rsplit(project_obj.name, 1)[1]
+								description[key] = project_directory + project_obj.name + temp
+
+						node_obj.description = description
+						node_obj.save()	
+
+				if Node.objects.filter(run = run_obj, node_type=0, dataset_node=1).exists():
+					node_obj = Node.objects.get(run = run_obj, node_type=0, dataset_node=1)
+
+					description = node_obj.description
+					if len(description) != 0:
+						description = ast.literal_eval(description)
+						for key in description:
+							if 'path' in str(key):
+								temp = description[key].rsplit(project_obj.name, 1)[1]
+								description[key] = project_directory + project_obj.name + temp
+
+						node_obj.description = description
+						node_obj.save()	
+
 
 		return Response(OK)
 
@@ -994,8 +1056,8 @@ class GetPytorchWeightsView(APIView):
 
 		run_obj = Run.objects.get(id=request.data['run_id'])
 
-		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
-		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
+		return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
+		#return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 
 

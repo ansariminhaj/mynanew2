@@ -27,6 +27,7 @@ class Project(models.Model):
 	outline_key = models.TextField(null=True, blank=True)
 	latest_dataset_run_id = models.TextField(null=True, blank=True)
 	latest_dataset_run_nodename = models.TextField(null=True, blank=True)
+	directory = models.TextField(null=True, blank=True)
 
 
 class ProjectUser(models.Model):

@@ -611,7 +611,7 @@ const CreateGraph = (props) => {
                  }    
                  
                   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-                    if (key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'label_names_train' || key == 'label_names_val' || key == 'label_names_test' || key == 'prev_saved_data')
+                    if (key == 'installed_packages' || key == 'train_count' || key == 'val_count' || key == 'test_count' || key == 'label_names_train' || key == 'label_names_val' || key == 'label_names_test' || key == 'prev_saved_data')
                       continue
 
                     count+=1
@@ -1456,7 +1456,7 @@ const CreateGraph = (props) => {
           <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Results</div>
           <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {resultNodes}
-            <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(3)} />
+            {/* <PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(3)} /> */}
           </div>
 
           <Divider />

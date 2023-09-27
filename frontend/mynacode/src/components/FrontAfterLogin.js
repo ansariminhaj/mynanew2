@@ -6,7 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Layout, Menu, Divider, Affix, Button, Modal, notification, Tooltip, Dropdown, Switch} from 'antd';
 import CreateGraph from "../components/CreateGraph";
 import Outline from "../components/Outline";
-import { MoreOutlined, LeftCircleOutlined, EditOutlined, DeleteOutlined, ShareAltOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { NodeIndexOutlined, CopyOutlined, MoreOutlined, LeftCircleOutlined, EditOutlined, DeleteOutlined, TeamOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import "./index.css";
 import protocol from "../components/httpORhttps";
 import type { NotificationPlacement } from 'antd/es/notification/interface';
@@ -16,10 +16,9 @@ import { Chart }            from 'react-chartjs-2'
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(ArcElement, Legend);
+const { Content, Sider } = Layout;
 
 const { TextArea } = Input;
-
-const { Content, Sider } = Layout;
 
 const layout = {
   labelCol: {
@@ -43,6 +42,7 @@ const FrontAfterLogin = (props) => {
   const [projectID, setProjectID] = useState(-1);
   const [editProjectID, setEditProjectID] = useState(-1);
   const [editProjectName, setEditProjectName] = useState("");
+  const [editProjectDirectory, setEditProjectDirectory] = useState("");
 
   const [isRunModalOpen, setIsRunModalOpen] = useState(false);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -54,6 +54,7 @@ const FrontAfterLogin = (props) => {
 
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
   const [isCreateRunModalOpen, setIsCreateRunModalOpen] = useState(false);
+  const [isChangeProjectBaseFolderModalOpen, setIsChangeProjectBaseFolderModalOpen] = useState(false);
 
   const [showOutline, setShowOutline] = useState("")
 
@@ -191,12 +192,17 @@ const FrontAfterLogin = (props) => {
     })
   }
 
-  const editProjectModalOpen = (projectID, projectName) => {
+  const editProjectModalOpen = (projectID, projectName, projectDirectory) => {
     setEditProjectID(projectID)
     setEditProjectName(projectName)
+    setEditProjectDirectory(projectDirectory)
     setIsProjectModalOpen(true)
+
+    console.log(projectDirectory)
+
     form.setFieldsValue({
-      project_name:projectName
+      project_name: 'lol',
+      project_directory: projectDirectory
     })
   }
 
@@ -235,6 +241,50 @@ const FrontAfterLogin = (props) => {
         .then(res => {
            if(res.data == 'OK')
               setIsRunModalOpen(false)
+              setRefresh((prevValue) => prevValue + 1) 
+        })
+        .catch(err => {
+          console.log(err.response.data);
+        })
+      })     
+  };
+
+
+  const changeProjectBaseFolder = (values) => {
+      console.log(values)
+      let form_data = new FormData();
+
+      for (const [key, value] of Object.entries(values))
+        form_data.append(key, value)
+
+      form_data.append('run_id', editRunID)
+
+      var csrftoken = Cookies.get('csrftoken');
+      axios({
+        withCredentials: true,
+        method: 'post',
+        url: protocol+'://'+IP+'/api/token/refresh/',
+        data: {'refresh': localStorage.getItem('refresh_token')},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken}} ) 
+      .then(res =>{
+          localStorage.setItem('access_token', res.data["access"])
+          localStorage.setItem('refresh_token', res.data["refresh"])
+
+          axios({
+          withCredentials: true,
+          method: 'post',
+          url: protocol+'://'+IP+'/api/change_project_base_folder',
+          data: form_data,
+          headers: {
+            'Authorization': "JWT " + localStorage.getItem('access_token'),
+            'content-type': 'multipart/form-data',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken}} )
+        .then(res => {
+           if(res.data == 'OK')
+              setIsChangeProjectBaseFolderModalOpen(false)
               setRefresh((prevValue) => prevValue + 1) 
         })
         .catch(err => {
@@ -580,7 +630,7 @@ const FrontAfterLogin = (props) => {
               items.push(getItem(<div style={{ display:'flex', flexDirection:'row', justifyContent:'space-around', alignItems:'center', fontWeight:'bold'}}>
                                   <Switch style={{marginRight:'10px'}} size="small" checked={projects[i]['enable']} onClick={()=>toggleEnable(projects[i]['id'])} />
                                   <div style={{maxWidth:'100px'}} onClick={()=>getRuns(projects[i]['id'], projects[i]['name'])}>{projects[i]['name']}</div> 
-                                  <MoreOutlined style={{marginLeft: 'auto', marginRight: 0, fontSize:'20px'}} onClick={()=>editProjectModalOpen(projects[i]['id'], projects[i]['name'])}/>
+                                  <MoreOutlined style={{marginLeft: 'auto', marginRight: 0, fontSize:'20px'}} onClick={()=>editProjectModalOpen(projects[i]['id'], projects[i]['name'], projects[i]['directory'])}/>
                                 </div>))
           }
 
@@ -638,9 +688,9 @@ const FrontAfterLogin = (props) => {
             <Form.Item name="run_name">
               <Input />
             </Form.Item>
-            <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer', marginRight:'15px'}} onClick={()=>setIsRunDeleteModalOpen(true)}>Delete Run</u> <u style={{cursor:'pointer', color:'purple'}} onClick={duplicateRun}>Duplicate Run</u></div>
+            <div style={{color:'red', marginBottom:'15px'}}> <Tooltip placement="top" title="Delete"> <DeleteOutlined style={{color:'red', marginBottom:'15px',  marginRight:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsRunDeleteModalOpen(true)} /> </Tooltip> <Tooltip placement="top" title="Duplicate"> <CopyOutlined style={{color:'purple', marginBottom:'15px',  marginRight:'15px', fontSize: '16px', cursor:'pointer'}} onClick={duplicateRun} /> </Tooltip> </div>
             <Form.Item>
-              <Button onClick={()=>setIsRunModalOpen(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Update</Button>
+              <Button onClick={()=>setIsRunModalOpen(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Update</Button> 
             </Form.Item>
           </Form>
         </Modal>
@@ -653,14 +703,22 @@ const FrontAfterLogin = (props) => {
             {...layout}
             onFinish={onProjectEdit}
           >
-            <div>Name</div>
+{/*            <div>Name</div>
+            
             <Form.Item name="project_name">
               <Input /> 
+            </Form.Item>*/}
+
+            <div>If you decide to relocate your project folder, update the base folder path to change all paths within the project.<br/> Structure: <span style={{fontWeight:'bold'}}>Base Folder</span> + /Your Project Name</div>
+            <div>Base Folder</div>
+            <Form.Item name="project_directory">
+            <TextArea rows={2} style={{minWidth:'400px'}} placeholder="Base Folder" />
             </Form.Item>
+
             <Form.Item>
               <Button onClick={()=>setIsProjectModalOpen(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Update</Button>
             </Form.Item>
-            <DeleteOutlined style={{color:'red', marginBottom:'15px',  marginRight:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsProjectDeleteModalOpen(true)} /> <ShareAltOutlined style={{color:'purple', marginBottom:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsProjectShareModalOpen(true)}/>
+            <Tooltip placement="top" title="Delete"> <DeleteOutlined style={{color:'red', marginBottom:'15px',  marginRight:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsProjectDeleteModalOpen(true)} /> </Tooltip>  <Tooltip placement="top" title="Share"> <TeamOutlined style={{color:'purple', marginRight:'15px', marginBottom:'15px', fontSize: '16px', cursor:'pointer'}} onClick={()=>setIsProjectShareModalOpen(true)}/> </Tooltip>
           </Form>
           Project ID: {editProjectID}
         </Modal>
@@ -718,6 +776,25 @@ const FrontAfterLogin = (props) => {
             </Form.Item>
           </Form>
         </Modal>
+
+{/*        <Modal visible={isChangeProjectBaseFolderModalOpen} closable={false} footer={null}>
+          <Form
+            form={form}
+            name="changeProjectBaseFolderForm"
+            {...layout}
+            onFinish={changeProjectBaseFolder}
+          >
+            <div>Project Base Folder</div>
+            <Form.Item name="project_directory">
+              <Input placeholder="Base Folder"/>/lol/troll
+            </Form.Item>
+
+            <Form.Item>
+              <Button onClick={()=>setIsChangeProjectBaseFolderModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'purple'}} htmlType="submit">Change</Button>
+            </Form.Item>
+          </Form>
+        </Modal>*/}
+
 
         <Modal visible={isRunDeleteModalOpen} closable={false}  footer={null}>
             <div style={{color:'red', marginBottom:'15px'}}><u>Are you sure you want to delete this run? Deleted runs cannot be restored.</u></div>
