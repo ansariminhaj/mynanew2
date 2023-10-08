@@ -85,15 +85,15 @@ class DuplicateRunView(APIView):
 class UserInfoView(APIView):
 
 	def post(self, request):
+		print("Here")
 		query_dict={'id': request.user.id, 'user_type': request.user.user_type,'name': request.user.name}
+		print(query_dict)
 
 		return Response(query_dict)
 
 class LoginView(APIView):
 
 	def post(self, request):
-		print("LOGIN")
-		print(request.data)
 		data = request.data
 		URL = 'http://'+IP+'/api/token/'
 		data={'username': data['username'], 'password': data['password']}
@@ -154,6 +154,7 @@ class CreatePythonProjectView(APIView):
 
 	def post(self, request):
 		data=request.data
+		create_project_flag = 0
 
 		if myUser.objects.filter(username = data['username'], key = data['key']).exists():
 			user_obj = myUser.objects.get(username = data['username'], key = data['key'])
@@ -162,7 +163,12 @@ class CreatePythonProjectView(APIView):
 
 		if Project.objects.filter(name=data["project_name"], directory=data["project_directory"]).exists():
 			project_obj_new = Project.objects.get(name=data["project_name"], directory=data["project_directory"])
+			if not ProjectUser.objects.filter(user = user_obj, project = project_obj_new).exists():
+				create_project_flag = 1
 		else:
+			create_project_flag = 1
+		
+		if create_project_flag == 1:
 			project_obj_new = Project.objects.create(name=data["project_name"], directory=data["project_directory"])
 			ProjectUser.objects.create(user = user_obj, project = project_obj_new)
 
@@ -234,10 +240,10 @@ class CreateRunView(APIView):
 class CreatePythonRunView(APIView):
 
 	def initial_nodes(self, user_obj, run_obj):
-		objective_node = Node.objects.create(run = run_obj, name="Objective", description = "Click to Edit",summary="", node_type = 5)
+		objective_node = Node.objects.create(run = run_obj, name="Objective", description = "",summary="Click to Edit", node_type = 5)
 		data_node = Node.objects.create(run = run_obj, name="Datasets", description = "{}",summary="", node_type = 0, dataset_node = 1)
 		csv_node = Node.objects.create(run = run_obj, name="CSV", description = "",summary="", node_type = 0, csv_node=1)
-		methods_node = Node.objects.create(run = run_obj, name="Method", description = "Click to Edit",summary="", node_type = 1)
+		methods_node = Node.objects.create(run = run_obj, name="Method", description = "",summary="Click to Edit", node_type = 1)
 		results_node = Node.objects.create(run = run_obj, name="Results", description = "{}",summary="", node_type = 2)
 		
 		return
@@ -289,6 +295,92 @@ class GetRunView(APIView):
 		node_obj.save()
 
 		return Response(OK)
+
+
+class LoadRunView(APIView):
+
+	def post(self, request):
+
+		data = request.data 
+		run_id = data['run_id']
+
+		query_dict = {}
+
+		if myUser.objects.filter(username = data['username'], key = data['key']).exists():
+			user_obj = myUser.objects.get(username = data['username'], key = data['key'])
+		else:
+			Response(0)
+
+		run_obj = Run.objects.get(id = int(run_id))
+
+		if Node.objects.filter(run = run_obj, name = "Datasets").exists():
+			node_dataset = Node.objects.get(run = run_obj, name = "Datasets")
+			description = node_dataset.description 
+
+			if len(description) != 0:
+				description = ast.literal_eval(description)
+				if description['library'] == 'PyTorch':
+					if 'train_dataloader_path' in description:
+						query_dict.update({'train_dataloader': description['train_dataloader_path']})
+					if 'val_dataloader_path' in description:
+						query_dict.update({'val_dataloader': description['val_dataloader_path']})					
+					if 'test_dataloader_path' in description:
+						query_dict.update({'test_dataloader': description['test_dataloader_path']})
+
+					query_dict.update({'dataset_library': 'PyTorch'})
+
+				elif description['library'] == 'Tensorflow':
+					if 'train_dataset_path' in description:
+						query_dict.update({'train_dataset': description['train_dataset_path']})
+					if 'val_dataset_path' in description:
+						query_dict.update({'val_dataset': description['val_dataset_path']})					
+					if 'test_dataset_path' in description:
+						query_dict.update({'test_dataset': description['test_dataset_path']})
+
+					query_dict.update({'dataset_library': 'Tensorflow'})
+
+				elif description['library'] == 'NumPy':
+					if 'train_set_path' in description:
+						query_dict.update({'train_set': description['train_set_path']})
+					if 'val_set_path' in description:
+						query_dict.update({'val_set': description['val_set_path']})					
+					if 'test_set_path' in description:
+						query_dict.update({'test_set': description['test_set_path']})
+
+					if 'train_labels_path' in description:
+						query_dict.update({'train_labels': description['train_labels_path']})
+					if 'val_labels_path' in description:
+						query_dict.update({'val_labels': description['val_labels_path']})					
+					if 'test_labels_path' in description:
+						query_dict.update({'test_labels': description['test_labels_path']})
+
+					query_dict.update({'dataset_library': 'NumPy'})
+
+				else:
+					pass
+
+
+		if Node.objects.filter(run = run_obj, name = "Results").exists():
+			node_dataset = Node.objects.get(run = run_obj, name = "Results")
+			description = node_dataset.description 
+
+			if len(description) != 0:
+				description = ast.literal_eval(description)
+				if description['library'] == 'PyTorch':
+					query_dict.update({'model_library': 'PyTorch'})
+					if 'best_model_statedict_path' in description:
+						query_dict.update({'best_model_statedict': description['best_model_statedict_path']})
+					if 'best_model_network_path' in description:
+						query_dict.update({'best_model_network': description['best_model_network_path']})
+				elif description['library'] == 'Keras':	
+					query_dict.update({'model_library': 'Keras'})
+					if 'best_model_path' in description:
+						query_dict.update({'best_model': description['best_model_path']})						
+				else:
+					pass
+
+
+		return Response(query_dict)
 
 
 class AddResultsView(APIView):
@@ -353,51 +445,16 @@ class AddDataView(APIView):
 		else:
 			return Response(ERROR)
 
-		if 'prev_saved_data' in config_dict:
-			if str(config_dict['prev_saved_data']) == 'True':
-				latest_dataset_run_id = project_obj.latest_dataset_run_id
-				latest_dataset_run_nodename = project_obj.latest_dataset_run_nodename
-				latest_dataset_run_obj = Run.objects.get(id=int(latest_dataset_run_id))
-				latest_dataset_node_obj = Node.objects.get(run = latest_dataset_run_obj, name = latest_dataset_run_nodename)
+		description = node_obj.description 
 
-				description = ast.literal_eval(latest_dataset_node_obj.description)
-				new_dict = {}
-
-				for key in description:
-					if key in ['train_count', 'val_count', 'test_count', 'train_labels', 'train_dataloader', 'val_dataloader', 'test_dataloader', 'labels_train', 'labels_val', 'labels_test', 'train_set', 'val_set', 'test_set']:
-						new_dict.update({key: description[key]})
-
-				node_obj.description = new_dict
-				node_obj.save()
-
-
-			else:
-				description = node_obj.description 
-
-				if len(description) == 0:
-					description = ast.literal_eval(data['config_dict'])	
-				else:
-					description = ast.literal_eval(description)
-					description.update(ast.literal_eval(data['config_dict']))
-
-				node_obj.description = description
-				node_obj.save()
-
-				project_obj.latest_dataset_run_id = int(data["run_id"])
-				project_obj.latest_dataset_run_nodename = data["node_name"]
-				project_obj.save()
+		if len(description) == 0:
+			description = ast.literal_eval(data['config_dict'])	
 		else:
-			description = node_obj.description 
+			description = ast.literal_eval(description)
+			description.update(ast.literal_eval(data['config_dict']))
 
-			if len(description) == 0:
-				description = ast.literal_eval(data['config_dict'])	
-			else:
-				description = ast.literal_eval(description)
-				description.update(ast.literal_eval(data['config_dict']))
-
-			node_obj.description = description
-			node_obj.save()
-
+		node_obj.description = description
+		node_obj.save()
 
 		return Response(OK)
 
@@ -411,7 +468,6 @@ class AddKeyValueView(APIView):
 
 		if Node.objects.filter(id = data["node_id"]).exists():
 			node_obj = Node.objects.get(id = data["node_id"])
-			print('exists')
 		else:
 			return Response(ERROR)
 
@@ -543,9 +599,10 @@ class GetRunsView(CreateAPIView):
 					    years_difference = time_difference.days // 365
 					    difference = f"{years_difference} years ago"
 
-					print(time_difference)
 					query_list.append({'run_name': run['run_name'], 'id': run['id'], 'run_date': run['run_date'], 'created': difference})
-		else:
+					query_list = sorted(query_list, key=lambda x: x['run_date'], reverse=True)
+		
+		else:		
 			pass
 
 		query_dict = {'runs': query_list}
@@ -649,11 +706,9 @@ class ProjectUpdateView(CreateAPIView):
 		change_flag = 0
 
 		project_id = int(data['project_id'])
-		# project_name = data['project_name']
 		project_directory = data['project_directory']
 
 		project_obj = Project.objects.get(id = project_id)
-		# project_obj.name = project_name
 
 		if project_obj.directory != project_directory:
 			project_obj.directory = project_directory

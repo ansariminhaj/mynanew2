@@ -198,8 +198,6 @@ const FrontAfterLogin = (props) => {
     setEditProjectDirectory(projectDirectory)
     setIsProjectModalOpen(true)
 
-    console.log(projectDirectory)
-
     form.setFieldsValue({
       project_name: 'lol',
       project_directory: projectDirectory
@@ -207,7 +205,6 @@ const FrontAfterLogin = (props) => {
   }
 
   const onRunEdit = (values) => {
-      console.log(values)
       let form_data = new FormData();
 
       for (const [key, value] of Object.entries(values))
@@ -251,7 +248,6 @@ const FrontAfterLogin = (props) => {
 
 
   const changeProjectBaseFolder = (values) => {
-      console.log(values)
       let form_data = new FormData();
 
       for (const [key, value] of Object.entries(values))
@@ -295,7 +291,6 @@ const FrontAfterLogin = (props) => {
 
 
   const onProjectEdit = (values) => {
-      console.log(values)
       let form_data = new FormData();
 
       for (const [key, value] of Object.entries(values))
@@ -339,7 +334,6 @@ const FrontAfterLogin = (props) => {
 
 
   const onProjectCreate = (values) => {
-      console.log(values)
       let form_data = new FormData();
 
       for (const [key, value] of Object.entries(values))
@@ -380,7 +374,6 @@ const FrontAfterLogin = (props) => {
   };
 
   const onRunCreate = (values) => {
-      console.log(values)
       let form_data = new FormData();
 
       for (const [key, value] of Object.entries(values))
@@ -431,7 +424,6 @@ const FrontAfterLogin = (props) => {
   };
 
   const onProjectShare = (values) => {
-      console.log(values)
       let form_data = new FormData();
 
       for (const [key, value] of Object.entries(values))
@@ -658,7 +650,6 @@ const FrontAfterLogin = (props) => {
 
 
   const getNodes = (runID, runName) => (e) => {
-    console.log(runID)
     setShowOutline(0)
     setRunID(runID)
   }
@@ -704,7 +695,7 @@ const FrontAfterLogin = (props) => {
             onFinish={onProjectEdit}
           >
 {/*            <div>Name</div>
-            
+
             <Form.Item name="project_name">
               <Input /> 
             </Form.Item>*/}

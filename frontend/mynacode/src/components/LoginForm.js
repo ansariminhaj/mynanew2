@@ -27,6 +27,9 @@ const LoginForm = (props) => {
 
     var csrftoken = Cookies.get('csrftoken')
 
+    console.log("CSRF TOKEN")
+    console.log(csrftoken)
+
     axios({
       withCredentials: true,
       method: 'post',
@@ -46,6 +49,10 @@ const LoginForm = (props) => {
         localStorage.setItem('access_token', res.data["access"])
         localStorage.setItem('refresh_token', res.data["refresh"]) 
         localStorage.setItem('isAuthenticated', 'true') 
+
+        console.log("CSRF TOKEN")
+        console.log(csrftoken)
+
         axios({
           withCredentials: true,
           method: 'post',
@@ -58,7 +65,10 @@ const LoginForm = (props) => {
             console.log(res.data)
             props.authSuccess(res.data['user_type'], res.data['id'], res.data['name'])
         })
-
+        .catch(err => {
+          console.log("Error!")
+          console.log(err.response.data);
+        })
       }
     })
     .catch(err => {

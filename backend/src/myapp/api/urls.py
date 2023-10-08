@@ -43,5 +43,5 @@ urlpatterns = [
 	path('create_project_python', CreatePythonProjectView.as_view()),
 	path('create_run_python', CreatePythonRunView.as_view()),
 	path('update_project_notes', UpdateProjectNotesView.as_view()),
-	path('get_run', GetRunView.as_view())
+	path('load_run', LoadRunView.as_view())
 ]

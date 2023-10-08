@@ -133,8 +133,6 @@ const CreateGraph = (props) => {
   const onFinish = (values)  => {
     let form_data = new FormData();
 
-    console.log(values)
-
     for (const [key, value] of Object.entries(values))
       form_data.append(key, value)
 
@@ -304,7 +302,7 @@ const CreateGraph = (props) => {
     console.log('mynacode')
   };
 
-  const editNode = (id, desc, name, summary) => {
+  const editNode = (id, desc, summary) => {
     setEditNodeViewModalDict(prevState => {
       return {
         ...prevState,
@@ -312,7 +310,7 @@ const CreateGraph = (props) => {
       }
     });
     setEditNodeID(id)
-    form.setFieldsValue({node_description: desc, node_id: id, node_name: name, node_summary: summary})
+    form.setFieldsValue({node_description: desc, node_id: id, node_summary: summary})
     setRefresh((prevValue) => prevValue + 1) 
   };
 
@@ -397,8 +395,6 @@ const CreateGraph = (props) => {
           'Content-Type': 'application/json',
           'X-CSRFToken': csrftoken}} )
       .then(res => { 
-
-        console.log(res.data)
 
           let variable_nodes = []
           let csv_nodes = []
@@ -495,7 +491,6 @@ const CreateGraph = (props) => {
 
               let index = res.data['nodes'][i]['id']
               let desc = JSON.stringify(res.data['nodes'][i]['description'])
-              let name = res.data['nodes'][i]['name']
               let summary = JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)
 
               let rows = []
@@ -530,10 +525,10 @@ const CreateGraph = (props) => {
                   for(let i=0; i<parsed_columns.length; i++){
                     count+=1
                     if(count%2==0)
-                      color = '#E0E0E0'
+                      color = 'white'
                     else
-                      color ='#89CFF0'
-                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '20px', width:'234px'}}>{parsed_columns[i]}</div><div style={{width:'134px'}}>{parsed_unique[i]}</div><div style={{width:'134px'}}>{parsed_null[i]}</div><div style={{width:'134px'}}>{parsed_dtypes[i]}</div></div>)
+                      color = '#E8E8E8'
+                    rows.push(<div style={{fontSize:'17px', width:'100%', padding:'8px', backgroundColor: color, display:'flex', flexDirection:'row'}}><div style={{paddingLeft: '20px', width:'234px'}}>{parsed_columns[i]}</div><div style={{width:'134px'}}>{parsed_unique[i]}</div><div style={{width:'134px'}}>{parsed_null[i]}</div><div style={{width:'134px'}}>{parsed_dtypes[i]}</div></div>)
                    
                    }
                   }
@@ -586,7 +581,6 @@ const CreateGraph = (props) => {
                 }     
 
                 if ('installed_packages' in res.data['nodes'][i]['description']){
-                  console.log(res.data['nodes'][i]['description']['installed_packages'])
                   let libraries = res.data['nodes'][i]['description']['installed_packages']
                   for(let i = 0; i<libraries.length;i++){
                     library_list.push( 
@@ -616,10 +610,10 @@ const CreateGraph = (props) => {
 
                     count+=1
                     if(count%2==0)
-                      color = '#E0E0E0'
+                      color = 'white'
                     else
-                      color = '#F08080'
-                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
+                      color = '#E8E8E8'
+                    rows.push(<div style={{fontSize:'17px', width:'100%', padding:'8px', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
                   }          
                 }
               }
@@ -698,7 +692,7 @@ const CreateGraph = (props) => {
                       color = 'white'
                     else
                       color = '#E8E8E8'
-                    rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
+                    rows.push(<div style={{fontSize:'17px', width:'100%', padding:'8px', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
                   }   
                 }
               }
@@ -712,7 +706,7 @@ const CreateGraph = (props) => {
                     dataset_nodes.push( 
                       <div>
                         <div style={{color:'black', minWidth: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                            < EditOutlined onClick={() => editNode(index, desc, name, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
+                            < EditOutlined onClick={() => editNode(index, desc, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                             <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
                             </div>
@@ -886,11 +880,6 @@ const CreateGraph = (props) => {
                             style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
                               <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
-                              Name
-                              <Form.Item name={"node_name"} initialValue={res.data['nodes'][i]['name']}> 
-                                <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
-                              </Form.Item> 
-
                               Description 
                               <Form.Item name={"node_summary"} initialValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)}>
                                 <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
@@ -900,7 +889,7 @@ const CreateGraph = (props) => {
                                 <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                                     <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
                               </Form.Item>
-                              <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
+                              <div style={{color:'red', marginBottom:'15px'}}></div>
 
                             </Form>
 
@@ -925,7 +914,7 @@ const CreateGraph = (props) => {
                             </div>
 
                             <Modal visible={editNodeViewModalDict[res.data['nodes'][i]['id']]} closable={false} footer={null}>
-                            <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
+                            <div style={{color:'red', marginBottom:'15px'}}></div>
                             <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CloseOutlined /> </Button> 
                             </Modal>
                         </div>
@@ -957,11 +946,10 @@ const CreateGraph = (props) => {
                           <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                           <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
                         </Form.Item>
-                        {/*<div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node </u></div>*/}
 
                       </Form>
                       :
-                      <div onClick={() => editNode(index)} style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', paddingBottom:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
+                      <div onClick={() => editNode(index)} style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', paddingBottom:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['node_summary']}</div>
                     }
 
                   </div>
@@ -991,11 +979,10 @@ const CreateGraph = (props) => {
                           <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                           <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
                         </Form.Item>
-                        {/*<div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node </u></div>*/}
 
                       </Form>
                       :
-                      <div onClick={() => editNode(index)} style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', paddingBottom:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['description']}</div>
+                      <div onClick={() => editNode(index)} style={{paddingLeft:'50px', paddingRight:'50px', paddingTop:'12px', paddingBottom:'12px', cursor:'pointer', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>{res.data['nodes'][i]['node_summary']}</div>
                     }
 
                 </div>
@@ -1007,7 +994,7 @@ const CreateGraph = (props) => {
                result_nodes.push(
                 <div>
                   <div style={{minWidth: '650px', minHeight: '100px', border: '1px solid black', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
-                      < EditOutlined onClick={() => editNode(index, desc, name, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
+                      < EditOutlined onClick={() => editNode(index, desc, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                       <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px', marginTop:'15px'}}>
                       
                       <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
@@ -1306,11 +1293,6 @@ const CreateGraph = (props) => {
                       style={{fontFamily: 'Helvetica, Arial, sans-serif'}}>
                         <Form.Item name={'node_id'} initialValue={res.data['nodes'][i]['id']} hidden={true}></Form.Item>
 
-                        Name
-                        <Form.Item name={"node_name"} initialValue={res.data['nodes'][i]['name']}> 
-                          <Input placeholder="Node Name" style={{width:'165px'}} defaultValue={res.data['nodes'][i]['name']} /> 
-                        </Form.Item> 
-
                         Description
                         <Form.Item name={"node_summary"} initialValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)}>
                           <TextArea rows={2} showCount placeholder="Summary" style={{width:'450px'}} defaultValue={JSON.stringify(res.data['nodes'][i]['node_summary']).slice(1, -1)} />
@@ -1320,7 +1302,7 @@ const CreateGraph = (props) => {
                           <Button style={{marginRight:10, color:'blue'}}  shape="circle" onClick={()=>closeEditNode(index)}> < CloseOutlined /> </Button> 
                           <Button htmlType="submit" style={{marginRight:10, color:'blue'}} shape="circle" onClick={()=>closeEditNode(index)} > < CheckOutlined /> </Button>
                         </Form.Item>
-                        <div style={{color:'red', marginBottom:'15px'}}><u style={{cursor:'pointer'}} onClick={()=>DeleteNode(index)}>Delete Node</u></div>
+                        <div style={{color:'red', marginBottom:'15px'}}></div>
 
                       </Form>
 
