@@ -59,6 +59,7 @@ class Node(models.Model):
 class Images(models.Model):
 	run = models.ForeignKey(Run, on_delete=models.CASCADE, blank=True, null=True)
 	image= models.ImageField(upload_to='images', blank=True, null=True, max_length=1000)
+	image_caption=models.TextField(blank=True, null=True, default='Add caption')
 	
 
 

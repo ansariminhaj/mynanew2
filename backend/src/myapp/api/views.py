@@ -640,8 +640,8 @@ class GetNodesView(CreateAPIView):
 			files_list = []
 
 			for file_obj in file_objs:
-				#files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
-				files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
+				files_list.append('http://127.0.0.1:8000/media/'+str(file_obj.file.name))
+				#files_list.append('https://www.mynacode.com/media/'+str(file_obj.file.name))
 
 
 			image_objs = Images.objects.filter(run = run_obj)
@@ -649,8 +649,8 @@ class GetNodesView(CreateAPIView):
 			images_list = []
 
 			for image_obj in image_objs:
-				#images_list.append('http://127.0.0.1:8000/media/'+str(image_obj.image.name))
-				images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+				images_list.append({'image':'http://127.0.0.1:8000/media/'+str(image_obj.image.name), 'image_id':image_obj.id ,'image_caption':image_obj.image_caption })
+				#images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
 
 			
 			query = {'nodes': query_list, 'files_list': files_list, 'images_list': images_list}
@@ -1111,8 +1111,8 @@ class GetPytorchWeightsView(APIView):
 
 		run_obj = Run.objects.get(id=request.data['run_id'])
 
-		return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
-		#return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
+		#return Response({'weights': 'https://www.mynacode.com/media/'+run_obj.weights.name, 'network': 'https://www.mynacode.com/media/'+run_obj.network.name})
+		return Response({'weights': 'http://'+IP+'/media/'+run_obj.weights.name, 'network': 'http://'+IP+'/media/'+run_obj.network.name})
 
 
 

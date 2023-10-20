@@ -7,6 +7,9 @@ import { Layout, Menu, Divider, Tabs} from 'antd';
 import CreateGraph from "../components/CreateGraph";
 import { LeftCircleOutlined } from '@ant-design/icons';
 import protocol from "../components/httpORhttps";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
 
 
 const { Content, Sider } = Layout;
@@ -239,6 +242,115 @@ const Docs = (props) => {
                   </li>
 
                   </ol>
+
+<h3>Code Example</h3>
+
+<SyntaxHighlighter language="python" style={vscDarkPlus}>
+
+{`import torch
+import torch.nn as nn
+import torchvision
+from torch.utils.data import Dataset, DataLoader, ConcatDataset
+from torchmetrics import AUROC
+import torch.nn.functional as F
+
+import mynacode
+mynacode.login("aaa", "1688106171XETpdKLRwJ")
+mynacode.start(project = "MNIST3")
+
+def load_data():
+  batch_size = 64
+  random_seed = 5
+
+  all_data =   torchvision.datasets.MNIST('/files/', train=True, download=True,
+                              transform=torchvision.transforms.Compose([
+                                torchvision.transforms.ToTensor(),
+                                torchvision.transforms.Normalize(
+                                  (0.1307,), (0.3081,))
+                              ]))
+
+  data, not_data = torch.utils.data.random_split(all_data, [1000, 59000], generator=torch.Generator().manual_seed(random_seed))
+  val, train_1  = torch.utils.data.random_split(data, [150, 850], generator=torch.Generator().manual_seed(random_seed))
+  test, train  = torch.utils.data.random_split(train_1, [150, 700], generator=torch.Generator().manual_seed(random_seed))
+
+  train_loader = torch.utils.data.DataLoader(train, batch_size=batch_size, shuffle=True)
+  test_loader = torch.utils.data.DataLoader(test, batch_size=batch_size, shuffle=True)
+  val_loader = torch.utils.data.DataLoader(val, batch_size=batch_size, shuffle=True)
+
+  return train_loader, test_loader, val_loader
+
+train_loader, test_loader, val_loader = load_data()
+
+mynacode.init(save_files = True, run_name="MNIST_run")
+mynacode.torch_dataloader(train=val_loader, val=val_loader, label_index=1, dataset_name="MNIST_data")
+
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
+        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
+        self.fc1 = nn.Linear(320, 50)
+        self.fc2 = nn.Linear(50, 10)
+
+    def forward(self, x):
+        x = F.relu(F.max_pool2d(self.conv1(x), 2))
+        x = F.relu(F.max_pool2d(self.conv2(x), 2))
+        x = x.view(-1, 320)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return F.log_softmax(x, dim=1)
+
+network = Net()
+epochs = 10
+start_lr = 1e-3
+momentum = 0.5
+optimizer = torch.optim.SGD(network.parameters(), lr=start_lr, momentum=momentum)
+lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=1.017)
+network.train()
+train_loss = 0
+auroc = AUROC(task='binary')
+
+for epoch in range(epochs):
+  print('Epoch: ', epoch)
+  train_loss = 0
+  for batch_idx, (data, target) in enumerate(train_loader):
+    optimizer.zero_grad()
+    output = network(data)
+    target = target.unsqueeze(1).float()
+    loss = F.binary_cross_entropy(output, target)
+    train_loss += loss.item()
+    loss.backward()
+    optimizer.step()
+    lr_scheduler.step()
+
+  network.eval()
+  voutput_list = []
+  vtarget_list = []
+
+  with torch.no_grad():
+    for vbatch_idx, (vdata, vtarget) in enumerate(val_loader):
+      voutput_list.append(network(vdata))
+      vtarget_list.append(vtarget)
+
+  val_auc = auroc(torch.cat(voutput_list), torch.cat(vtarget_list))
+
+  mynacode.torch_model(model=network, model_name=str(epoch)+'model', metric_name="val auc", metric_value=val_auc, goal='maximize', current_epoch = epoch)
+
+model = Net()
+checkpoint = torch.load('mynacode/MNIST3/R411_MNIST_run/model/model_epoch_8.pt')
+model.load_state_dict(checkpoint)
+
+toutput_list = []
+ttarget_list = []
+
+with torch.no_grad():
+  for tbatch_idx, (tdata, ttarget) in enumerate(test_loader):
+    toutput_list.append(model(tdata))
+    ttarget_list.append(ttarget)
+
+mynacode.results(y_true = torch.cat(ttarget_list), y_pred = torch.cat(toutput_list), threshold=0.5)`}
+</SyntaxHighlighter>
+
                 </div>
 
               </div>

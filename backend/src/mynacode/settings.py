@@ -65,26 +65,26 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mynacode.wsgi.application'
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'pgdb',
-        'PORT': 5432,
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'myna2',
-#         'USER': 'mladmin',
-#         'PASSWORD': 'Fapa-Nufe0336!', #Fapa-Nufe0336!
-#         'HOST': 'localhost',
-#         'PORT': '',
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'postgres',
+#         'HOST': 'pgdb',
+#         'PORT': 5432,
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'myna2',
+        'USER': 'mladmin',
+        'PASSWORD': 'Fapa-Nufe0336!', #Fapa-Nufe0336!
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
 
 
 # Password validation

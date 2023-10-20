@@ -14,6 +14,7 @@ import { Bar, Line, Scatter, Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Legend } from 'chart.js/auto'
 import { Chart }            from 'react-chartjs-2'
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import './MyComponent.css'; 
 
 ChartJS.register(ArcElement, Legend);
 const { Content, Sider } = Layout;
@@ -544,7 +545,10 @@ const FrontAfterLogin = (props) => {
               items.push(
                   <Menu.Item style={{ paddingTop: '50px', paddingBottom: '50px' }}> 
                       <div onClick={getNodes(runs[i]['id'], runs[i]['run_name'])} style={{ display:'flex', flexDirection:'row', alignItems:'center', fontWeight:'bold'}}>
-                            <div style={{fontSize:'17px'}}> {runs[i]['run_name'] } </div> 
+                            { runs[i]['run_name'].length > 23 ?
+                            <div className="text-moving-div"> <span className="moving-text"> {runs[i]['run_name'] } </span></div> 
+                            :
+                            <div style={{fontSize:'17px'}}> <span> {runs[i]['run_name'] } </span></div>}
                             <MoreOutlined style={{fontSize:'20px', marginRight:0, marginLeft:'auto'}}  onClick={()=>editRunModalOpen(runs[i]['id'], runs[i]['run_name'])}/> 
                       </div>
                       <div style={{fontSize:'13px'}}>{runs[i]['run_date'].slice(0, 10) } ({runs[i]['created']})</div>

@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import IP from "../components/ipConfig";
 import { useNavigate, Link } from 'react-router-dom';
 import { Divider, message, Button, Tooltip, Popover, Checkbox, Form, Input, Alert, Modal, Switch, Dropdown, Menu, Upload } from 'antd';
-import { PlusCircleOutlined, EditOutlined, AlignLeftOutlined, ApartmentOutlined, FileImageOutlined, CloseOutlined, CheckOutlined, DesktopOutlined, InboxOutlined, FileOutlined, UploadOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, PlusCircleOutlined, EditOutlined, AlignLeftOutlined, ApartmentOutlined, FileImageOutlined, CloseOutlined, CheckOutlined, DesktopOutlined, InboxOutlined, FileOutlined, UploadOutlined } from '@ant-design/icons';
 import '../components/index.css';
 import protocol from "../components/httpORhttps";
 import * as actions from '../store/actions/actions';
@@ -102,6 +102,7 @@ const CreateGraph = (props) => {
   const [isDeleteNodeModalOpen, setIsDeleteNodeModalOpen] = useState(false);
   const [showUploadProgress, setshowUploadProgress] = useState(false)
   const [showFileUploadProgress, setshowFileUploadProgress] = useState(false)
+  const [imageCaptionModal, setImageCaptionModal] = useState(false)
   const [files, setFiles] = useState()
   const [images, setImages] = useState()
 
@@ -193,6 +194,45 @@ const CreateGraph = (props) => {
         withCredentials: true,
         method: 'post',
         url: protocol+'://'+IP+'/api/add_key_value',
+        data: form_data,
+        headers: {
+          'Authorization': "JWT " + localStorage.getItem('access_token'),
+          'Content-Type': 'application/json',
+          'content-type': 'multipart/form-data',
+          'X-CSRFToken': csrftoken}} )
+      .then(res => {
+        setRefresh((prevValue) => prevValue + 1) 
+      })
+    })
+    .catch(err => {
+      console.log(err.response.data);
+      navigate("/login")
+    })
+  }
+
+
+  const onFinishImageCaption = (values)  => {
+    let form_data = new FormData();
+
+    for (const [key, value] of Object.entries(values))
+      form_data.append(key, value)
+
+    var csrftoken = Cookies.get('csrftoken');
+    axios({
+      withCredentials: true,
+      method: 'post',
+      url: protocol+'://'+IP+'/api/token/refresh/',
+      data: {'refresh': localStorage.getItem('refresh_token')},
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken}} ) 
+    .then(res =>{
+      localStorage.setItem('access_token', res.data["access"])
+      localStorage.setItem('refresh_token', res.data["refresh"])
+      axios({
+        withCredentials: true,
+        method: 'post',
+        url: protocol+'://'+IP+'/api/add_image_caption',
         data: form_data,
         headers: {
           'Authorization': "JWT " + localStorage.getItem('access_token'),
@@ -478,11 +518,14 @@ const CreateGraph = (props) => {
               images_list.push(         
                   {key: k,
                   label: (
-                      <div><img width={500} src={res.data['images_list'][k]} /></div>
+                      <div>
+                          <img width={500} src={res.data['images_list'][k]['image']} />
+                          <div style={{cursor:'pointer', color:'black'}} onClick={() => setImageCaptionModal(true)}>{res.data['images_list'][k]['image_caption']}</div>
+                      </div>
                   ),
-                })
+              })
             }
-            setImages(<Menu items={images_list} style={{overflowY: 'auto', height:'600px'}}/>)
+            setImages(<Menu items={images_list} style={{overflowY: 'auto', height:'600px' }}/>)
           }
 
           
@@ -1217,7 +1260,7 @@ const CreateGraph = (props) => {
                       {typeof metric_values != 'undefined' ?
                       <Line
                         data={{
-                          labels: Array.from(Array(metric_values.length).keys()).map(n => n + 1),
+                          labels: Array.from(Array(metric_values.length).keys()),
                           datasets: [
                             {
                               label: metric_name,
@@ -1234,8 +1277,8 @@ const CreateGraph = (props) => {
                               backgroundColor: 'rgb(75, 192, 192)',
                               borderColor: 'rgb(75, 192, 192)',
                               data: [
-                                {x: (metric_index+1), y:0}, 
-                                {x: (metric_index+1), y:Math.max( ...Array.from(metric_values) )}
+                                {x: metric_index, y:0}, 
+                                {x: metric_index, y:Math.max( ...Array.from(metric_values) )}
                               ]
                             },
                           ]
@@ -1257,7 +1300,7 @@ const CreateGraph = (props) => {
                               },
                               title: {
                                 display: true,
-                                text: "Total Epochs (Start index: 1)"
+                                text: "Epochs"
                               }
                             },
                             y: {
@@ -1378,6 +1421,24 @@ const CreateGraph = (props) => {
     <Modal visible={isDeleteNodeModalOpen} closable={false}  footer={null}>
         <div style={{color:'red', marginBottom:'15px'}}><u>Are you sure you want to delete this Node? Deleted Nodes cannot be restored.</u></div>
         <Button onClick={()=>setIsDeleteNodeModalOpen(false)}>Cancel</Button> <Button type="primary" style={{backgroundColor:'red'}} onClick={handleDeleteNodeOk}>Delete</Button>
+    </Modal>
+
+    <Modal visible={imageCaptionModal} closable={false} footer={null}>
+        <div>
+          <Form
+            initialValues={{ remember: true,}}
+            {...layout}
+            onFinish={onFinishImageCaption}
+            style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}
+          >
+              <Form.Item name={'image_caption'}>
+                  <Input placeholder="Add Caption" style={{width:'100%', marginRight:'10px'}}/>
+              </Form.Item>
+            <Form.Item>
+              <Button onClick={()=>setImageCaptionModal(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Add</Button> 
+            </Form.Item>
+          </Form>
+        </div>
     </Modal>
 
 
