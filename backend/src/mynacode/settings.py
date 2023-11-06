@@ -14,7 +14,7 @@ AUTH_USER_MODEL = 'myapp.myUser'
 SECRET_KEY = 'django-insecure-c(+8+apbknho9q3v6x(ny1*f3gbjmn+%6=*9o2p6x(s@3g8$=g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*', 'www.mynacode.com', 'mynacode.com', '54.210.56.0']
 

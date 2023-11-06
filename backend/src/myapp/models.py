@@ -38,6 +38,14 @@ class Run(models.Model):
 	run_name = models.TextField(null=True, blank=True)
 	run_date = models.DateTimeField(default=datetime.now, blank=True)
 
+class Model(models.Model):
+	run = models.ForeignKey(Run, on_delete=models.CASCADE, blank=True, null=True)
+	model_path = models.TextField(null=True, blank=True)
+	metric_name = models.TextField(null=True, blank=True)
+	metric_value = models.TextField(null=True, blank=True)
+	library = models.TextField(null=True, blank=True)
+	track_dict = models.TextField(blank=True, null=True)
+
 
 class Files(models.Model):
 	run = models.ForeignKey(Run, on_delete=models.CASCADE, blank=True, null=True)

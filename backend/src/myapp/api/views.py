@@ -258,14 +258,9 @@ class CreatePythonRunView(APIView):
 
 		project_obj = Project.objects.get(id = data['project_id'])
 
-		if data['sweep'] == 'True':
-			run_obj_new = Run.objects.create(project = project_obj, run_name="S "+ data['sweep_name'])
-			run_obj_new.run_name = "S"+str(run_obj_new.id)+" "+data['sweep_name']
-			run_obj_new.save()
-		else:
-			run_obj_new = Run.objects.create(project = project_obj, run_name="R " + data['run_name'])
-			run_obj_new.run_name = "R"+str(run_obj_new.id)+" "+data['run_name']
-			run_obj_new.save()
+		run_obj_new = Run.objects.create(project = project_obj, run_name="R " + data['run_name'])
+		run_obj_new.run_name = str(run_obj_new.id)+" "+data['run_name']
+		run_obj_new.save()
 		
 		project_obj.latest_run_index += 1
 		project_obj.save()
@@ -379,6 +374,11 @@ class LoadRunView(APIView):
 				else:
 					pass
 
+				if 'threshold' in description:
+					query_dict.update({'val_thresh': description['threshold']})
+				else:
+					query_dict.update({'val_thresh': 'NaN'})
+
 
 		return Response(query_dict)
 
@@ -456,6 +456,61 @@ class AddDataView(APIView):
 		node_obj.description = description
 		node_obj.save()
 
+		return Response(OK)
+
+
+class AddModelView(APIView):
+
+	def post(self, request):
+		data = querydict_to_dict(request.data)
+
+		if not myUser.objects.filter(username = data['username'], key = data['key']).exists():
+			return Response(0)
+
+		user_obj = myUser.objects.get(username = data['username'], key = data['key'])
+
+		if Run.objects.filter(id=int(data["run_id"])).exists():
+			run_obj = Run.objects.get(id=int(data["run_id"]))
+			
+			model_obj = Model.objects.create(run = run_obj)
+
+			if isinstance(ast.literal_eval(data['model_dict']), Mapping):
+				model_dict = ast.literal_eval(data['model_dict'])	
+			else:
+				return Response(ERROR)
+
+			print(model_dict)
+			model_obj.model_path = model_dict['Model Path']
+			model_obj.metric_name = model_dict['Metric']
+			model_obj.metric_value = model_dict['Value']
+			model_obj.goal = model_dict['Goal']
+			model_obj.library = model_dict['Library']
+
+			if 'track_dict' in data:
+				if isinstance(ast.literal_eval(data['track_dict']), Mapping):
+					model_obj.track_dict = ast.literal_eval(data['track_dict'])	
+
+			model_obj.save()
+		else:
+			return Response(ERROR)
+
+		return Response(OK)
+
+
+
+class AddImageCaptionView(APIView):
+
+	def post(self, request):
+		data = querydict_to_dict(request.data)
+
+
+		if Images.objects.filter(id = data["image_id"]).exists():
+			image_obj = Images.objects.get(id = data["image_id"])
+		else:
+			return Response(ERROR)
+
+		image_obj.image_caption = data["image_caption"]
+		image_obj.save()
 		return Response(OK)
 
 
@@ -650,10 +705,28 @@ class GetNodesView(CreateAPIView):
 
 			for image_obj in image_objs:
 				images_list.append({'image':'http://127.0.0.1:8000/media/'+str(image_obj.image.name), 'image_id':image_obj.id ,'image_caption':image_obj.image_caption })
-				#images_list.append('https://www.mynacode.com/media/'+str(image_obj.image.name))
+				#images_list.append({'image': 'https://www.mynacode.com/media/'+str(image_obj.image.name), 'image_id':image_obj.id ,'image_caption':image_obj.image_caption })
 
 			
 			query = {'nodes': query_list, 'files_list': files_list, 'images_list': images_list}
+
+			models = Model.objects.filter(run = run_obj)
+
+			models_list = []
+			for model in models:
+				try:
+					track_dict = ast.literal_eval(model.track_dict)
+				except:
+					track_dict = {}
+
+				models_list.append({'path': model.model_path, 'metric': model.metric_name,
+					'value': model.metric_value, 'library': model.library, 'track_dict':track_dict})
+
+
+			query = {'nodes': query_list, 'files_list': files_list, 'images_list': images_list, 'models_list': models_list}
+
+			#print(query)
+
 			return Response(query)
 
 		return Response(ERROR)

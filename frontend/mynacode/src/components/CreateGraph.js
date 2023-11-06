@@ -103,6 +103,7 @@ const CreateGraph = (props) => {
   const [showUploadProgress, setshowUploadProgress] = useState(false)
   const [showFileUploadProgress, setshowFileUploadProgress] = useState(false)
   const [imageCaptionModal, setImageCaptionModal] = useState(false)
+  const [imageID, setImageID] = useState(-1)
   const [files, setFiles] = useState()
   const [images, setImages] = useState()
 
@@ -169,6 +170,11 @@ const CreateGraph = (props) => {
     })
   }
 
+  const setImageCaptionFunc = (image_id) => {
+    setImageCaptionModal(true)
+    setImageID(image_id)
+  }
+
 
   const onFinishKeyValue = (values)  => {
     let form_data = new FormData();
@@ -217,6 +223,8 @@ const CreateGraph = (props) => {
     for (const [key, value] of Object.entries(values))
       form_data.append(key, value)
 
+    form_data.append('image_id', imageID)
+
     var csrftoken = Cookies.get('csrftoken');
     axios({
       withCredentials: true,
@@ -240,6 +248,7 @@ const CreateGraph = (props) => {
           'content-type': 'multipart/form-data',
           'X-CSRFToken': csrftoken}} )
       .then(res => {
+        setImageCaptionModal(false)
         setRefresh((prevValue) => prevValue + 1) 
       })
     })
@@ -513,19 +522,21 @@ const CreateGraph = (props) => {
           }
 
           if (res.data['images_list']){
+            console.log(res.data['images_list'])
             let images_list = []
             for(var k=0;k<res.data['images_list'].length;k++){
+              let imgid = res.data['images_list'][k]['image_id']
               images_list.push(         
                   {key: k,
                   label: (
                       <div>
                           <img width={500} src={res.data['images_list'][k]['image']} />
-                          <div style={{cursor:'pointer', color:'black'}} onClick={() => setImageCaptionModal(true)}>{res.data['images_list'][k]['image_caption']}</div>
+                          <div style={{cursor:'pointer', color:'black'}} onClick={() => setImageCaptionFunc(imgid)}>{res.data['images_list'][k]['image_caption']}</div>
                       </div>
                   ),
               })
             }
-            setImages(<Menu items={images_list} style={{overflowY: 'auto', height:'600px' }}/>)
+            setImages(<Menu items={images_list} style={{overflowY: 'auto', height:'600px', width:'560px' }}/>)
           }
 
           
@@ -715,7 +726,6 @@ const CreateGraph = (props) => {
 
                     mid_zero_bins = consecutiveAverage(zero_bins).slice(1)
                     mid_one_bins = consecutiveAverage(one_bins).slice(1)
-
 
                     length_one = Math.max(...one_freq)
                     length_zero = Math.max(...zero_freq)
@@ -1079,6 +1089,26 @@ const CreateGraph = (props) => {
                           labels: mid_zero_bins,
                           datasets: [
                            {
+                              label: '0',
+                              type: 'line',
+                              borderWidth: 0,
+                              pointRadius: 0,
+                              data: [
+                                {x: 0, y:0},
+                                {x: 0, y:length_zero}
+                              ]
+                            },
+                           {
+                              label: '1',
+                              type: 'line',
+                              borderWidth: 0,
+                              pointRadius: 0,
+                              data: [
+                                {x: 1, y:0},
+                                {x: 1, y:length_zero}
+                              ]
+                            },
+                           {
                               label: 'Val Threshold: ' +threshold,
                               type: 'line',
                               backgroundColor:'red',
@@ -1137,6 +1167,11 @@ const CreateGraph = (props) => {
                                 plugins: {
                                 tooltip: {
                                   enabled:false
+                                },
+                                legend: {
+                                  labels: {
+                                    filter: (l) => (l.text !== '0' && l.text !== '1')
+                                  }
                                 }
                               }
                           }}
@@ -1148,6 +1183,26 @@ const CreateGraph = (props) => {
                         data={{
                           labels: mid_one_bins,
                           datasets: [
+                           {
+                              label: '0',
+                              type: 'line',
+                              borderWidth: 0,
+                              pointRadius: 0,
+                              data: [
+                                {x: 0, y:0},
+                                {x: 0, y:length_zero}
+                              ]
+                            },
+                           {
+                              label: '1',
+                              type: 'line',
+                              borderWidth: 0,
+                              pointRadius: 0,
+                              data: [
+                                {x: 1, y:0},
+                                {x: 1, y:length_zero}
+                              ]
+                            },
                             {
                               label: 'Val Threshold: ' +threshold,
                               type: 'line',
@@ -1208,7 +1263,12 @@ const CreateGraph = (props) => {
                                 plugins: {
                                 tooltip: {
                                   enabled:false
-                                }
+                                },
+                                legend: {
+                                  labels: {
+                                    filter: (l) => (l.text !== '0' && l.text !== '1')
+                                  }
+                                }                             
                               }
                           }}
                       />:
@@ -1426,14 +1486,13 @@ const CreateGraph = (props) => {
     <Modal visible={imageCaptionModal} closable={false} footer={null}>
         <div>
           <Form
-            initialValues={{ remember: true,}}
             {...layout}
             onFinish={onFinishImageCaption}
             style={{fontFamily: 'Helvetica, Arial, sans-serif', marginTop:'12px'}}
           >
-              <Form.Item name={'image_caption'}>
-                  <Input placeholder="Add Caption" style={{width:'100%', marginRight:'10px'}}/>
-              </Form.Item>
+            <Form.Item name={'image_caption'}>
+                <Input placeholder="Add Caption"/>
+            </Form.Item>
             <Form.Item>
               <Button onClick={()=>setImageCaptionModal(false)}>Cancel</Button> <Button type="primary" htmlType="submit">Add</Button> 
             </Form.Item>
