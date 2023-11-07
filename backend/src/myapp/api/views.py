@@ -479,7 +479,6 @@ class AddModelView(APIView):
 			else:
 				return Response(ERROR)
 
-			print(model_dict)
 			model_obj.model_path = model_dict['Model Path']
 			model_obj.metric_name = model_dict['Metric']
 			model_obj.metric_value = model_dict['Value']
@@ -724,8 +723,6 @@ class GetNodesView(CreateAPIView):
 
 
 			query = {'nodes': query_list, 'files_list': files_list, 'images_list': images_list, 'models_list': models_list}
-
-			#print(query)
 
 			return Response(query)
 

@@ -43,6 +43,7 @@ class Model(models.Model):
 	model_path = models.TextField(null=True, blank=True)
 	metric_name = models.TextField(null=True, blank=True)
 	metric_value = models.TextField(null=True, blank=True)
+	goal = models.TextField(null=True, blank=True)
 	library = models.TextField(null=True, blank=True)
 	track_dict = models.TextField(blank=True, null=True)
 

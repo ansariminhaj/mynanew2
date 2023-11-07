@@ -110,6 +110,7 @@ const CreateGraph = (props) => {
   const [variableNodes, setVariableNodes] = useState([])
   const [csvNodes, setCSVNodes] = useState([])
   const [datasetNodes, setDatasetNodes] = useState([])
+  const [modelsNode, setModelsNode] = useState([])
   const [methodNodes, setMethodNodes] = useState([])
   const [resultNodes, setResultNodes] = useState([])
   const [objectiveNodes, setObjectiveNodes] = useState([])
@@ -448,6 +449,7 @@ const CreateGraph = (props) => {
           let variable_nodes = []
           let csv_nodes = []
           let dataset_nodes = []
+          let models_node = []
           let result_nodes = []
           let method_nodes = []
           let objective_nodes = []
@@ -539,6 +541,54 @@ const CreateGraph = (props) => {
             setImages(<Menu items={images_list} style={{overflowY: 'auto', height:'600px', width:'560px' }}/>)
           }
 
+          if (res.data['models_list']){
+            console.log(res.data['models_list'])
+            let rows = []
+            let count = 0
+            let color = 'white'
+
+            const track_labels = Object.keys(res.data['models_list'][k]['track_dict']).map((key) => (
+                          <div style={{paddingLeft: '30px', width:'134px'}}>{key}</div>
+                        ));
+
+            rows.push(<div style={{fontSize:'18px', color:'white', marginTop: '10px', width:'100%', backgroundColor: '#38b6ff', display:'flex', flexDirection:'row', paddingBottom:'10px', paddingTop:'10px'}}>
+              <div style={{paddingLeft: '20px', width:'234px'}}>Model Path</div>
+              <div style={{paddingLeft: '30px', width:'134px'}}>Metric</div>
+              <div style={{paddingLeft: '30px', width:'134px'}}>Value</div>
+              {track_labels}
+              </div>) 
+
+            for(var k=0;k<res.data['models_list'].length;k++){
+              
+              const track_values = Object.keys(res.data['models_list'][k]['track_dict']).map((key) => (
+                            <div style={{paddingLeft: '30px', width:'134px'}}>{res.data['models_list'][k]['track_dict'][key]}</div>
+                          ));
+              count+=1
+              if(count%2==0)
+                color = 'white'
+              else
+                color = '#E8E8E8'
+              rows.push(<div style={{fontSize:'17px', padding:'8px', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>
+                <div style={{paddingLeft: '20px', width:'234px'}}>{res.data['models_list'][k]['path']}</div>
+                <div style={{paddingLeft: '30px', width:'134px'}}>{res.data['models_list'][k]['metric']}</div>
+                <div style={{paddingLeft: '30px', width:'134px'}}>{res.data['models_list'][k]['value']}</div>
+                {track_values}
+                </div>)            
+            }
+
+            
+            models_node.push(
+              <div style={{ overflow:'auto', width: '650px', minHeight: '100px', maxHeight:'500px', border: '1px solid black', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin:'20px', borderRadius: '5px', boxShadow: '3px 4px 5px #888888'}}>
+                  <div style={{margin:'0 auto', marginTop:'15px', display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
+                    {rows.length == 0 ?
+                    <div>Add models from your code.</div>
+                    :
+                    rows}
+                  </div>
+              </div>
+          )
+          }
+
           
           if (res.data['nodes']){
             for(var i=0;i<res.data['nodes'].length;i++){
@@ -552,16 +602,7 @@ const CreateGraph = (props) => {
               let count = 0
               let color = 'white'
 
-              // if(res.data['nodes'][i]['node_type'] == 0  && res.data['nodes'][i]['csv_node'] == 0 && res.data['nodes'][i]['dataset_node'] == 0){
-              //   for(const [key, value] of Object.entries(res.data['nodes'][i]['description'])){
-              //     count+=1
-              //     if(count%2==0)
-              //       color = '#E0E0E0'
-              //     else
-              //       color = '#AECBB7'
-              //     rows.push(<div style={{fontSize:'16px', width:'100%', backgroundColor: color, display:'flex', flexDirection:'row', whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}><div style={{paddingLeft: '90px', width: '460px'}}>{String(key)}</div><div style={{width: '180px'}}>{JSON.stringify(value).replace(/^"(.*)"$/, '$1')}</div></div>)
-              //   }
-              // }
+
               if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['csv_node'] == 1){
                 if (res.data['nodes'][i]['description']){
                   let parsed_columns = JSON.parse(res.data['nodes'][i]['description']['columns list'].replace(/'/g, '"'))
@@ -589,50 +630,6 @@ const CreateGraph = (props) => {
               }
               else if (res.data['nodes'][i]['node_type'] == 0 && res.data['nodes'][i]['dataset_node'] == 1){
                 if (res.data['nodes'][i]['description']){
-                if('train_count' in res.data['nodes'][i]['description']){
-                  train_count = res.data['nodes'][i]['description']['train_count']
-                  if('label_names_train' in res.data['nodes'][i]['description']){
-                    train_count_label = res.data['nodes'][i]['description']['label_names_train']
-                    for (var j = 0; j < train_count_label.length; j++) {
-                      train_count_label[j] = String(train_count_label[j]);
-                    }
-                  }
-                  else{
-                    for (var j = 0; j < train_count.length; j++) {
-                      train_count_label.push(String(j));
-                    }
-                  }
-                }
-
-                if('val_count' in res.data['nodes'][i]['description']){
-                  val_count = res.data['nodes'][i]['description']['val_count']
-                  if('label_names_val' in res.data['nodes'][i]['description']){
-                    val_count_label = res.data['nodes'][i]['description']['label_names_val']
-                    for (var j = 0; j < val_count_label.length; j++) {
-                      val_count_label[j] = String(val_count_label[j]);
-                    }
-                  }
-                  else{
-                    for (var j = 0; j < val_count.length; j++) {
-                      val_count_label.push(String(j));
-                    }
-                  }
-                }
-
-                if('test_count' in res.data['nodes'][i]['description']){
-                  test_count = res.data['nodes'][i]['description']['test_count']
-                  if('label_names_test' in res.data['nodes'][i]['description']){
-                    test_count_label = res.data['nodes'][i]['description']['label_names_test'] 
-                    for (var j = 0; j < test_count_label.length; j++) {
-                      test_count_label[j] = String(test_count_label[j]);
-                    }
-                  }
-                  else{                 
-                    for (var j = 0; j < test_count.length; j++) {
-                      test_count_label.push(String(j));
-                    }
-                  }
-                }     
 
                 if ('installed_packages' in res.data['nodes'][i]['description']){
                   let libraries = res.data['nodes'][i]['description']['installed_packages']
@@ -762,137 +759,6 @@ const CreateGraph = (props) => {
                             < EditOutlined onClick={() => editNode(index, desc, summary)}  style={{paddingTop:'5px', cursor:'pointer', marginLeft:'auto', marginRight:'10px'}} />
                             <div style={{paddingBottom: '10px', paddingTop: '10px', fontWeight: 'bold'}}>
                               {res.data['nodes'][i]['node_summary']}
-                            </div>
-
-                              <div style={{display:'flex', marginBottom:'15px'}}>
-                                {typeof train_count != 'undefined' ?
-                                <div style={{width:'250px'}}>
-                                <Pie data = {{
-                                  labels: train_count_label,
-                                  datasets: [
-                                    {
-                                      data: train_count,
-                                      backgroundColor: [
-                                        'rgba(255, 99, 132, 0.2)',
-                                        'rgba(54, 162, 235, 0.2)',
-                                        'rgba(255, 206, 86, 0.2)',
-                                        'rgba(75, 192, 192, 0.2)',
-                                        'rgba(153, 102, 255, 0.2)',
-                                        'rgba(255, 159, 64, 0.2)',
-                                      ],
-                                      borderColor: [
-                                        'rgba(255, 99, 132, 1)',
-                                        'rgba(54, 162, 235, 1)',
-                                        'rgba(255, 206, 86, 1)',
-                                        'rgba(75, 192, 192, 1)',
-                                        'rgba(153, 102, 255, 1)',
-                                        'rgba(255, 159, 64, 1)',
-                                      ],
-                                      borderWidth: 1,
-                                    },
-                                  ]}}
-
-                                  plugins = {[ChartDataLabels]}
-
-                                  options = {{
-                                      plugins: {
-                                          title: {
-                                              display: true,
-                                              text: 'TRAIN LABELS COUNT'
-                                          },
-                                          legend: {
-                                            display: false
-                                          }                                      
-                                      }}
-                                  } /></div> : null}
-
-
-                                {typeof val_count != 'undefined' ?
-                                <div style={{width:'250px'}}>
-                                <Pie data = {{
-                                  labels: val_count_label,
-                                  datasets: [
-                                    {
-                                      data: val_count,
-                                      backgroundColor: [
-                                        'rgba(255, 99, 132, 0.2)',
-                                        'rgba(54, 162, 235, 0.2)',
-                                        'rgba(255, 206, 86, 0.2)',
-                                        'rgba(75, 192, 192, 0.2)',
-                                        'rgba(153, 102, 255, 0.2)',
-                                        'rgba(255, 159, 64, 0.2)',
-                                      ],
-                                      borderColor: [
-                                        'rgba(255, 99, 132, 1)',
-                                        'rgba(54, 162, 235, 1)',
-                                        'rgba(255, 206, 86, 1)',
-                                        'rgba(75, 192, 192, 1)',
-                                        'rgba(153, 102, 255, 1)',
-                                        'rgba(255, 159, 64, 1)',
-                                      ],
-                                      borderWidth: 1,
-                                    },
-                                  ]}} 
-
-                                  plugins = {[ChartDataLabels]}
-
-                                  options = {{
-                                      plugins: {
-                                          title: {
-                                              display: true,
-                                              text: 'VAL LABELS COUNT'
-                                          },
-                                          legend: {
-                                            display: false
-                                          }                                         
-                                      }}
-                                  } /></div> : null}
-
-
-                                {typeof test_count != 'undefined' ?
-                                <div style={{width:'250px'}}>
-                                <Pie data = {{
-                                  labels: test_count_label,
-                                  datasets: [
-                                    {
-                                      data: test_count,
-                                      backgroundColor: [
-                                        'rgba(255, 99, 132, 0.2)',
-                                        'rgba(54, 162, 235, 0.2)',
-                                        'rgba(255, 206, 86, 0.2)',
-                                        'rgba(75, 192, 192, 0.2)',
-                                        'rgba(153, 102, 255, 0.2)',
-                                        'rgba(255, 159, 64, 0.2)',
-                                      ],
-                                      borderColor: [
-                                        'rgba(255, 99, 132, 1)',
-                                        'rgba(54, 162, 235, 1)',
-                                        'rgba(255, 206, 86, 1)',
-                                        'rgba(75, 192, 192, 1)',
-                                        'rgba(153, 102, 255, 1)',
-                                        'rgba(255, 159, 64, 1)',
-                                      ],
-                                      borderWidth: 1,
-                                      
-                                    },
-                                  ]}} 
-
-                                  plugins = {[ChartDataLabels]}
-
-                                  options = {{
-
-                                      plugins: {
-                                          title: {
-                                              display: true,
-                                              text: 'TEST LABELS COUNT'
-                                          },
-                                          legend: {
-                                            display: false
-                                          }
-                                      }}
-                                  } />
-                                  </div>: null}
-
                             </div>
 
                             <div style={{display: 'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', marginBottom:'15px'}}>
@@ -1427,6 +1293,7 @@ const CreateGraph = (props) => {
           setDatasetNodes(dataset_nodes)
           setVariableNodes(variable_nodes)
           setObjectiveNodes(objective_nodes)
+          setModelsNode(models_node)
 
         }})
     })
@@ -1551,6 +1418,13 @@ const CreateGraph = (props) => {
           <div style={{display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
             {objectiveNodes}
             {/*<PlusCircleOutlined style={{fontSize:'30px', paddingBottom:'30px'}} onClick={()=>onNodeCreate(5)} />*/}
+          </div>
+
+          <Divider />
+
+          <div style={{color:'#34568B', fontSize:'20px', fontWeight:'bold'}}>Models</div>
+          <div style={{overflow: 'auto', display:'flex', flexDirection:'column', justifyContent: 'center', alignItems: 'center', flexWrap:'wrap'}}>
+            {modelsNode}
           </div>
 
           <Divider />
